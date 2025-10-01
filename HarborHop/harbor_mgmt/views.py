@@ -1,6 +1,7 @@
 from django.shortcuts import redirect, render
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
+from .forms import UserRegistrationForm
 from django.contrib import messages   
 
 
@@ -8,7 +9,7 @@ from django.contrib import messages
 def home(request):
     return render(request, 'home.html')
 
-""""
+
 def register(request):
     if request.method == "POST":
         form = UserRegistrationForm(request.POST)
@@ -20,9 +21,9 @@ def register(request):
             return redirect('login')
     else:
         form = UserRegistrationForm()
-    return render(request, 'HarborHop/register.html', {'form': form})
+    return render(request, 'register.html', {'form': form})
 
-"""
+
 
 def user_login(request):
     if request.user.is_authenticated:

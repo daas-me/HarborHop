@@ -29,7 +29,7 @@
 
                 <!-- Title -->
                 <div class="sign-in-title">Log In</div>
-                <p class="subtitle">Don't have an account? <a href="#">Sign up now</a></p>
+                <p class="subtitle">Don't have an account? <a href="{% url 'register' %}">Sign up now</a></p>
 
                 <!-- Django Form -->
                 <form method="post">
@@ -80,7 +80,7 @@
                 <!-- Register Section -->
                 <div class="register-section">
                     <p>New to HarborHop?</p>
-                     <a href="#" class="register-btn">Create an Account</a>
+                     <a href="{% url 'register' %}" class="register-btn">Create an Account</a>
                 </div>
             </div>
         </div>
