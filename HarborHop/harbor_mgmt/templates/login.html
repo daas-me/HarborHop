@@ -4,69 +4,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HarborHop Log In</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    
+    <title>HarborHop - Log In</title>
+    <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
 </head>
 <body>
- 
     <div class="container">
-        <!-- Image Section (Left side with background image) -->
-        <div class="image-section"></div>
- 
-        <!-- Form Section (Right side) -->
+        <!-- Left Image Section -->
+        <div class="image-section">
+            <div class="image-overlay">
+                <h2>Welcome Back!</h2>
+                <p>Your maritime adventure awaits</p>
+            </div>
+        </div>
+
+        <!-- Right Form Section -->
         <div class="form-section">
             <div class="form-container">
-                <h1>HARBOR<span>hop</span></h1>
-                <p>Hop Aboard, Sail Beyond.</p>
- 
-                <!-- Sign In Title -->
+                <!-- Logo -->
+                <div class="logo-section">
+                    <a href="{% url 'home' %}" class="logo">HARBOR<span>hop</span></a>
+                    <p class="tagline">Hop Aboard. Sail Beyond</p>
+                </div>
+
+                <!-- Title -->
                 <div class="sign-in-title">Log In</div>
-                <!-- <p class="login-link">Don't have an account yet? <a href="#">Sign up now</a></p> -->
- 
-                <!-- Social Sign-In Buttons -->
-                {% comment %} <div class="social-buttons">
-                    <button class="facebook">Facebook</button>
-                    <button class="google">Google</button>
-                </div> {% endcomment %}
- 
-                <!-- Divider -->
-                {% comment %} <div class="divider">
-                    <hr>
-                    <span>or</span>
-                    <hr>
-                </div> {% endcomment %}
- 
-                <!-- Form -->
-                <!-- <form action="#" method="post">
-                    {% csrf_token %}
-                    <div class="input-container">
-                        <i class="input-icon">&#x1F464;</i>
-                        <input type="email" name="email" placeholder="Email Address" required>
-                    </div>
-                    <div class="input-container">
-                        <i class="input-icon">&#x1F512;</i>
-                        <input type="password" name="password" placeholder="Password" required>
-                    </div>
- 
-                    <div class="forgot-password">
-                        <a href="#">Forgot your password?</a>
-                    </div>
- 
-                    <button type="submit" class="sign-in-btn">Log In</button>
-                </form> -->
- 
+                <p class="subtitle">Don't have an account? <a href="#">Sign up now</a></p>
+
+                <!-- Django Form -->
                 <form method="post">
                     {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit">Login</button>
+                    
+                    {% if form.non_field_errors %}
+                        <ul class="errorlist">
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
+                    {% for field in form %}
+                        <div class="form-group">
+                            {{ field.label_tag }}
+                            <div class="input-wrapper">
+                                {% if field.name == 'username' %}
+                                    <span class="input-icon">👤</span>
+                                {% elif field.name == 'password' %}
+                                    <span class="input-icon">🔒</span>
+                                {% endif %}
+                                {{ field }}
+                            </div>
+                            {% if field.errors %}
+                                <ul class="errorlist">
+                                    {% for error in field.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    <div class="form-options">
+                        <label class="remember-me">
+                            <input type="checkbox" name="remember">
+                            <span>Remember me</span>
+                        </label>
+                        <div class="forgot-password">
+                            <a href="#">Forgot password?</a>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="login-btn">Log In</button>
                 </form>
-                <!--<a href="#"><button class="register-btn">Register</button></a>-->
+
+                <!-- Register Section -->
+                <div class="register-section">
+                    <p>New to HarborHop?</p>
+                     <a href="#" class="register-btn">Create an Account</a>
+                </div>
             </div>
         </div>
     </div>
- 
- 
-   
 </body>
 </html>

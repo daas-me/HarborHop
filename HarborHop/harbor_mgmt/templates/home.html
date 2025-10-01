@@ -1,641 +1,358 @@
-{% include "header.html" %}
 {% load static %}
-
-{% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel = "stylesheet">
-<style>
-    body {
-        font-family: 'Alan Sans', sans-serif;
-        margin: 0;
-        padding: 0;
-        background: url('https://images.pexels.com/photos/1223649/pexels-photo-1223649.jpeg') no-repeat center center fixed;
-        background-size: cover;
-        min-height: 10vh;
-    }
-
-    .container {
-        margin: 0;
-        padding: 0;
-    }
-
-    main {
-        flex: 1;
-        overflow-y: auto;
-        padding: 20px;
-        background: white;
-        max-width: 800px;
-        margin: 20px auto;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    h2 {
-        color: #ff9900;
-        text-align: center;
-        margin-bottom: 20px;
-    }
-
-    h3 {
-        color: #333;
-        margin-top: 20px;
-    }
-
-    p {
-        color: #555;
-        line-height: 1.6;
-    }
-
-    ul {
-        list-style-type: disc;
-        padding-left: 20px;
-    }
-
-    ul li {
-        margin-bottom: 10px;
-        color: #555;
-    }
-
-    .btn-book-now {
-        display: block;
-        margin: 20px auto;
-        padding: 15px 30px;
-        background-color: #ff9900;
-        color: white;
-        font-size: 18px;
-        font-weight: bold;
-        text-align: center;
-        text-decoration: none;
-        border-radius: 5px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: background-color 0.3s ease;
-    }
-
-    .btn-book-now:hover {
-        background-color: #e68a00;
-    }
-
-    .btn-learn-more {
-        display: block;
-        margin: 20px auto;
-        padding: 15px 30px;
-        background-color: transparent;
-        color: #ff9900;
-        font-size: 18px;
-        font-weight: bold;
-        text-align: center;
-        text-decoration: none;
-        border: 2px solid #ff9900;
-        border-radius: 5px;
-        transition: all 0.3s ease;
-    }
-
-    .btn-learn-more:hover {
-        background-color: #ff9900;
-        color: white;
-    }
-
-    .offers-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 20px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 30px;
-        justify-content: center;
-        position: relative;
-    }
-
-    .offer-card {
-        flex: 0 1 300px;
-        display: flex;
-        flex-direction: column;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        background: white;
-        transition: all 0.3s ease;
-        position: relative;
-        background: rgba(255, 255, 255, 0.95);
-    }
-
-    .offer-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
-    }
-
-    .offer-card img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-    }
-
-    .offer-card-content {
-        padding: 15px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-
-    .tag {
-        display: inline-block;
-        background-color: #ff9900;
-        color: white;
-        font-size: 12px;
-        padding: 5px 10px;
-        margin-bottom: 10px;
-        border-radius: 3px;
-    }
-
-    .tag.limited {
-        background-color: #ffcc00; /* Yellow for "Limited Time" */
-        color: black; /* Black text for better readability */
-    }
-
-    .view-all-btn {
-        display: block;
-        margin: 20px auto;
-        padding: 10px 20px;
-        background-color: #007bff;
-        color: white;
-        text-align: center;
-        text-decoration: none;
-        border-radius: 5px;
-    }
-
-    .view-all-btn:hover {
-        background-color: #0056b3;
-    }
-
-    .features-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 20px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 30px;
-        justify-content: center;
-        position: relative;
-    }
-
-    .feature-card {
-        flex: 0 1 300px;
-        display: flex;
-        flex-direction: column;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        background: white;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: visible;
-    }
-
-    .feature-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
-    }
-
-    .feature-card img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-    }
-
-    .feature-card p {
-        padding: 15px;
-        margin: 0;
-        text-align: center;
-    }
-
-    .why-use-section {
-        background: url('https://images.pexels.com/photos/1223649/pexels-photo-1223649.jpeg') no-repeat center center fixed;
-        background-size: cover;
-        padding: 40px 0;
-        position: relative;
-    }
-
-    .why-use-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-    }
-
-    .why-use-section h2 {
-        position: relative;
-        color: white;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    }
-
-    .main-title {
-        font-size: 3.5rem;
-        color: #ff9900;
-        text-align: center;
-        margin-bottom: 30px;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        font-weight: 700;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-        animation: fadeIn 1.5s ease-in;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .latest-offers-section {
-        background: url('https://images.pexels.com/photos/1223649/pexels-photo-1223649.jpeg') no-repeat center center fixed;
-        background-size: cover;
-        padding: 40px 0;
-        position: relative;
-    }
-
-    .latest-offers-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-    }
-
-    .latest-offers-section h2 {
-        position: relative;
-        color: white;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    }
-
-    .section-header {
-        text-align: center;
-        margin-bottom: 40px;
-        position: relative;
-        z-index: 1;
-    }
-
-    .section-header h2 {
-        font-size: 2.5em;
-        margin-bottom: 15px;
-    }
-
-    .section-header p {
-        color: #fff;
-        max-width: 600px;
-        margin: 0 auto;
-        font-size: 1.1em;
-    }
-
-    .price-badge {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        background: #ff9900;
-        color: white;
-        padding: 10px 15px;
-        border-radius: 25px;
-        font-weight: bold;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .feature-icon {
-        position: absolute;
-        top: -25px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 50px;
-        height: 50px;
-        background: #ff9900;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 24px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .book-now-btn {
-        background: #ff9900;
-        color: white;
-        padding: 8px 15px;
-        border-radius: 5px;
-        text-decoration: none;
-        margin-top: 10px;
-        display: inline-block;
-        transition: all 0.3s ease;
-    }
-
-    .book-now-btn:hover {
-        background: #e68a00;
-        transform: scale(1.05);
-    }
-
-    .hero-section {
-        position: relative;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        padding: 50px 20px;
-        background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5));
-        background-size: cover;
-        color: white;
-        margin-top: -24px; /* Remove the gap between header and hero section */
-    }
-
-    .hero-content {
-        max-width: 800px;
-        margin: 0 auto;
-        background: rgba(0, 0, 0, 0.6);
-        padding: 40px;
-        border-radius: 15px;
-        backdrop-filter: blur(5px);
-    }
-
-    .hero-title {
-        font-size: 4rem;
-        color: #ff9900;
-        margin-bottom: 20px;
-        text-transform: uppercase;
-        letter-spacing: 3px;
-        animation: fadeInDown 1s ease-out;
-    }
-
-    .hero-description {
-        font-size: 1.2rem;
-        line-height: 1.8;
-        margin-bottom: 30px;
-        color: #fff;
-        animation: fadeIn 1.5s ease-out;
-    }
-
-    .hero-buttons {
-        display: flex;
-        gap: 20px;
-        justify-content: center;
-        animation: fadeInUp 1s ease-out;
-    }
-
-    .hero-btn {
-        padding: 15px 40px;
-        font-size: 1.2rem;
-        font-weight: bold;
-        text-transform: uppercase;
-        border-radius: 50px;
-        transition: all 0.3s ease;
-        text-decoration: none;
-    }
-
-    .hero-btn-primary {
-        background: #ff9900;
-        color: white;
-        border: none;
-    }
-
-    .hero-btn-primary:hover {
-        background: #e68a00;
-        transform: translateY(-3px);
-    }
-
-    .hero-btn-secondary {
-        background: transparent;
-        color: white;
-        border: 2px solid white;
-    }
-
-    .hero-btn-secondary:hover {
-        background: white;
-        color: #ff9900;
-        transform: translateY(-3px);
-    }
-
-    @keyframes fadeInDown {
-        from {
-            opacity: 0;
-            transform: translateY(-30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-</style>
-
-
-<section class="hero-section">
-    <div class="hero-content">
-        <h1 class="hero-title">🚢 HarborHop</h1>
-        <p class="hero-description">
-            Discover the Philippines' hidden paradise islands with HarborHop - Where Every Journey Becomes an Adventure! 
-            Set sail to breathtaking destinations with just a few clicks. From pristine beaches to secret coves, 
-            we connect you to over 100+ routes across the archipelago at exclusive rates.
-            <br><br>
-            Why choose us? Simple booking process ⚡, real-time availability 🕒, and up to 30% savings on tickets 💰. 
-            Plus, our local experts are available 24/7 to ensure your journey is smooth sailing from start to finish.
-        </p>
-
-        <div class="hero-buttons">
-            {% comment %}
-            <a href="{% url 'booking_create' %}" class="hero-btn hero-btn-primary">Book Now</a>
-            <a href="{% url 'about' %}" class="hero-btn hero-btn-secondary">Learn More</a>
-            {% endcomment %}
-        </div>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HarborHop - Your Gateway to Maritime Adventures</title>
+    <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}?v=3">
+</head>
+<body>
+   <!-- Header -->
+<header>
+    <div class="logo-container">
+        <a href="{% url 'home' %}" class="logo">HARBOR<span>hop</span></a>
+        <p class="tagline">Hop aboard. Sail beyond</p>
     </div>
-</section>
+    <nav>
+        <a href="{% url 'home' %}">Home</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'booking_create' %}">Transaction</a>
+            <a href="#">Latest Offers</a>
+            <a href="{% url 'account' %}">Contact Us</a>
+            <div class="nav-divider"></div>
+            <a href="#" class="language-link">PH</a>
+            <span class="language-separator">|</span>
+            <a href="#" class="language-link">EN</a>
+            <a href="{% url 'logout' %}" class="login-btn">Log out</a>
+        {% else %}
+            <a href="#">Transaction</a>
+            <a href="#">Latest Offers</a>
+            <a href="#">Contact Us</a>
+            <div class="nav-divider"></div>
+            <a href="#" class="language-link">PH</a>
+            <span class="language-separator">|</span>
+            <a href="#" class="language-link">EN</a>
+            <a href="{% url 'login' %}" class="login-btn">Log In</a>
+        {% endif %}
+    </nav>
+</header>
 
-{% comment %} <div class="destination-links">
-    <a href="{% url 'booking_boracay' %}" class="destination">Boracay</a>
-    <a href="{% url 'booking_cebu' %}" class="destination">Cebu</a>
-    <a href="{% url 'booking_elnido' %}" class="destination">El Nido</a>
-    <a href="{% url 'booking_siargao' %}" class="destination">Siargao</a>
-</div> {% endcomment %}
+    <!-- Hero Section with Booking Card -->
+    <section class="hero-section">
+        <div class="booking-card">
+            <h2 class="booking-title">Find Your Trip</h2>
+            <p class="booking-subtitle">Book ferry tickets and explore the wonders of the PH!</p>
+            
+            <form class="booking-form">
+                <div class="form-row">
+                    <div class="input-group">
+                        <label>Travel Destination</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">📍</span>
+                            <input type="text" placeholder="Enter Origin City/Port" class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="swap-icon">⇄</div>
+                    
+                    <div class="input-group">
+                        <label>&nbsp;</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">📍</span>
+                            <input type="text" placeholder="Enter Destination City/Port" class="form-input">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="input-group">
+                        <label>Departure Date</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">📅</span>
+                            <input type="date" class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Select Shipping Lines</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">🚢</span>
+                            <select class="form-input">
+                                <option>Goaboda</option>
+                                <option>2GO Travel</option>
+                                <option>Oceanjet</option>
+                                <option>Weesam Express</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row passengers">
+                    <div class="passenger-group">
+                        <span class="passenger-icon">👤</span>
+                        <div class="passenger-info">
+                            <strong>Adults</strong>
+                            <small>12 years and up</small>
+                        </div>
+                        <div class="counter">
+                            <button type="button" class="counter-btn" onclick="decrementCounter(this)">-</button>
+                            <span class="counter-value">0</span>
+                            <button type="button" class="counter-btn" onclick="incrementCounter(this)">+</button>
+                        </div>
+                    </div>
+                    
+                    <div class="passenger-group">
+                        <span class="passenger-icon">👶</span>
+                        <div class="passenger-info">
+                            <strong>Children</strong>
+                            <small>2-11 years old</small>
+                        </div>
+                        <div class="counter">
+                            <button type="button" class="counter-btn" onclick="decrementCounter(this)">-</button>
+                            <span class="counter-value">0</span>
+                            <button type="button" class="counter-btn" onclick="incrementCounter(this)">+</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-buttons">
+                    <button type="submit" class="btn-submit">Find Your Ticket</button>
+                    <button type="button" class="btn-secondary">Manage My Bookings</button>
+                </div>
+            </form>
+        </div>
+    </section>
 
-<!-- Latest Offers Section -->
-<section class="latest-offers-section">
+    <!-- Latest Offers Section -->
+    <section class="latest-offers-section">
+        <div class="section-header">
+            <h2>🏷️ Latest Offers</h2>
+            <p>Exclusive deals on popular routes across the Philippines</p>
+        </div>
+        <div class="offers-container">
+            <div class="offer-card">
+                <div class="price-badge">From ₱999</div>
+                <img src="https://static1.detourista.com/wp/wp-content/uploads/Unorganized/Boracay-Spots-Featured.jpg" alt="Boracay Express">
+                <div class="offer-card-content">
+                    <span class="tag limited">30% OFF</span>
+                    <h3>Boracay Express</h3>
+                    <p>Manila ↔ Boracay<br>
+                    Starting at ₱999<br>
+                    Valid until June 2024</p>
+                </div>
+            </div>
+
+            <div class="offer-card">
+                <div class="price-badge">Family Package</div>
+                <img src="https://www.kkday.com/en-ph/blog/wp-content/uploads/FBblogCoverIslandHoppinginCebu-1170x630.jpg   " alt="Cebu Island Hopper">
+                <div class="offer-card-content">
+                    <span class="tag limited">Family Package</span>
+                    <h3>Cebu Island Hopper</h3>
+                    <p>4 Islands in 1 Day<br>
+                    Kids Travel Free<br>
+                    Includes Lunch</p>
+                </div>
+            </div>
+
+            <div class="offer-card">
+                <div class="price-badge">Flash Sale</div>
+                <img src="https://i.ytimg.com/vi/aWOdllk6u2U/mqdefault.jpg" alt="Palawan Adventure">
+                <div class="offer-card-content">
+                    <span class="tag limited">Flash Sale</span>
+                    <h3>El Nido Express</h3>
+                    <p>Manila ↔ El Nido<br>
+                    Buy 1 Get 1 Free<br>
+                    24 Hours Only!</p>
+                </div>
+            </div>
+
+            <div class="offer-card">
+                <div class="price-badge">Student Offer</div>
+                <img src="https://i.ytimg.com/vi/l6K6FgR2xB8/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLCVmTDDTDEHhgshytd1yuDBy914bA" alt="Siargao Surfer">
+                <div class="offer-card-content">
+                    <span class="tag limited">Student Offer</span>
+                    <h3>Siargao Surfer</h3>
+                    <p>20% Student Discount<br>
+                    Free Surf Board Transport<br>
+                    Valid ID Required</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Use HarborHop Section -->
+    <section class="why-use-section">
+        <div class="section-header">
+            <h2>Why Choose HarborHop?</h2>
+            <p>Join thousands of happy travelers who trust us for their island-hopping adventures</p>
+        </div>
+        <div class="features-container">
+            <div class="feature-card">
+                <div class="feature-icon">💰</div>
+                <img src="https://media.licdn.com/dms/image/v2/C4D1BAQFWtDwvyWttvg/company-background_10000/company-background_10000/0/1605151800225/best_price_cruises_cover?e=2147483647&v=beta&t=0Q-f57ZiNmjw-FZvjDUz0EamF6K6ihURFDPotNeLH9g" alt="Best Prices">
+                <p><strong>Best Price Guarantee</strong><br>
+                Get exclusive deals and up to 30% off on ferry tickets. We match any competitor's price!</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📞</div>
+                <img src="https://assets.princess.com/is/image/princesscruises/oceannow-crew-delivers-cocktails-couple-lounging-lido-deck-wearing-medallion:5x4?ts=1721071273083" alt="24/7 Support">
+                <p><strong>24/7 Expert Support</strong><br>
+                Our local travel experts are available round-the-clock to assist you in English and Filipino.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📡</div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1LvSYGo6p2sttgDU8xW0kLq-xFo2SvsyrDw&s" alt="Real-time Updates">
+                <p><strong>Real-time Updates</strong><br>
+                Get instant notifications about schedule changes, weather updates, and live vessel tracking.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🛒</div>
+                <img src="https://blogimage.vantagecircle.com/content/images/2024/01/13-Corporate-Reward-Programs-with-Essentials--Benefits--Ideas--and-Steps.png" alt="Easy Booking">
+                <p><strong>Seamless Booking</strong><br>
+                Book your trips in minutes with our user-friendly platform. Instant confirmation and e-tickets.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🎁</div>
+                <img src="https://blogimage.vantagecircle.com/content/images/2024/01/13-Corporate-Reward-Programs-with-Essentials--Benefits--Ideas--and-Steps.png" alt="Rewards Program">
+                <p><strong>HopRewards Program</strong><br>
+                Earn points on every booking and enjoy exclusive member benefits and priority boarding.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Partners Section -->
+<section class="partners-section">
     <div class="section-header">
-        <h2>🌊 Latest Offers</h2>
-        <p>Exclusive deals on popular routes across the Philippines</p>
+        <h2>Our Partners</h2>
     </div>
-    <div class="offers-container">
-        <div class="offer-card">
-            <div class="price-badge">From ₱999</div>
-            <img src="https://static1.detourista.com/wp/wp-content/uploads/Unorganized/Boracay-Spots-Featured.jpg" alt="Boracay Express">
-            <div class="offer-card-content">
-                <span class="tag limited">30% OFF</span>
-                <h3>Boracay Express</h3>
-                <p>Manila ↔ Boracay<br>
-                Starting at ₱999<br>
-                Valid until June 2024</p>
-                {% comment %}
-                <a href="{% url 'booking_boracay' %}" class="book-now-btn">Book Boracay Trip</a>
-                {% endcomment %}
-            </div>
+    <div class="partners-container">
+        <div class="partner-logo">
+            <img src="https://upload.wikimedia.org/wikipedia/en/2/2f/Lite_ferries_logo.png" alt="Lite Ferries">
         </div>
-
-        <div class="offer-card">
-            <div class="price-badge">Family Package</div>
-            <img src="https://gttp.imgix.net/198182/x/0/top-10-tourist-spots-in-cebu-10.jpg" alt="Cebu Island Hopper">
-            <div class="offer-card-content">
-                <span class="tag limited">Family Package</span>
-                <h3>Cebu Island Hopper</h3>
-                <p>4 Islands in 1 Day<br>
-                Kids Travel Free<br>
-                Includes Lunch</p>
-                {% comment %}    
-                <a href="{% url 'booking_cebu' %}" class="book-now-btn">Book Cebu Trip</a>
-                {% endcomment %}
-            </div>
+        <div class="partner-logo">
+            <img src="https://bustickets.ph/wp-content/uploads/2020/06/starlite-ferries.svg" alt="Starlite Ferries">
         </div>
-
-        <div class="offer-card">
-            <div class="price-badge">Flash Sale</div>
-            <img src="https://i.ytimg.com/vi/aWOdllk6u2U/mqdefault.jpg" alt="Palawan Adventure">
-            <div class="offer-card-content">
-                <span class="tag limited">Flash Sale</span>
-                <h3>El Nido Express</h3>
-                <p>Manila ↔ El Nido<br>
-                Buy 1 Get 1 Free<br>
-                24 Hours Only!</p>
-                {% comment %}
-                <a href="{% url 'booking_elnido' %}" class="book-now-btn">Book El Nido Trip</a>
-                {% endcomment %}
-            </div>
+        <div class="partner-logo">
+            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/0/05/OceanJet_logo.svg/250px-OceanJet_logo.svg.png" alt="OceanJet">
         </div>
-
-        <div class="offer-card">
-            <div class="price-badge">Student Offer</div>
-            <img src="https://i.ytimg.com/vi/l6K6FgR2xB8/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLCVmTDDTDEHhgshytd1yuDBy914bA" alt="Siargao Surfer">
-            <div class="offer-card-content">
-                <span class="tag limited">Student Offer</span>
-                <h3>Siargao Surfer</h3>
-                <p>20% Student Discount<br>
-                Free Surf Board Transport<br>
-                Valid ID Required</p>
-                {% comment %}
-                <a href="{% url 'booking_siargao' %}" class="book-now-btn">Book Siargao Trip</a>
-                {% endcomment %}
-            </div>
+        <div class="partner-logo">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/2GO_Travel_logo_%282018%29.svg/1200px-2GO_Travel_logo_%282018%29.svg.png" alt="2GO Travel">
+        </div>
+        <div class="partner-logo">
+            <img src="https://upload.wikimedia.org/wikipedia/en/b/b5/APFC_company_logo.svg" alt="Archipelago Philippine Ferries Corporation">
+        </div>
+        <div class="partner-logo">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/SuperFerry_logo.svg/2560px-SuperFerry_logo.svg.png" alt="SuperFerry">
+        </div>
+        <div class="partner-logo">
+            <img src="https://www.transasiashipping.com/wp-content/uploads/2023/05/TASLI-NEW.png" alt="Trans-Asia Shipping Lines">
+        </div>
+        <div class="partner-logo">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSTP1yTyp1bl0ym8FXk_9rRTpTLsUlsvrJBPg&s" alt="Santa Clara Shipping Corp.">
+        </div>
+        <div class="partner-logo">
+            <img src="https://media.glassdoor.com/sqll/632352/cokaliong-shipping-lines-squarelogo-1473157373209.png" alt="Cokaliong Shipping Lines">
+        </div>
+        <div class="partner-logo">
+            <img src="https://ecpay.com.ph/sites/default/files/2024-01/FASTCAT.png" alt="FastCat">
+        </div>
+        <div class="partner-logo">
+            <img src="https://montenegrolines.com.ph/assets/img/logo-01-current.png" alt="Montenegro Lines">
+        </div>
+        <div class="partner-logo">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Super_Shuttle_Logo.jpg" alt="Super Shuttle Ferry">
         </div>
     </div>
 </section>
 
-<!-- Why Use HarborHop Section -->
-<section class="why-use-section">
-    <div class="section-header">
-        <h2>⭐ Why Choose HarborHop?</h2>
-        <p>Join thousands of happy travelers who trust us for their island-hopping adventures</p>
-    </div>
-    <div class="features-container">
-        <div class="feature-card">
-            <div class="feature-icon">💰</div>
-            <img src="https://media.licdn.com/dms/image/v2/C4D1BAQFWtDwvyWttvg/company-background_10000/company-background_10000/0/1605151800225/best_price_cruises_cover?e=2147483647&v=beta&t=0Q-f57ZiNmjw-FZvjDUz0EamF6K6ihURFDPotNeLH9g" alt="Best Prices">
-            <p><strong>Best Price Guarantee</strong><br>
-            Get exclusive deals and up to 30% off on ferry tickets. We match any competitor's price!</p>
+    <!-- Customer Service Section -->
+    <section class="customer-service-section">
+        <div class="customer-service-content">
+            <div class="customer-service-text">
+        <h2>
+            <div class="service-icon">❓</div>
+            Customer Service
+        </h2>
+        <p>Visit our customer service page to find useful information on travelling by ferry, our FAQs, and how to contact us for help with your booking.</p>
+            </div>
+            <div class="customer-service-cta">
+                <a href="#" class="need-help-btn">Need Help?</a>
+            </div>
         </div>
-        <div class="feature-card">
-            <div class="feature-icon">📞</div>
-            <img src="https://assets.princess.com/is/image/princesscruises/oceannow-crew-delivers-cocktails-couple-lounging-lido-deck-wearing-medallion:5x4?ts=1721071273083" alt="24/7 Support">
-            <p><strong>24/7 Expert Support</strong><br>
-            Our local travel experts are available round-the-clock to assist you in English and Filipino.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">📡</div>
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1LvSYGo6p2sttgDU8xW0kLq-xFo2SvsyrDw&s" alt="Real-time Updates">
-            <p><strong>Real-time Updates</strong><br>
-            Get instant notifications about schedule changes, weather updates, and live vessel tracking.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">🛒</div>
-            <img src="data:image/png;base64,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" alt="Easy Booking">
-            <p><strong>Seamless Booking</strong><br>
-            Book your trips in minutes with our user-friendly platform. Instant confirmation and e-tickets.</p>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <div class="footer-logo">
+                    <div class="logo-text">HARBOR<span class="highlight">hop</span></div>
+                    <p class="tagline">Hop Aboard. Sail Beyond</p>
+                </div>
+                <p style="color: #2c3e50; margin-top: 20px;">Experience the best cruise booking platform with exclusive deals and premium customer service.</p>
+            </div>
+
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <div class="contact-info">
+                    <p>✉️ Steven@harborhop.com</p>
+                    <p>📞 +1 (555) 123-4567</p>
+                    <p>📍 123 Marina Blvd, Beach City, CA</p>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h4>Connect With Us</h4>
+                <div class="social-media">
+                    <a href="#" title="Facebook">
+                        <img src="https://cdn-icons-png.flaticon.com/512/124/124010.png" alt="Facebook">
+                    </a>
+                    <a href="#" title="Twitter">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3256/3256013.png" alt="Twitter">
+                    </a>
+                    <a href="#" title="Instagram">
+                        <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram">
+                    </a>
+                </div>
+                <div style="margin-top: 20px;">
+                    <h4>Newsletter</h4>
+                    <form style="display: flex; gap: 10px;">
+                        <input type="email" placeholder="Enter your email" style="padding: 8px; border-radius: 4px; border: none; flex: 1;">
+                        <button type="submit" style="background: #ff9900; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Subscribe</button>
+                    </form>
+                </div>
+            </div>
         </div>
         
-        <div class="feature-card">
-            <div class="feature-icon">🎁</div>
-            <img src="https://blogimage.vantagecircle.com/content/images/2024/01/13-Corporate-Reward-Programs-with-Essentials--Benefits--Ideas--and-Steps.png" alt="Rewards Program">
-            <p><strong>HopRewards Program</strong><br>
-            Earn points on every booking and enjoy exclusive member benefits and priority boarding.</p>
+        <div class="footer-bottom">
+            <p>&copy; 2025 HarborHop. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
         </div>
-    </div>
-</section>
+    </footer>
 
-<footer>
-    <div class="footer-content">
-        <div class="footer-section">
-            <div class="footer-logo">
-                <div class="logo-text">HARBOR<span class="highlight">hop</span></div>
-                <p class="tagline">Your Gateway to Maritime Adventures</p>
-            </div>
-            <p style="color: #ccc; margin-top: 20px;">Experience the best cruise booking platform with exclusive deals and premium customer service.</p>
-        </div>
+    <script>
+        function incrementCounter(btn) {
+            const counterValue = btn.previousElementSibling;
+            let count = parseInt(counterValue.textContent);
+            counterValue.textContent = count + 1;
+        }
 
-        <div class="footer-section">
-            <h4>Quick Links</h4>
-            <ul class="footer-links">
-                <li><a href="{% url 'home' %}">Home</a></li>
-                {% comment %}  
-                <li><a href="{% url 'about' %}">About Us</a></li>
-                {% endcomment %}
-                {% comment %} <li><a href="#">Cruise Deals</a></li>
-                <li><a href="#">Travel Guide</a></li>
-                <li><a href="#">FAQ</a></li> {% endcomment %}
-            </ul>
-        </div>
-
-        <div class="footer-section">
-            <h4>Contact Us</h4>
-            <div class="contact-info">
-                <p><i class="fas fa-envelope"></i> Steven@harborhop.com</p>
-                <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
-                <p><i class="fas fa-map-marker-alt"></i> 123 Marina Blvd, Beach City, CA</p>
-            </div>
-        </div>
-
-        <div class="footer-section">
-            <h4>Connect With Us</h4>
-            <div class="social-media">
-                <a href="#" title="Facebook">
-                    <img src="https://cdn-icons-png.flaticon.com/512/124/124010.png" alt="Facebook">
-                </a>
-                <a href="#" title="Twitter">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3256/3256013.png" alt="Twitter">
-                </a>
-                <a href="#" title="Instagram">
-                    <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram">
-                </a>
-            </div>
-            <div style="margin-top: 20px;">
-                <h4>Newsletter</h4>
-                <form style="display: flex; gap: 10px;">
-                    <input type="email" placeholder="Enter your email" style="padding: 8px; border-radius: 4px; border: none; flex: 1;">
-                    <button type="submit" style="background: #ff9900; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Subscribe</button>
-                </form>
-            </div>
-        </div>
-    </div>
-    
-    <div class="footer-bottom">
-        <p>&copy; 2024 HarborHop. All rights reserved. | <a href="#" style="color: #888;">Privacy Policy</a> | <a href="#" style="color: #888;">Terms of Service</a></p>
-    </div>
-</footer>
-
-{% endblock %}
+        function decrementCounter(btn) {
+            const counterValue = btn.nextElementSibling;
+            let count = parseInt(counterValue.textContent);
+            if (count > 0) {
+                counterValue.textContent = count - 1;
+            }
+        }
+    </script>
+</body>
+</html>
