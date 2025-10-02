@@ -1,0 +1,359 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HarborHop - Your Gateway to Maritime Adventures</title>
+    <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}?v=3">
+</head>
+<body>
+   <!-- Header -->
+<header>
+    <div class="logo-container">
+        <a href="{% url 'home' %}" class="logo">HARBOR<span>hop</span></a>
+        <p class="tagline">Hop aboard. Sail beyond</p>
+    </div>
+    <nav>
+        <a href="{% url 'home' %}">Home</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'home' %}">Transaction</a>
+            <a href="#">Latest Offers</a>
+            <a href="#">Contact Us</a>
+            <div class="nav-divider"></div>
+            <a href="#" class="language-link">PH</a>
+            <span class="language-separator">|</span>
+            <a href="#" class="language-link">EN</a>
+            <span class="user-name-btn">{{ user.username }}</span>
+            <a href="{% url 'logout' %}" class="login-btn">Log out</a>
+        {% else %}
+            <a href="#">Transaction</a>
+            <a href="#">Latest Offers</a>
+            <a href="#">Contact Us</a>
+            <div class="nav-divider"></div>
+            <a href="#" class="language-link">PH</a>
+            <span class="language-separator">|</span>
+            <a href="#" class="language-link">EN</a>
+            <a href="{% url 'login' %}" class="login-btn">Log In</a>
+        {% endif %}
+    </nav>
+</header>
+
+    <!-- Hero Section with Booking Card -->
+    <section class="hero-section">
+        <div class="booking-card">
+            <h2 class="booking-title">Find Your Trip</h2>
+            <p class="booking-subtitle">Book ferry tickets and explore the wonders of the PH!</p>
+            
+            <form class="booking-form">
+                <div class="form-row">
+                    <div class="input-group">
+                        <label>Travel Destination</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">📍</span>
+                            <input type="text" placeholder="Enter Origin City/Port" class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="swap-icon">⇄</div>
+                    
+                    <div class="input-group">
+                        <label>&nbsp;</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">📍</span>
+                            <input type="text" placeholder="Enter Destination City/Port" class="form-input">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="input-group">
+                        <label>Departure Date</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">📅</span>
+                            <input type="date" class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Select Shipping Lines</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">🚢</span>
+                            <select class="form-input">
+                                <option>Goaboda</option>
+                                <option>2GO Travel</option>
+                                <option>Oceanjet</option>
+                                <option>Weesam Express</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row passengers">
+                    <div class="passenger-group">
+                        <span class="passenger-icon">👤</span>
+                        <div class="passenger-info">
+                            <strong>Adults</strong>
+                            <small>12 years and up</small>
+                        </div>
+                        <div class="counter">
+                            <button type="button" class="counter-btn" onclick="decrementCounter(this)">-</button>
+                            <span class="counter-value">0</span>
+                            <button type="button" class="counter-btn" onclick="incrementCounter(this)">+</button>
+                        </div>
+                    </div>
+                    
+                    <div class="passenger-group">
+                        <span class="passenger-icon">👶</span>
+                        <div class="passenger-info">
+                            <strong>Children</strong>
+                            <small>2-11 years old</small>
+                        </div>
+                        <div class="counter">
+                            <button type="button" class="counter-btn" onclick="decrementCounter(this)">-</button>
+                            <span class="counter-value">0</span>
+                            <button type="button" class="counter-btn" onclick="incrementCounter(this)">+</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-buttons">
+                    <button type="submit" class="btn-submit">Find Your Ticket</button>
+                    <button type="button" class="btn-secondary">Manage My Bookings</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Latest Offers Section -->
+    <section class="latest-offers-section">
+        <div class="section-header">
+            <h2>🏷️ Latest Offers</h2>
+            <p>Exclusive deals on popular routes across the Philippines</p>
+        </div>
+        <div class="offers-container">
+            <div class="offer-card">
+                <div class="price-badge">From ₱999</div>
+                <img src="https://static1.detourista.com/wp/wp-content/uploads/Unorganized/Boracay-Spots-Featured.jpg" alt="Boracay Express">
+                <div class="offer-card-content">
+                    <span class="tag limited">30% OFF</span>
+                    <h3>Boracay Express</h3>
+                    <p>Manila ↔ Boracay<br>
+                    Starting at ₱999<br>
+                    Valid until June 2024</p>
+                </div>
+            </div>
+
+            <div class="offer-card">
+                <div class="price-badge">Family Package</div>
+                <img src="https://www.kkday.com/en-ph/blog/wp-content/uploads/FBblogCoverIslandHoppinginCebu-1170x630.jpg   " alt="Cebu Island Hopper">
+                <div class="offer-card-content">
+                    <span class="tag limited">Family Package</span>
+                    <h3>Cebu Island Hopper</h3>
+                    <p>4 Islands in 1 Day<br>
+                    Kids Travel Free<br>
+                    Includes Lunch</p>
+                </div>
+            </div>
+
+            <div class="offer-card">
+                <div class="price-badge">Flash Sale</div>
+                <img src="https://i.ytimg.com/vi/aWOdllk6u2U/mqdefault.jpg" alt="Palawan Adventure">
+                <div class="offer-card-content">
+                    <span class="tag limited">Flash Sale</span>
+                    <h3>El Nido Express</h3>
+                    <p>Manila ↔ El Nido<br>
+                    Buy 1 Get 1 Free<br>
+                    24 Hours Only!</p>
+                </div>
+            </div>
+
+            <div class="offer-card">
+                <div class="price-badge">Student Offer</div>
+                <img src="https://i.ytimg.com/vi/l6K6FgR2xB8/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLCVmTDDTDEHhgshytd1yuDBy914bA" alt="Siargao Surfer">
+                <div class="offer-card-content">
+                    <span class="tag limited">Student Offer</span>
+                    <h3>Siargao Surfer</h3>
+                    <p>20% Student Discount<br>
+                    Free Surf Board Transport<br>
+                    Valid ID Required</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Use HarborHop Section -->
+    <section class="why-use-section">
+        <div class="section-header">
+            <h2>Why Choose HarborHop?</h2>
+            <p>Join thousands of happy travelers who trust us for their island-hopping adventures</p>
+        </div>
+        <div class="features-container">
+            <div class="feature-card">
+                <div class="feature-icon">💰</div>
+                <img src="https://media.licdn.com/dms/image/v2/C4D1BAQFWtDwvyWttvg/company-background_10000/company-background_10000/0/1605151800225/best_price_cruises_cover?e=2147483647&v=beta&t=0Q-f57ZiNmjw-FZvjDUz0EamF6K6ihURFDPotNeLH9g" alt="Best Prices">
+                <p><strong>Best Price Guarantee</strong><br>
+                Get exclusive deals and up to 30% off on ferry tickets. We match any competitor's price!</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📞</div>
+                <img src="https://assets.princess.com/is/image/princesscruises/oceannow-crew-delivers-cocktails-couple-lounging-lido-deck-wearing-medallion:5x4?ts=1721071273083" alt="24/7 Support">
+                <p><strong>24/7 Expert Support</strong><br>
+                Our local travel experts are available round-the-clock to assist you in English and Filipino.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📡</div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1LvSYGo6p2sttgDU8xW0kLq-xFo2SvsyrDw&s" alt="Real-time Updates">
+                <p><strong>Real-time Updates</strong><br>
+                Get instant notifications about schedule changes, weather updates, and live vessel tracking.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🛒</div>
+                <img src="https://blogimage.vantagecircle.com/content/images/2024/01/13-Corporate-Reward-Programs-with-Essentials--Benefits--Ideas--and-Steps.png" alt="Easy Booking">
+                <p><strong>Seamless Booking</strong><br>
+                Book your trips in minutes with our user-friendly platform. Instant confirmation and e-tickets.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🎁</div>
+                <img src="https://blogimage.vantagecircle.com/content/images/2024/01/13-Corporate-Reward-Programs-with-Essentials--Benefits--Ideas--and-Steps.png" alt="Rewards Program">
+                <p><strong>HopRewards Program</strong><br>
+                Earn points on every booking and enjoy exclusive member benefits and priority boarding.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Partners Section -->
+<section class="partners-section">
+    <div class="section-header">
+        <h2>Our Partners</h2>
+    </div>
+    <div class="partners-container">
+        <div class="partner-logo">
+            <img src="https://upload.wikimedia.org/wikipedia/en/2/2f/Lite_ferries_logo.png" alt="Lite Ferries">
+        </div>
+        <div class="partner-logo">
+            <img src="https://bustickets.ph/wp-content/uploads/2020/06/starlite-ferries.svg" alt="Starlite Ferries">
+        </div>
+        <div class="partner-logo">
+            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/0/05/OceanJet_logo.svg/250px-OceanJet_logo.svg.png" alt="OceanJet">
+        </div>
+        <div class="partner-logo">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/2GO_Travel_logo_%282018%29.svg/1200px-2GO_Travel_logo_%282018%29.svg.png" alt="2GO Travel">
+        </div>
+        <div class="partner-logo">
+            <img src="https://upload.wikimedia.org/wikipedia/en/b/b5/APFC_company_logo.svg" alt="Archipelago Philippine Ferries Corporation">
+        </div>
+        <div class="partner-logo">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/SuperFerry_logo.svg/2560px-SuperFerry_logo.svg.png" alt="SuperFerry">
+        </div>
+        <div class="partner-logo">
+            <img src="https://www.transasiashipping.com/wp-content/uploads/2023/05/TASLI-NEW.png" alt="Trans-Asia Shipping Lines">
+        </div>
+        <div class="partner-logo">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSTP1yTyp1bl0ym8FXk_9rRTpTLsUlsvrJBPg&s" alt="Santa Clara Shipping Corp.">
+        </div>
+        <div class="partner-logo">
+            <img src="https://media.glassdoor.com/sqll/632352/cokaliong-shipping-lines-squarelogo-1473157373209.png" alt="Cokaliong Shipping Lines">
+        </div>
+        <div class="partner-logo">
+            <img src="https://ecpay.com.ph/sites/default/files/2024-01/FASTCAT.png" alt="FastCat">
+        </div>
+        <div class="partner-logo">
+            <img src="https://montenegrolines.com.ph/assets/img/logo-01-current.png" alt="Montenegro Lines">
+        </div>
+        <div class="partner-logo">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Super_Shuttle_Logo.jpg" alt="Super Shuttle Ferry">
+        </div>
+    </div>
+</section>
+
+    <!-- Customer Service Section -->
+    <section class="customer-service-section">
+        <div class="customer-service-content">
+            <div class="customer-service-text">
+        <h2>
+            <div class="service-icon">❓</div>
+            Customer Service
+        </h2>
+        <p>Visit our customer service page to find useful information on travelling by ferry, our FAQs, and how to contact us for help with your booking.</p>
+            </div>
+            <div class="customer-service-cta">
+                <a href="#" class="need-help-btn">Need Help?</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <div class="footer-logo">
+                    <div class="logo-text">HARBOR<span class="highlight">hop</span></div>
+                    <p class="tagline">Hop Aboard. Sail Beyond</p>
+                </div>
+                <p style="color: #2c3e50; margin-top: 20px;">Experience the best cruise booking platform with exclusive deals and premium customer service.</p>
+            </div>
+
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <div class="contact-info">
+                    <p>✉️ Steven@harborhop.com</p>
+                    <p>📞 +1 (555) 123-4567</p>
+                    <p>📍 123 Marina Blvd, Beach City, CA</p>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h4>Connect With Us</h4>
+                <div class="social-media">
+                    <a href="#" title="Facebook">
+                        <img src="https://cdn-icons-png.flaticon.com/512/124/124010.png" alt="Facebook">
+                    </a>
+                    <a href="#" title="Twitter">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3256/3256013.png" alt="Twitter">
+                    </a>
+                    <a href="#" title="Instagram">
+                        <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram">
+                    </a>
+                </div>
+                <div style="margin-top: 20px;">
+                    <h4>Newsletter</h4>
+                    <form style="display: flex; gap: 10px;">
+                        <input type="email" placeholder="Enter your email" style="padding: 8px; border-radius: 4px; border: none; flex: 1;">
+                        <button type="submit" style="background: #ff9900; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 HarborHop. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+        </div>
+    </footer>
+
+    <script>
+        function incrementCounter(btn) {
+            const counterValue = btn.previousElementSibling;
+            let count = parseInt(counterValue.textContent);
+            counterValue.textContent = count + 1;
+        }
+
+        function decrementCounter(btn) {
+            const counterValue = btn.nextElementSibling;
+            let count = parseInt(counterValue.textContent);
+            if (count > 0) {
+                counterValue.textContent = count - 1;
+            }
+        }
+    </script>
+</body>
+</html>
