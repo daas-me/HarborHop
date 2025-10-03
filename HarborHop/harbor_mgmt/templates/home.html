@@ -18,13 +18,14 @@
     <nav>
         <a href="{% url 'home' %}">Home</a>
         {% if user.is_authenticated %}
-            <a href="{% url 'booking_create' %}">Transaction</a>
+            <a href="{% url 'home' %}">Transaction</a>
             <a href="#">Latest Offers</a>
-            <a href="{% url 'account' %}">Contact Us</a>
+            <a href="#">Contact Us</a>
             <div class="nav-divider"></div>
             <a href="#" class="language-link">PH</a>
             <span class="language-separator">|</span>
             <a href="#" class="language-link">EN</a>
+            <span class="user-name-btn">{{ user.username }}</span>
             <a href="{% url 'logout' %}" class="login-btn">Log out</a>
         {% else %}
             <a href="#">Transaction</a>

@@ -73,6 +73,17 @@ body {
     overflow-y: auto;
 }
 
+.form-section-register {
+    flex: 0.5;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    background: white;
+    padding: 100px 30px;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+}
+
 .form-container {
     width: 100%;
     max-width: 300px;

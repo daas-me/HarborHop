@@ -51,6 +51,23 @@ ul li {
     color: #555;
 }
 
+/* User Name Button - Add this to your home.css */
+.user-name-btn {
+    padding: 8px 20px;
+    background: #ff9800;
+    color: white !important;
+    border-radius: 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.user-name-btn:hover {
+    background: #e68a00;
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 153, 0, 0.4);
+}
+
 /* Buttons */
 .btn-book-now {
     display: block;

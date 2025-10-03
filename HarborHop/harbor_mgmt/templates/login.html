@@ -7,6 +7,7 @@
     <title>HarborHop - Log In</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 <body>
     <div class="container">
@@ -14,7 +15,7 @@
         <div class="image-section">
             <div class="image-overlay">
                 <h2>Welcome Back!</h2>
-                <p>Your maritime adventure awaits</p>
+                <p>Your maritime adventure continues</p>
             </div>
         </div>
 
@@ -28,8 +29,17 @@
                 </div>
 
                 <!-- Title -->
-                <div class="sign-in-title">Log In</div>
+                <div class="sign-in-title">Sign in</div>
                 <p class="subtitle">Don't have an account? <a href="{% url 'register' %}">Sign up now</a></p>
+
+                <!-- Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
 
                 <!-- Django Form -->
                 <form method="post">
@@ -64,24 +74,9 @@
                         </div>
                     {% endfor %}
 
-                    <div class="form-options">
-                        <label class="remember-me">
-                            <input type="checkbox" name="remember">
-                            <span>Remember me</span>
-                        </label>
-                        <div class="forgot-password">
-                            <a href="#">Forgot password?</a>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="login-btn">Log In</button>
+                    <button type="submit" class="login-btn">Sign In</button>
                 </form>
 
-                <!-- Register Section -->
-                <div class="register-section">
-                    <p>New to HarborHop?</p>
-                     <a href="{% url 'register' %}" class="register-btn">Create an Account</a>
-                </div>
             </div>
         </div>
     </div>
