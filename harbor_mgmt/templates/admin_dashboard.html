@@ -1,0 +1,138 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HarborHop - Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}?v=1">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <a href="{% url 'home' %}" class="logo">HARBOR<span>hop</span></a>
+                <p class="tagline">Admin Dashboard</p>
+            </div>
+            
+                <nav class="sidebar-nav">
+                    <a href="{% url 'admin_dashboard' %}" class="nav-item active">
+                        <span class="icon">📊</span>
+                        <span>Dashboard</span>
+                     </a>
+                     <a href="#" class="nav-item">
+                        <span class="icon">🎫</span>
+                        <span>Bookings</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="icon">🚢</span>
+                        <span>Ferry Lines</span>
+                    </a>
+                    <a href="{% url 'admin_users' %}" class="nav-item">
+                        <span class="icon">👥</span>
+                        <span>Users</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="icon">🏷️</span>
+                        <span>Offers</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="icon">⚙️</span>
+                        <span>Settings</span>
+                    </a>
+                </nav>
+            
+            <div class="sidebar-footer">
+                <a href="{% url 'home' %}" class="nav-item">
+                    <span class="icon">🏠</span>
+                    <span>Back to Home</span>
+                </a>
+                <a href="{% url 'logout' %}" class="nav-item">
+                    <span class="icon">🚪</span>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <h1>Welcome back, {{ user.username }}!</h1>
+                <div class="user-info">
+                    <span class="user-avatar">👤</span>
+                    <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="dashboard-content">
+                <div class="welcome-card">
+                    <h2>Admin Dashboard</h2>
+                    <p>This is your administrative control panel. From here, you can manage all aspects of HarborHop.</p>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🎫</div>
+                        <div class="stat-info">
+                            <h3>Total Bookings</h3>
+                            <p class="stat-number">0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-info">
+                            <h3>Total Users</h3>
+                            <p class="stat-number">0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">🚢</div>
+                        <div class="stat-info">
+                            <h3>Active Routes</h3>
+                            <p class="stat-number">0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-info">
+                            <h3>Revenue</h3>
+                            <p class="stat-number">₱0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h3>Quick Actions</h3>
+                    <div class="actions-grid">
+                        <button class="action-btn">
+                            <span class="icon">➕</span>
+                            <span>Add Booking</span>
+                        </button>
+                        <button class="action-btn">
+                            <span class="icon">🚢</span>
+                            <span>Add Ferry Route</span>
+                        </button>
+                        <button class="action-btn">
+                            <span class="icon">👤</span>
+                            <span>Add User</span>
+                        </button>
+                        <button class="action-btn">
+                            <span class="icon">🏷️</span>
+                            <span>Create Offer</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

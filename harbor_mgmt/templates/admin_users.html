@@ -1,0 +1,301 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HarborHop - Manage Users</title>
+    <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}?v=2">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <a href="{% url 'home' %}" class="logo">HARBOR<span>hop</span></a>
+                <p class="tagline">Admin Dashboard</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="{% url 'admin_dashboard' %}" class="nav-item">
+                    <span class="icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="icon">🎫</span>
+                    <span>Bookings</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="icon">🚢</span>
+                    <span>Ferry Lines</span>
+                </a>
+                <a href="{% url 'admin_users' %}" class="nav-item active">
+                    <span class="icon">👥</span>
+                    <span>Users</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="icon">🏷️</span>
+                    <span>Offers</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="icon">⚙️</span>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="{% url 'home' %}" class="nav-item">
+                    <span class="icon">🏠</span>
+                    <span>Back to Home</span>
+                </a>
+                <a href="{% url 'logout' %}" class="nav-item">
+                    <span class="icon">🚪</span>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div>
+                    <h1>Manage Users</h1>
+                    <p class="page-subtitle">View and manage all registered users</p>
+                </div>
+                <div class="user-info">
+                    <span class="user-avatar">👤</span>
+                    <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
+                </div>
+            </header>
+
+            <!-- Users Management Content -->
+            <div class="dashboard-content">
+                
+                <!-- Stats Overview -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-info">
+                            <h3>Total Users</h3>
+                            <p class="stat-number">247</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">👑</div>
+                        <div class="stat-info">
+                            <h3>Admin Users</h3>
+                            <p class="stat-number">5</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-info">
+                            <h3>Active Users</h3>
+                            <p class="stat-number">238</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">📅</div>
+                        <div class="stat-info">
+                            <h3>New This Month</h3>
+                            <p class="stat-number">42</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search and Filter Section -->
+                <div class="users-controls">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" placeholder="Search users by name, email, or username..." class="search-input">
+                    </div>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active">All Users</button>
+                        <button class="filter-btn">Admins</button>
+                        <button class="filter-btn">Regular</button>
+                        <button class="filter-btn">Recent</button>
+                    </div>
+                    <button class="add-user-btn">
+                        <span>➕</span>
+                        <span>Add User</span>
+                    </button>
+                </div>
+
+                <!-- Users Table -->
+                <div class="users-table-container">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input type="checkbox" class="table-checkbox">
+                                </th>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Sample User Row 1 -->
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="table-checkbox">
+                                </td>
+                                <td>
+                                    <div class="user-cell">
+                                        <div class="user-avatar-small">👤</div>
+                                        <div class="user-details">
+                                            <span class="user-name-text">John Doe</span>
+                                            <span class="user-username">@johndoe</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>john.doe@email.com</td>
+                                <td><span class="role-badge admin">Admin</span></td>
+                                <td><span class="status-badge active">Active</span></td>
+                                <td>Jan 15, 2024</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-icon-btn" title="View">👁️</button>
+                                        <button class="action-icon-btn" title="Edit">✏️</button>
+                                        <button class="action-icon-btn delete" title="Delete">🗑️</button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Sample User Row 2 -->
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="table-checkbox">
+                                </td>
+                                <td>
+                                    <div class="user-cell">
+                                        <div class="user-avatar-small">👤</div>
+                                        <div class="user-details">
+                                            <span class="user-name-text">Jane Smith</span>
+                                            <span class="user-username">@janesmith</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>jane.smith@email.com</td>
+                                <td><span class="role-badge user">User</span></td>
+                                <td><span class="status-badge active">Active</span></td>
+                                <td>Feb 20, 2024</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-icon-btn" title="View">👁️</button>
+                                        <button class="action-icon-btn" title="Edit">✏️</button>
+                                        <button class="action-icon-btn delete" title="Delete">🗑️</button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Sample User Row 3 -->
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="table-checkbox">
+                                </td>
+                                <td>
+                                    <div class="user-cell">
+                                        <div class="user-avatar-small">👤</div>
+                                        <div class="user-details">
+                                            <span class="user-name-text">Mike Johnson</span>
+                                            <span class="user-username">@mikej</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>mike.johnson@email.com</td>
+                                <td><span class="role-badge user">User</span></td>
+                                <td><span class="status-badge inactive">Inactive</span></td>
+                                <td>Mar 10, 2024</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-icon-btn" title="View">👁️</button>
+                                        <button class="action-icon-btn" title="Edit">✏️</button>
+                                        <button class="action-icon-btn delete" title="Delete">🗑️</button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Sample User Row 4 -->
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="table-checkbox">
+                                </td>
+                                <td>
+                                    <div class="user-cell">
+                                        <div class="user-avatar-small">👤</div>
+                                        <div class="user-details">
+                                            <span class="user-name-text">Sarah Williams</span>
+                                            <span class="user-username">@sarahw</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>sarah.w@email.com</td>
+                                <td><span class="role-badge user">User</span></td>
+                                <td><span class="status-badge active">Active</span></td>
+                                <td>Apr 05, 2024</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-icon-btn" title="View">👁️</button>
+                                        <button class="action-icon-btn" title="Edit">✏️</button>
+                                        <button class="action-icon-btn delete" title="Delete">🗑️</button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Sample User Row 5 -->
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="table-checkbox">
+                                </td>
+                                <td>
+                                    <div class="user-cell">
+                                        <div class="user-avatar-small">👤</div>
+                                        <div class="user-details">
+                                            <span class="user-name-text">{{ user.get_full_name|default:"Dwight Schrute" }}</span>
+                                            <span class="user-username">@dwight13</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>dwight@harborhop.com</td>
+                                <td><span class="role-badge admin">Admin</span></td>
+                                <td><span class="status-badge active">Active</span></td>
+                                <td>May 12, 2024</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-icon-btn" title="View">👁️</button>
+                                        <button class="action-icon-btn" title="Edit">✏️</button>
+                                        <button class="action-icon-btn delete" title="Delete">🗑️</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination">
+                    <button class="pagination-btn" disabled>Previous</button>
+                    <div class="pagination-numbers">
+                        <button class="pagination-num active">1</button>
+                        <button class="pagination-num">2</button>
+                        <button class="pagination-num">3</button>
+                        <span>...</span>
+                        <button class="pagination-num">10</button>
+                    </div>
+                    <button class="pagination-btn">Next</button>
+                </div>
+
+            </div>
+        </main>
+    </div>
+</body>
+</html>
