@@ -51,6 +51,38 @@ ul li {
     color: #555;
 }
 
+/* Input Icons - Orange Color */
+.input-icon {
+    color: #ff9900;
+}
+
+.passenger-icon {
+    color: #ff9900;
+}
+
+.swap-icon {
+    color: #ff9900;
+}
+
+.swap-icon i {
+    color: #ff9900;
+}
+
+/* Counter buttons icons */
+.counter-btn i {
+    color: inherit; /* Inherits white color from parent */
+}
+
+/* Feature icons */
+.feature-icon i {
+    color: #2c3e50;
+}
+
+/* Make sure all Font Awesome icons in inputs are orange */
+.input-wrapper i {
+    color: #ff9900;
+}
+
 /* User Name Button - Add this to your home.css */
 .user-name-btn {
     padding: 8px 20px;

@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HarborHop - Your Gateway to Maritime Adventures</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/home.css' %}?v=3">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}?v=11">
+    <script src="https://kit.fontawesome.com/1256e3cde2.js" crossorigin="anonymous"></script>
 </head>
 <body>
   <!-- Header -->
@@ -21,7 +22,7 @@
             <!-- Admin Dashboard Button - Only visible to admin users -->
             {% if user.profile.is_admin_user %}
                 <a href="{% url 'admin_dashboard' %}" class="admin-dashboard-link">
-                    <span class="dashboard-icon"></span>Admin Access
+                    <i class="fa-solid fa-chart-line dashboard-icon"></i> Admin Access
                 </a>
             {% endif %}
             
@@ -58,17 +59,17 @@
                     <div class="input-group">
                         <label>Travel Destination</label>
                         <div class="input-wrapper">
-                            <span class="input-icon">📍</span>
+                            <i class="fa-solid fa-location-dot input-icon"></i>
                             <input type="text" placeholder="Enter Origin City/Port" class="form-input">
                         </div>
                     </div>
                     
-                    <div class="swap-icon">⇄</div>
+                    <div class="swap-icon"><i class="fa-solid fa-right-left"></i></div>
                     
                     <div class="input-group">
                         <label>&nbsp;</label>
                         <div class="input-wrapper">
-                            <span class="input-icon">📍</span>
+                            <i class="fa-solid fa-location-dot input-icon"></i>
                             <input type="text" placeholder="Enter Destination City/Port" class="form-input">
                         </div>
                     </div>
@@ -78,7 +79,7 @@
                     <div class="input-group">
                         <label>Departure Date</label>
                         <div class="input-wrapper">
-                            <span class="input-icon">📅</span>
+                            <i class="fa-solid fa-calendar-days input-icon"></i>
                             <input type="date" class="form-input">
                         </div>
                     </div>
@@ -86,7 +87,7 @@
                     <div class="input-group">
                         <label>Select Shipping Lines</label>
                         <div class="input-wrapper">
-                            <span class="input-icon">🚢</span>
+                            <i class="fa-solid fa-ship input-icon"></i>
                             <select class="form-input">
                                 <option>Goaboda</option>
                                 <option>2GO Travel</option>
@@ -99,28 +100,36 @@
                 
                 <div class="form-row passengers">
                     <div class="passenger-group">
-                        <span class="passenger-icon">👤</span>
+                        <i class="fa-solid fa-user passenger-icon"></i>
                         <div class="passenger-info">
                             <strong>Adults</strong>
                             <small>12 years and up</small>
                         </div>
                         <div class="counter">
-                            <button type="button" class="counter-btn" onclick="decrementCounter(this)">-</button>
+                            <button type="button" class="counter-btn" onclick="decrementCounter(this)">
+                                <i class="fa-solid fa-minus"></i>
+                            </button>
                             <span class="counter-value">0</span>
-                            <button type="button" class="counter-btn" onclick="incrementCounter(this)">+</button>
+                            <button type="button" class="counter-btn" onclick="incrementCounter(this)">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
                         </div>
                     </div>
                     
                     <div class="passenger-group">
-                        <span class="passenger-icon">👶</span>
+                        <i class="fa-solid fa-child passenger-icon"></i>
                         <div class="passenger-info">
                             <strong>Children</strong>
                             <small>2-11 years old</small>
                         </div>
                         <div class="counter">
-                            <button type="button" class="counter-btn" onclick="decrementCounter(this)">-</button>
+                            <button type="button" class="counter-btn" onclick="decrementCounter(this)">
+                                <i class="fa-solid fa-minus"></i>
+                            </button>
                             <span class="counter-value">0</span>
-                            <button type="button" class="counter-btn" onclick="incrementCounter(this)">+</button>
+                            <button type="button" class="counter-btn" onclick="incrementCounter(this)">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -136,7 +145,7 @@
     <!-- Latest Offers Section -->
     <section class="latest-offers-section">
         <div class="section-header">
-            <h2>🏷️ Latest Offers</h2>
+            <h2><i class="fa-solid fa-tags"></i> Latest Offers</h2>
             <p>Exclusive deals on popular routes across the Philippines</p>
         </div>
         <div class="offers-container">
@@ -154,7 +163,7 @@
 
             <div class="offer-card">
                 <div class="price-badge">Family Package</div>
-                <img src="https://www.kkday.com/en-ph/blog/wp-content/uploads/FBblogCoverIslandHoppinginCebu-1170x630.jpg   " alt="Cebu Island Hopper">
+                <img src="https://www.kkday.com/en-ph/blog/wp-content/uploads/FBblogCoverIslandHoppinginCebu-1170x630.jpg" alt="Cebu Island Hopper">
                 <div class="offer-card-content">
                     <span class="tag limited">Family Package</span>
                     <h3>Cebu Island Hopper</h3>
@@ -198,32 +207,32 @@
         </div>
         <div class="features-container">
             <div class="feature-card">
-                <div class="feature-icon">💰</div>
+                <div class="feature-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
                 <img src="https://media.licdn.com/dms/image/v2/C4D1BAQFWtDwvyWttvg/company-background_10000/company-background_10000/0/1605151800225/best_price_cruises_cover?e=2147483647&v=beta&t=0Q-f57ZiNmjw-FZvjDUz0EamF6K6ihURFDPotNeLH9g" alt="Best Prices">
                 <p><strong>Best Price Guarantee</strong><br>
                 Get exclusive deals and up to 30% off on ferry tickets. We match any competitor's price!</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">📞</div>
+                <div class="feature-icon"><i class="fa-solid fa-headset"></i></div>
                 <img src="https://assets.princess.com/is/image/princesscruises/oceannow-crew-delivers-cocktails-couple-lounging-lido-deck-wearing-medallion:5x4?ts=1721071273083" alt="24/7 Support">
                 <p><strong>24/7 Expert Support</strong><br>
                 Our local travel experts are available round-the-clock to assist you in English and Filipino.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">📡</div>
+                <div class="feature-icon"><i class="fa-solid fa-tower-broadcast"></i></div>
                 <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1LvSYGo6p2sttgDU8xW0kLq-xFo2SvsyrDw&s" alt="Real-time Updates">
                 <p><strong>Real-time Updates</strong><br>
                 Get instant notifications about schedule changes, weather updates, and live vessel tracking.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🛒</div>
+                <div class="feature-icon"><i class="fa-solid fa-cart-shopping"></i></div>
                 <img src="https://blogimage.vantagecircle.com/content/images/2024/01/13-Corporate-Reward-Programs-with-Essentials--Benefits--Ideas--and-Steps.png" alt="Easy Booking">
                 <p><strong>Seamless Booking</strong><br>
                 Book your trips in minutes with our user-friendly platform. Instant confirmation and e-tickets.</p>
             </div>
             
             <div class="feature-card">
-                <div class="feature-icon">🎁</div>
+                <div class="feature-icon"><i class="fa-solid fa-gift"></i></div>
                 <img src="https://blogimage.vantagecircle.com/content/images/2024/01/13-Corporate-Reward-Programs-with-Essentials--Benefits--Ideas--and-Steps.png" alt="Rewards Program">
                 <p><strong>HopRewards Program</strong><br>
                 Earn points on every booking and enjoy exclusive member benefits and priority boarding.</p>
@@ -281,7 +290,7 @@
         <div class="customer-service-content">
             <div class="customer-service-text">
         <h2>
-            <div class="service-icon">❓</div>
+            <div class="service-icon"><i class="fa-solid fa-circle-question"></i></div>
             Customer Service
         </h2>
         <p>Visit our customer service page to find useful information on travelling by ferry, our FAQs, and how to contact us for help with your booking.</p>
@@ -313,9 +322,9 @@
             <div class="footer-section">
                 <h4>Contact Us</h4>
                 <div class="contact-info">
-                    <p>✉️ Steven@harborhop.com</p>
-                    <p>📞 +1 (555) 123-4567</p>
-                    <p>📍 123 Marina Blvd, Beach City, CA</p>
+                    <p><i class="fa-solid fa-envelope"></i> Steven@harborhop.com</p>
+                    <p><i class="fa-solid fa-phone"></i> +1 (555) 123-4567</p>
+                    <p><i class="fa-solid fa-location-dot"></i> 123 Marina Blvd, Beach City, CA</p>
                 </div>
             </div>
 
