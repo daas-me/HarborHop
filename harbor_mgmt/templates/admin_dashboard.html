@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HarborHop - Admin Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/admin.css' %}?v=2">
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}?v=1">
     <script src="https://kit.fontawesome.com/1256e3cde2.js" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -18,32 +18,32 @@
                 <p class="tagline">Admin Dashboard</p>
             </div>
             
-            <nav class="sidebar-nav">
-                <a href="{% url 'admin_dashboard' %}" class="nav-item active">
-                    <span class="icon"><i class="fa-solid fa-table-columns"></i></span>
-                    <span>Dashboard</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <span class="icon"><i class="fa-solid fa-ticket"></i></span>
-                    <span>Bookings</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <span class="icon"><i class="fa-solid fa-ship"></i></span>
-                    <span>Ferry Lines</span>
-                </a>
-                <a href="{% url 'admin_users' %}" class="nav-item">
-                    <span class="icon"><i class="fa-solid fa-users"></i></span>
-                    <span>Users</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <span class="icon"><i class="fa-solid fa-tag"></i></span>
-                    <span>Offers</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <span class="icon"><i class="fa-solid fa-gear"></i></span>
-                    <span>Settings</span>
-                </a>
-            </nav>
+                <nav class="sidebar-nav">
+                    <a href="{% url 'admin_dashboard' %}" class="nav-item active">
+                        <span class="icon"><i class="fa-solid fa-table-columns"></i></span>
+                        <span>Dashboard</span>
+                     </a>
+                     <a href="#" class="nav-item">
+                        <span class="icon"><i class="fa-solid fa-ticket"></i></span>
+                        <span>Bookings</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="icon"><i class="fa-solid fa-ship"></i></span>
+                        <span>Ferry Lines</span>
+                    </a>
+                    <a href="{% url 'admin_users' %}" class="nav-item">
+                        <span class="icon"><i class="fa-solid fa-users"></i></span>
+                        <span>Users</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="icon"><i class="fa-solid fa-tag"></i></span>
+                        <span>Offers</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="icon"><i class="fa-solid fa-gear"></i></span>
+                        <span>Settings</span>
+                    </a>
+                </nav>
             
             <div class="sidebar-footer">
                 <a href="{% url 'home' %}" class="nav-item">
@@ -78,7 +78,7 @@
                 <!-- Stats Grid -->
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-icon"><i class="fa-solid fa-ticket"></i></div>
+                        <div class="stat-icon"><i class="fa-solid fa-ticket"></div>
                         <div class="stat-info">
                             <h3>Total Bookings</h3>
                             <p class="stat-number">0</p>
@@ -86,7 +86,7 @@
                     </div>
                     
                     <div class="stat-card">
-                        <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                        <div class="stat-icon"><i class="fa-solid fa-users"></div>
                         <div class="stat-info">
                             <h3>Total Users</h3>
                             <p class="stat-number">0</p>
@@ -94,7 +94,7 @@
                     </div>
                     
                     <div class="stat-card">
-                        <div class="stat-icon"><i class="fa-solid fa-ship"></i></div>
+                        <div class="stat-icon"><i class="fa-solid fa-ship"></div>
                         <div class="stat-info">
                             <h3>Active Routes</h3>
                             <p class="stat-number">0</p>
@@ -119,15 +119,15 @@
                             <span>Add Booking</span>
                         </button>
                         <button class="action-btn">
-                            <span class="icon"><i class="fa-solid fa-ship"></i></span>
+                            <span class="icon"><i class="fa-solid fa-ship"></span>
                             <span>Add Ferry Route</span>
                         </button>
                         <button class="action-btn">
-                            <span class="icon"><i class="fa-solid fa-user"></i></span>
+                            <span class="icon"><i class="fa-solid fa-user"></span>
                             <span>Add User</span>
                         </button>
                         <button class="action-btn">
-                            <span class="icon"><i class="fa-solid fa-tag"></i></span>
+                            <span class="icon"><i class="fa-solid fa-tag"></span>
                             <span>Create Offer</span>
                         </button>
                     </div>
