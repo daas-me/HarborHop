@@ -40,7 +40,8 @@ def register(request):
 
 def user_login(request):
     """Handle user login"""
-    if request.user.is_authenticated:
+    # Only redirect if user is authenticated AND it's a GET request (not after logout)
+    if request.user.is_authenticated and request.method == 'GET':
         # Check if user is admin
         try:
             if request.user.profile.is_admin_user:
@@ -143,4 +144,3 @@ def admin_users(request):
         return redirect('admin_users')
 
     return render(request, 'admin_users.html', {'users': users})
-
