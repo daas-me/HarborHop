@@ -99,14 +99,31 @@ WSGI_APPLICATION = 'HarborHop.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# Database configuration
+DATABASE_URL = os.getenv('DATABASE_URL')
+
 # Database configuration using Supabase Session Pooler
-DATABASES = {
-"default": dj_database_url.config(
-default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-conn_max_age=600, # persistent connections
- ssl_require=False if 'localhost' in os.getenv('DATABASE_URL', '') else True
-)
-}
+if DATABASE_URL:
+   # Production: Use PostgreSQL from Railway
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+    # Add SSL requirement for PostgreSQL
+    DATABASES['default']['OPTIONS'] = {
+        'sslmode': 'require'
+    }
+else:
+    # Local development: Use SQLite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
