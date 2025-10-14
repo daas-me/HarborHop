@@ -48,6 +48,11 @@ MESSAGE_TAGS = {
     messages.ERROR: 'error',
 }
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://harborhop-production.up.railway.app',
+]
+
+
 # Application definition
 
 INSTALLED_APPS = [
