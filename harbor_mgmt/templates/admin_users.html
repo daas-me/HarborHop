@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HarborHop - Manage Users</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/admin.css' %}?v=2">
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}?v=3">
+    <script src="https://kit.fontawesome.com/1256e3cde2.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <div class="admin-container">
@@ -19,38 +20,38 @@
             
             <nav class="sidebar-nav">
                 <a href="{% url 'admin_dashboard' %}" class="nav-item">
-                    <span class="icon">📊</span>
+                    <span class="icon"><i class="fa-solid fa-table-columns"></i></span>
                     <span>Dashboard</span>
                 </a>
                 <a href="#" class="nav-item">
-                    <span class="icon">🎫</span>
+                    <span class="icon"><i class="fa-solid fa-ticket"></i></span>
                     <span>Bookings</span>
                 </a>
                 <a href="#" class="nav-item">
-                    <span class="icon">🚢</span>
+                    <span class="icon"><i class="fa-solid fa-ship"></i></span>
                     <span>Ferry Lines</span>
                 </a>
                 <a href="{% url 'admin_users' %}" class="nav-item active">
-                    <span class="icon">👥</span>
+                    <span class="icon"><i class="fa-solid fa-users"></i></span>
                     <span>Users</span>
                 </a>
                 <a href="#" class="nav-item">
-                    <span class="icon">🏷️</span>
+                    <span class="icon"><i class="fa-solid fa-tag"></i></span>
                     <span>Offers</span>
                 </a>
                 <a href="#" class="nav-item">
-                    <span class="icon">⚙️</span>
+                    <span class="icon"><i class="fa-solid fa-gear"></i></span>
                     <span>Settings</span>
                 </a>
             </nav>
             
             <div class="sidebar-footer">
                 <a href="{% url 'home' %}" class="nav-item">
-                    <span class="icon">🏠</span>
+                    <span class="icon"><i class="fa-solid fa-house"></i></span>
                     <span>Back to Home</span>
                 </a>
                 <a href="{% url 'logout' %}" class="nav-item">
-                    <span class="icon">🚪</span>
+                    <span class="icon"><i class="fa-solid fa-right-from-bracket"></i></span>
                     <span>Logout</span>
                 </a>
             </div>
@@ -65,7 +66,7 @@
                     <p class="page-subtitle">View and manage all registered users</p>
                 </div>
                 <div class="user-info">
-                    <span class="user-avatar">👤</span>
+                    <span class="user-avatar"><i class="fa-solid fa-user"></i></span>
                     <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
                 </div>
             </header>
@@ -76,7 +77,7 @@
                 <!-- Stats Overview -->
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-icon">👥</div>
+                        <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
                         <div class="stat-info">
                             <h3>Total Users</h3>
                             <p class="stat-number">247</p>
@@ -84,7 +85,7 @@
                     </div>
                     
                     <div class="stat-card">
-                        <div class="stat-icon">👑</div>
+                        <div class="stat-icon"><i class="fa-solid fa-crown"></i></div>
                         <div class="stat-info">
                             <h3>Admin Users</h3>
                             <p class="stat-number">5</p>
@@ -92,7 +93,7 @@
                     </div>
                     
                     <div class="stat-card">
-                        <div class="stat-icon">✅</div>
+                        <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
                         <div class="stat-info">
                             <h3>Active Users</h3>
                             <p class="stat-number">238</p>
@@ -100,7 +101,7 @@
                     </div>
                     
                     <div class="stat-card">
-                        <div class="stat-icon">📅</div>
+                        <div class="stat-icon"><i class="fa-solid fa-calendar-days"></i></div>
                         <div class="stat-info">
                             <h3>New This Month</h3>
                             <p class="stat-number">42</p>
@@ -111,7 +112,7 @@
                 <!-- Search and Filter Section -->
                 <div class="users-controls">
                     <div class="search-box">
-                        <span class="search-icon">🔍</span>
+                        <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
                         <input type="text" placeholder="Search users by name, email, or username..." class="search-input">
                     </div>
                     <div class="filter-buttons">
@@ -121,7 +122,7 @@
                         <button class="filter-btn">Recent</button>
                     </div>
                     <button class="add-user-btn">
-                        <span>➕</span>
+                        <span><i class="fa-solid fa-plus"></i></span>
                         <span>Add User</span>
                     </button>
                 </div>
@@ -150,7 +151,7 @@
                                 </td>
                                 <td>
                                     <div class="user-cell">
-                                        <div class="user-avatar-small">👤</div>
+                                        <div class="user-avatar-small"><i class="fa-solid fa-user"></i></div>
                                         <div class="user-details">
                                             <span class="user-name-text">John Doe</span>
                                             <span class="user-username">@johndoe</span>
@@ -163,9 +164,9 @@
                                 <td>Jan 15, 2024</td>
                                 <td>
                                     <div class="action-buttons">
-                                        <button class="action-icon-btn" title="View">👁️</button>
-                                        <button class="action-icon-btn" title="Edit">✏️</button>
-                                        <button class="action-icon-btn delete" title="Delete">🗑️</button>
+                                        <button class="action-icon-btn" title="View"><i class="fa-solid fa-eye"></i></button>
+                                        <button class="action-icon-btn" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="action-icon-btn delete" title="Delete"><i class="fa-solid fa-trash"></i></button>
                                     </div>
                                 </td>
                             </tr>
@@ -177,7 +178,7 @@
                                 </td>
                                 <td>
                                     <div class="user-cell">
-                                        <div class="user-avatar-small">👤</div>
+                                        <div class="user-avatar-small"><i class="fa-solid fa-user"></i></div>
                                         <div class="user-details">
                                             <span class="user-name-text">Jane Smith</span>
                                             <span class="user-username">@janesmith</span>
@@ -190,9 +191,9 @@
                                 <td>Feb 20, 2024</td>
                                 <td>
                                     <div class="action-buttons">
-                                        <button class="action-icon-btn" title="View">👁️</button>
-                                        <button class="action-icon-btn" title="Edit">✏️</button>
-                                        <button class="action-icon-btn delete" title="Delete">🗑️</button>
+                                        <button class="action-icon-btn" title="View"><i class="fa-solid fa-eye"></i></button>
+                                        <button class="action-icon-btn" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="action-icon-btn delete" title="Delete"><i class="fa-solid fa-trash"></i></button>
                                     </div>
                                 </td>
                             </tr>
@@ -204,7 +205,7 @@
                                 </td>
                                 <td>
                                     <div class="user-cell">
-                                        <div class="user-avatar-small">👤</div>
+                                        <div class="user-avatar-small"><i class="fa-solid fa-user"></i></div>
                                         <div class="user-details">
                                             <span class="user-name-text">Mike Johnson</span>
                                             <span class="user-username">@mikej</span>
@@ -217,9 +218,9 @@
                                 <td>Mar 10, 2024</td>
                                 <td>
                                     <div class="action-buttons">
-                                        <button class="action-icon-btn" title="View">👁️</button>
-                                        <button class="action-icon-btn" title="Edit">✏️</button>
-                                        <button class="action-icon-btn delete" title="Delete">🗑️</button>
+                                        <button class="action-icon-btn" title="View"><i class="fa-solid fa-eye"></i></button>
+                                        <button class="action-icon-btn" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="action-icon-btn delete" title="Delete"><i class="fa-solid fa-trash"></i></button>
                                     </div>
                                 </td>
                             </tr>
@@ -231,7 +232,7 @@
                                 </td>
                                 <td>
                                     <div class="user-cell">
-                                        <div class="user-avatar-small">👤</div>
+                                        <div class="user-avatar-small"><i class="fa-solid fa-user"></i></div>
                                         <div class="user-details">
                                             <span class="user-name-text">Sarah Williams</span>
                                             <span class="user-username">@sarahw</span>
@@ -244,9 +245,9 @@
                                 <td>Apr 05, 2024</td>
                                 <td>
                                     <div class="action-buttons">
-                                        <button class="action-icon-btn" title="View">👁️</button>
-                                        <button class="action-icon-btn" title="Edit">✏️</button>
-                                        <button class="action-icon-btn delete" title="Delete">🗑️</button>
+                                        <button class="action-icon-btn" title="View"><i class="fa-solid fa-eye"></i></button>
+                                        <button class="action-icon-btn" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="action-icon-btn delete" title="Delete"><i class="fa-solid fa-trash"></i></button>
                                     </div>
                                 </td>
                             </tr>
@@ -258,7 +259,7 @@
                                 </td>
                                 <td>
                                     <div class="user-cell">
-                                        <div class="user-avatar-small">👤</div>
+                                        <div class="user-avatar-small"><i class="fa-solid fa-user"></i></div>
                                         <div class="user-details">
                                             <span class="user-name-text">{{ user.get_full_name|default:"Dwight Schrute" }}</span>
                                             <span class="user-username">@dwight13</span>
@@ -271,9 +272,9 @@
                                 <td>May 12, 2024</td>
                                 <td>
                                     <div class="action-buttons">
-                                        <button class="action-icon-btn" title="View">👁️</button>
-                                        <button class="action-icon-btn" title="Edit">✏️</button>
-                                        <button class="action-icon-btn delete" title="Delete">🗑️</button>
+                                        <button class="action-icon-btn" title="View"><i class="fa-solid fa-eye"></i></button>
+                                        <button class="action-icon-btn" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="action-icon-btn delete" title="Delete"><i class="fa-solid fa-trash"></i></button>
                                     </div>
                                 </td>
                             </tr>
@@ -283,7 +284,7 @@
 
                 <!-- Pagination -->
                 <div class="pagination">
-                    <button class="pagination-btn" disabled>Previous</button>
+                    <button class="pagination-btn" disabled><i class="fa-solid fa-chevron-left"></i> Previous</button>
                     <div class="pagination-numbers">
                         <button class="pagination-num active">1</button>
                         <button class="pagination-num">2</button>
@@ -291,7 +292,7 @@
                         <span>...</span>
                         <button class="pagination-num">10</button>
                     </div>
-                    <button class="pagination-btn">Next</button>
+                    <button class="pagination-btn">Next <i class="fa-solid fa-chevron-right"></i></button>
                 </div>
 
             </div>
