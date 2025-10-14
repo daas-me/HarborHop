@@ -144,140 +144,47 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Sample User Row 1 -->
+                            {% for u in users %}
                             <tr>
-                                <td>
-                                    <input type="checkbox" class="table-checkbox">
-                                </td>
-                                <td>
-                                    <div class="user-cell">
-                                        <div class="user-avatar-small"><i class="fa-solid fa-user"></i></div>
-                                        <div class="user-details">
-                                            <span class="user-name-text">John Doe</span>
-                                            <span class="user-username">@johndoe</span>
-                                        </div>
+                            <td><input type="checkbox" class="table-checkbox"></td>
+                            <td>
+                                <div class="user-cell">
+                                <div class="user-avatar-small"><i class="fa-solid fa-user"></i></div>
+                                <div class="user-details">
+                                    <span class="user-name-text">{{ u.get_full_name|default:u.username }}</span>
+                                    <span class="user-username">@{{ u.username }}</span>
+                                </div>
                                     </div>
-                                </td>
-                                <td>john.doe@email.com</td>
-                                <td><span class="role-badge admin">Admin</span></td>
-                                <td><span class="status-badge active">Active</span></td>
-                                <td>Jan 15, 2024</td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="action-icon-btn" title="View"><i class="fa-solid fa-eye"></i></button>
-                                        <button class="action-icon-btn" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
-                                        <button class="action-icon-btn delete" title="Delete"><i class="fa-solid fa-trash"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <!-- Sample User Row 2 -->
+                            </td>
+                             <td>{{ u.email }}</td>
+                            <td>
+                                {% if u.profile.is_admin_user %}
+                                    <span class="role-badge admin">Admin</span>
+                                {% else %}
+                                    <span class="role-badge user">User</span>
+                                {% endif %}
+                            </td>
+                             <td>
+                                {% if u.is_active %}
+                                <span class="status-badge active">Active</span>
+                                {% else %}
+                                <span class="status-badge inactive">Inactive</span>
+                                {% endif %}
+                            </td>
+                                 <td>{{ u.date_joined|date:"M d, Y" }}</td>
+                             <td>
+                                <div class="action-buttons">
+                                    <button class="action-icon-btn" title="View"><i class="fa-solid fa-eye"></i></button>
+                                    <button class="action-icon-btn" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                                    <button class="action-icon-btn delete" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                            {% empty %}
                             <tr>
-                                <td>
-                                    <input type="checkbox" class="table-checkbox">
-                                </td>
-                                <td>
-                                    <div class="user-cell">
-                                        <div class="user-avatar-small"><i class="fa-solid fa-user"></i></div>
-                                        <div class="user-details">
-                                            <span class="user-name-text">Jane Smith</span>
-                                            <span class="user-username">@janesmith</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>jane.smith@email.com</td>
-                                <td><span class="role-badge user">User</span></td>
-                                <td><span class="status-badge active">Active</span></td>
-                                <td>Feb 20, 2024</td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="action-icon-btn" title="View"><i class="fa-solid fa-eye"></i></button>
-                                        <button class="action-icon-btn" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
-                                        <button class="action-icon-btn delete" title="Delete"><i class="fa-solid fa-trash"></i></button>
-                                    </div>
-                                </td>
+                                <td colspan="7" style="text-align:center;">No users found.</td>
                             </tr>
-
-                            <!-- Sample User Row 3 -->
-                            <tr>
-                                <td>
-                                    <input type="checkbox" class="table-checkbox">
-                                </td>
-                                <td>
-                                    <div class="user-cell">
-                                        <div class="user-avatar-small"><i class="fa-solid fa-user"></i></div>
-                                        <div class="user-details">
-                                            <span class="user-name-text">Mike Johnson</span>
-                                            <span class="user-username">@mikej</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>mike.johnson@email.com</td>
-                                <td><span class="role-badge user">User</span></td>
-                                <td><span class="status-badge inactive">Inactive</span></td>
-                                <td>Mar 10, 2024</td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="action-icon-btn" title="View"><i class="fa-solid fa-eye"></i></button>
-                                        <button class="action-icon-btn" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
-                                        <button class="action-icon-btn delete" title="Delete"><i class="fa-solid fa-trash"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <!-- Sample User Row 4 -->
-                            <tr>
-                                <td>
-                                    <input type="checkbox" class="table-checkbox">
-                                </td>
-                                <td>
-                                    <div class="user-cell">
-                                        <div class="user-avatar-small"><i class="fa-solid fa-user"></i></div>
-                                        <div class="user-details">
-                                            <span class="user-name-text">Sarah Williams</span>
-                                            <span class="user-username">@sarahw</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>sarah.w@email.com</td>
-                                <td><span class="role-badge user">User</span></td>
-                                <td><span class="status-badge active">Active</span></td>
-                                <td>Apr 05, 2024</td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="action-icon-btn" title="View"><i class="fa-solid fa-eye"></i></button>
-                                        <button class="action-icon-btn" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
-                                        <button class="action-icon-btn delete" title="Delete"><i class="fa-solid fa-trash"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <!-- Sample User Row 5 -->
-                            <tr>
-                                <td>
-                                    <input type="checkbox" class="table-checkbox">
-                                </td>
-                                <td>
-                                    <div class="user-cell">
-                                        <div class="user-avatar-small"><i class="fa-solid fa-user"></i></div>
-                                        <div class="user-details">
-                                            <span class="user-name-text">{{ user.get_full_name|default:"Dwight Schrute" }}</span>
-                                            <span class="user-username">@dwight13</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>dwight@harborhop.com</td>
-                                <td><span class="role-badge admin">Admin</span></td>
-                                <td><span class="status-badge active">Active</span></td>
-                                <td>May 12, 2024</td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="action-icon-btn" title="View"><i class="fa-solid fa-eye"></i></button>
-                                        <button class="action-icon-btn" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
-                                        <button class="action-icon-btn delete" title="Delete"><i class="fa-solid fa-trash"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>

@@ -5,6 +5,7 @@ from .forms import UserRegistrationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import UserProfile
+from django.contrib.auth.models import User
 
 
 def home(request):
@@ -87,7 +88,6 @@ def user_logout(request):
 @login_required
 def admin_dashboard(request):
     """Admin dashboard - only accessible to admin users"""
-    # Check if user has admin access
     try:
         if not request.user.profile.is_admin_user:
             messages.error(request, "You don't have permission to access the admin dashboard.")
@@ -96,20 +96,51 @@ def admin_dashboard(request):
         UserProfile.objects.create(user=request.user)
         messages.error(request, "You don't have permission to access the admin dashboard.")
         return redirect('home')
-    
+
+    # Compute statistics
+    from django.contrib.auth.models import User
+    total_users = User.objects.count()
+    admin_users = UserProfile.objects.filter(is_admin_user=True).count()
+    active_users = User.objects.filter(is_active=True).count()
+
+    from django.utils import timezone
+    from datetime import timedelta
+    start_of_month = timezone.now().replace(day=1)
+    new_this_month = User.objects.filter(date_joined__gte=start_of_month).count()
+
     context = {
         'user': request.user,
+        'total_users': total_users,
+        'admin_users': admin_users,
+        'active_users': active_users,
+        'new_this_month': new_this_month,
     }
     return render(request, 'admin_dashboard.html', context)
 
+
 @login_required
 def admin_users(request):
-    """Admin users management page - UI only"""
+    """Admin users management page - list users and allow role updates"""
     if not hasattr(request.user, 'profile') or not request.user.profile.is_admin_user:
         messages.error(request, "You don't have permission to access this page.")
         return redirect('home')
-    
-    context = {
-        'user': request.user,
-    }
-    return render(request, 'admin_users.html', context)
+
+    users = User.objects.all().select_related('profile')
+
+    if request.method == "POST":
+        user_id = request.POST.get('user_id')
+        action = request.POST.get('action')
+        profile = UserProfile.objects.get(user_id=user_id)
+
+        if action == "make_admin":
+            profile.is_admin_user = True
+            messages.success(request, f"{profile.user.username} is now an admin.")
+        elif action == "remove_admin":
+            profile.is_admin_user = False
+            messages.success(request, f"{profile.user.username} is no longer an admin.")
+        
+        profile.save()
+        return redirect('admin_users')
+
+    return render(request, 'admin_users.html', {'users': users})
+
