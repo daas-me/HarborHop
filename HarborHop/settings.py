@@ -104,7 +104,7 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 
 # Database configuration using Supabase Session Pooler
 if DATABASE_URL:
-   # Production: Use PostgreSQL from Railway
+   # Production: Use PostgreSQL from Supabase
     DATABASES = {
         'default': dj_database_url.config(
             default=DATABASE_URL,
@@ -112,10 +112,7 @@ if DATABASE_URL:
             conn_health_checks=True,
         )
     }
-    # Add SSL requirement for PostgreSQL
-    DATABASES['default']['OPTIONS'] = {
-        'sslmode': 'require'
-    }
+
 else:
     # Local development: Use SQLite
     DATABASES = {
