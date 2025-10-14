@@ -69,46 +69,49 @@
             </header>
 
             <!-- Dashboard Content -->
-            <div class="dashboard-content">
-                <div class="welcome-card">
-                    <h2>Admin Dashboard</h2>
-                    <p>This is your administrative control panel. From here, you can manage all aspects of HarborHop.</p>
-                </div>
-
-                <!-- Stats Grid -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fa-solid fa-ticket"></i></div>
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-ticket"></i></div>
                         <div class="stat-info">
                             <h3>Total Bookings</h3>
                             <p class="stat-number">0</p>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
-                        <div class="stat-info">
-                            <h3>Total Users</h3>
-                            <p class="stat-number">0</p>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fa-solid fa-ship"></i></div>
-                        <div class="stat-info">
-                            <h3>Active Routes</h3>
-                            <p class="stat-number">0</p>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fa-solid fa-coins"></i></div>
-                        <div class="stat-info">
-                            <h3>Revenue</h3>
-                            <p class="stat-number">₱0</p>
-                        </div>
-                    </div>
                 </div>
+            </div>
+    
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                    <div class="stat-info">
+                        <h3>Total Users</h3>
+                        <p class="stat-number">{{ total_users }}</p>
+                    </div>
+            </div>
+    
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-user-shield"></i></div>
+                <div class="stat-info">
+                    <h3>Admin Users</h3>
+                    <p class="stat-number">{{ admin_users }}</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-user-check"></i></div>
+                <div class="stat-info">
+                    <h3>Active Users</h3>
+                    <p class="stat-number">{{ active_users }}</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-calendar-plus"></i></div>
+                <div class="stat-info">
+                <h3>New This Month</h3>
+                <p class="stat-number">{{ new_this_month }}</p>
+            </div>
+        </div>
+        </div>
+
 
                 <!-- Quick Actions -->
                 <div class="quick-actions">
