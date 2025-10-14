@@ -205,5 +205,59 @@
             </div>
         </main>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const searchInput = document.querySelector(".search-input");
+            const filterButtons = document.querySelectorAll(".filter-btn");
+            const rows = document.querySelectorAll(".users-table tbody tr");
+
+        function filterTable() {
+            const searchValue = searchInput.value.toLowerCase();
+            const activeFilter = document.querySelector(".filter-btn.active").textContent.trim();
+
+        rows.forEach(row => {
+            const name = row.querySelector(".user-name-text")?.textContent.toLowerCase() || "";
+            const username = row.querySelector(".user-username")?.textContent.toLowerCase() || "";
+            const email = row.querySelector("td:nth-child(3)")?.textContent.toLowerCase() || "";
+            const role = row.querySelector(".role-badge")?.textContent.trim().toLowerCase();
+
+            // Match search text
+            const matchesSearch = name.includes(searchValue) || username.includes(searchValue) || email.includes(searchValue);
+
+            // Match role filter
+            let matchesFilter = true;
+            if (activeFilter === "Admins") matchesFilter = role === "admin";
+            else if (activeFilter === "Regular") matchesFilter = role === "user";
+            else if (activeFilter === "Recent") {
+                // Show users joined in last 30 days
+                const joinedText = row.querySelector("td:nth-child(6)")?.textContent.trim();
+                const joinedDate = new Date(joinedText);
+                const now = new Date();
+                const diffDays = (now - joinedDate) / (1000 * 60 * 60 * 24);
+                matchesFilter = diffDays <= 30;
+            }
+
+            // Show/hide row
+            if (matchesSearch && matchesFilter) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+                }
+            });
+        }
+
+        // Search event
+        searchInput.addEventListener("keyup", filterTable);
+
+        // Filter buttons event
+        filterButtons.forEach(btn => {
+            btn.addEventListener("click", () => {
+                filterButtons.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                filterTable();
+            });
+        });
+    });
+</script>
 </body>
 </html>
