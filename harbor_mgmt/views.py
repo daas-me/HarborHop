@@ -121,7 +121,7 @@ def admin_dashboard(request):
 
 @login_required
 def admin_users(request):
-    """Admin users management page - list users and allow role updates"""
+    """Admin users management page - handle list, add, edit, and delete"""
     if not hasattr(request.user, 'profile') or not request.user.profile.is_admin_user:
         messages.error(request, "You don't have permission to access this page.")
         return redirect('home')
@@ -129,18 +129,62 @@ def admin_users(request):
     users = User.objects.all().select_related('profile')
 
     if request.method == "POST":
-        user_id = request.POST.get('user_id')
-        action = request.POST.get('action')
-        profile = UserProfile.objects.get(user_id=user_id)
+        action = request.POST.get("action")
+        user_id = request.POST.get("user_id")
 
-        if action == "make_admin":
-            profile.is_admin_user = True
-            messages.success(request, f"{profile.user.username} is now an admin.")
-        elif action == "remove_admin":
-            profile.is_admin_user = False
-            messages.success(request, f"{profile.user.username} is no longer an admin.")
-        
-        profile.save()
-        return redirect('admin_users')
+        # 🗑 DELETE USER
+        if action == "delete":
+            try:
+                user_to_delete = User.objects.get(id=user_id)
+                username = user_to_delete.username
+                user_to_delete.delete()
+                messages.success(request, f"User '{username}' has been deleted successfully.")
+            except User.DoesNotExist:
+                messages.error(request, "User not found.")
 
-    return render(request, 'admin_users.html', {'users': users})
+        # ➕ ADD USER
+        elif action == "add_user":
+            username = request.POST.get("username")
+            email = request.POST.get("email")
+            password = request.POST.get("password")
+            first_name = request.POST.get("first_name")
+            last_name = request.POST.get("last_name")
+            role = request.POST.get("role")
+
+            if username and email and password:
+                if User.objects.filter(username=username).exists():
+                    messages.error(request, "That username is already taken.")
+                else:
+                    new_user = User.objects.create_user(
+                        username=username,
+                        email=email,
+                        password=password,
+                        first_name=first_name,
+                        last_name=last_name
+                    )
+                    profile = UserProfile.objects.create(user=new_user)
+                    if role == "admin":
+                        profile.is_admin_user = True
+                        profile.save()
+                    messages.success(request, f"User '{username}' has been created successfully.")
+            else:
+                messages.error(request, "Please fill out all required fields.")
+
+        # ✏️ EDIT USER
+        elif action == "edit_user" and user_id:
+            try:
+                user = User.objects.get(id=user_id)
+                profile = user.profile
+                user.first_name = request.POST.get("first_name")
+                user.last_name = request.POST.get("last_name")
+                user.email = request.POST.get("email")
+                profile.is_admin_user = True if request.POST.get("role") == "admin" else False
+                user.save()
+                profile.save()
+                messages.success(request, f"User '{user.username}' has been updated successfully.")
+            except User.DoesNotExist:
+                messages.error(request, "User not found.")
+
+        return redirect("admin_users")
+
+    return render(request, "admin_users.html", {"users": users})
