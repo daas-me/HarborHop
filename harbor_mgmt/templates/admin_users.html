@@ -80,7 +80,7 @@
                         <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
                         <div class="stat-info">
                             <h3>Total Users</h3>
-                            <p class="stat-number">247</p>
+                            <p class="stat-number">{{ total_users }}</p>
                         </div>
                     </div>
                     
@@ -88,7 +88,7 @@
                         <div class="stat-icon"><i class="fa-solid fa-crown"></i></div>
                         <div class="stat-info">
                             <h3>Admin Users</h3>
-                            <p class="stat-number">5</p>
+                            <p class="stat-number">{{ admin_users }}</p>
                         </div>
                     </div>
                     
@@ -96,7 +96,7 @@
                         <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
                         <div class="stat-info">
                             <h3>Active Users</h3>
-                            <p class="stat-number">238</p>
+                            <p class="stat-number">{{ active_users }}</p>
                         </div>
                     </div>
                     
@@ -104,7 +104,7 @@
                         <div class="stat-icon"><i class="fa-solid fa-calendar-days"></i></div>
                         <div class="stat-info">
                             <h3>New This Month</h3>
-                            <p class="stat-number">42</p>
+                            <p class="stat-number">{{ new_this_month }}</p>
                         </div>
                     </div>
                 </div>
@@ -329,14 +329,27 @@
             let matchesFilter = true;
             if (activeFilter === "Admins") matchesFilter = role === "admin";
             else if (activeFilter === "Regular") matchesFilter = role === "user";
-            else if (activeFilter === "Recent") {
-                // Show users joined in last 30 days
-                const joinedText = row.querySelector("td:nth-child(6)")?.textContent.trim();
-                const joinedDate = new Date(joinedText);
-                const now = new Date();
-                const diffDays = (now - joinedDate) / (1000 * 60 * 60 * 24);
-                matchesFilter = diffDays <= 30;
-            }
+             else if (activeFilter === "Recent") {
+                    // Sort and show users by most recent join date (newest first)
+                    const tbody = document.querySelector(".users-table tbody");
+                    const rowsArray = Array.from(tbody.querySelectorAll("tr"));
+
+                    rowsArray.sort((a, b) => {
+                        const dateA = new Date(a.querySelector("td:nth-child(6)")?.textContent.trim());
+                        const dateB = new Date(b.querySelector("td:nth-child(6)")?.textContent.trim());
+                        return dateB - dateA; // Sort newest → oldest
+                    });
+
+                    // Re-append sorted rows
+                    rowsArray.forEach(row => tbody.appendChild(row));
+
+                    // Show all rows (no filtering)
+                    rowsArray.forEach(row => {
+                        row.style.display = "";
+                    });
+
+                    return; // Exit early
+                }
 
             // Show/hide row
             if (matchesSearch && matchesFilter) {
