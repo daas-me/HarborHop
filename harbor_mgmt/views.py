@@ -186,5 +186,26 @@ def admin_users(request):
                 messages.error(request, "User not found.")
 
         return redirect("admin_users")
+    
+    total_users = users.count()
+    admin_users = users.filter(profile__is_admin_user=True).count()
+    active_users = users.filter(is_active=True).count()
 
-    return render(request, "admin_users.html", {"users": users})
+    from django.utils import timezone
+    now = timezone.now()
+    new_this_month = users.filter(
+        date_joined__year=now.year, 
+        date_joined__month=now.month
+    ).count()
+
+    # ✅ Pass stats to the template
+    context = {
+        "users": users,
+        "total_users": total_users,
+        "admin_users": admin_users,
+        "active_users": active_users,
+        "new_this_month": new_this_month,
+    }
+    
+
+    return render(request, "admin_users.html", context)
