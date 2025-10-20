@@ -244,8 +244,11 @@ function showAddUserModal() {
                     <label for="password">Password</label>
                     <input type="password" id="password" name="password" required>
                 </div>
-                <div class="form-group">
-                    <label><input type="checkbox" name="is_admin"> Make Admin</label>
+                <div class="form-group checkbox-group">
+                    <label>
+                        <input type="checkbox" name="is_admin">
+                        <span>Make Admin</span>
+                    </label>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-cancel">Cancel</button>
