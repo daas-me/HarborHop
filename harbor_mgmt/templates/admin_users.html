@@ -4,12 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store" />
     <title>HarborHop - Manage Users</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/admin.css' %}?v=3">
     <script src="https://kit.fontawesome.com/1256e3cde2.js" crossorigin="anonymous"></script>
     <script src="{% static 'js/admin_users.js' %}?v=2"></script>
 </head>
+
+<script>
+window.addEventListener('pageshow', function(event) {
+  if (event.persisted) {
+    window.location.reload();
+  }
+});
+</script>
+
 <body>
     <div class="admin-container">
         <!-- Sidebar -->
