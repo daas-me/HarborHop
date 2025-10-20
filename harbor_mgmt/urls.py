@@ -9,6 +9,8 @@ urlpatterns = [
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('admin-dashboard/users/', views.admin_users, name='admin_users'),
     path('change-user-role/', views.change_user_role, name='change_user_role'),
-    path('admin/add-user/', views.add_user, name='add_user'),
-    path('admin/delete-user/<int:user_id>/', views.delete_user, name='delete_user'),
+    path('add-user/', views.add_user, name='add_user'),
+    path('edit-user/<int:user_id>/', views.edit_user, name='edit_user'),
+    path('delete-user/<int:user_id>/', views.delete_user, name='delete_user'),
+    path('test-csrf/', views.test_csrf, name='test_csrf'),
 ]
