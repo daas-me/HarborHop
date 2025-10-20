@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/admin.css' %}?v=3">
     <script src="https://kit.fontawesome.com/1256e3cde2.js" crossorigin="anonymous"></script>
+    <script src="{% static 'js/admin_users.js' %}"></script>
 </head>
 <body>
     <div class="admin-container">
@@ -157,11 +158,33 @@
                                     </div>
                             </td>
                              <td>{{ u.email }}</td>
-                            <td>
-                                {% if u.profile.is_admin_user %}
-                                    <span class="role-badge admin">Admin</span>
+                           <td>
+                                {% if u.id == user.id %}
+                                    <!-- Can't change own role -->
+                                    {% if u.profile.is_admin_user %}
+                                        <span class="role-badge admin">Admin (You)</span>
+                                    {% else %}
+                                        <span class="role-badge user">User (You)</span>
+                                    {% endif %}
                                 {% else %}
-                                    <span class="role-badge user">User</span>
+                                    <!-- Toggle form for other users -->
+                                    <form method="post" style="display: inline;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="user_id" value="{{ u.id }}">
+                                        {% if u.profile.is_admin_user %}
+                                            <input type="hidden" name="action" value="remove_admin">
+                                            <button type="button" class="role-badge-btn admin">
+                                                <span class="role-text">Admin</span>
+                                                <i class="fa-solid fa-arrow-down"></i>
+                                            </button>
+                                        {% else %}
+                                            <input type="hidden" name="action" value="make_admin">
+                                            <button type="button" class="role-badge-btn user">
+                                                <span class="role-text">User</span>
+                                                <i class="fa-solid fa-arrow-up"></i>
+                                            </button>
+                                        {% endif %}
+                                    </form>
                                 {% endif %}
                             </td>
                              <td>
@@ -239,196 +262,5 @@
             </div>
         </form>
     </div>
-</div>
-
-                <!-- ✅ Add User Modal (now separate) -->
-                <div id="addUserModal" class="modal">
-                    <div class="modal-content">
-                        <h2>Add New User</h2>
-                        <form method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="add_user">
-
-                    <div class="form-group">
-                        <label>First Name</label>
-                        <input type="text" name="first_name" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Last Name</label>
-                        <input type="text" name="last_name" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Username</label>
-                        <input type="text" name="username" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" name="email" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" name="password" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Role</label>
-                            <select name="role" required>
-                                <option value="user" selected>User</option>
-                                <option value="admin">Admin</option>
-                            </select>
-                    </div>
-
-                    <div class="modal-buttons">
-                        <button type="submit" class="add-btn">Add User</button>
-                        <button type="button" class="close-btn" onclick="toggleAddModal(false)">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-                    <!-- Pagination -->
-                    <div class="pagination">
-                        <button class="pagination-btn" disabled><i class="fa-solid fa-chevron-left"></i> Previous</button>
-                            <div class="pagination-numbers">
-                            <button class="pagination-num active">1</button>
-                            <button class="pagination-num">2</button>
-                            <button class="pagination-num">3</button>
-                            <span>...</span>
-                            <button class="pagination-num">10</button>
-                        </div>
-                        <button class="pagination-btn">Next <i class="fa-solid fa-chevron-right"></i></button>
-                    </div>
-
-                    </div>
-                </main>
-            </div>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const searchInput = document.querySelector(".search-input");
-            const filterButtons = document.querySelectorAll(".filter-btn");
-            const rows = document.querySelectorAll(".users-table tbody tr");
-
-        function filterTable() {
-            const searchValue = searchInput.value.toLowerCase();
-            const activeFilter = document.querySelector(".filter-btn.active").textContent.trim();
-
-        rows.forEach(row => {
-            const name = row.querySelector(".user-name-text")?.textContent.toLowerCase() || "";
-            const username = row.querySelector(".user-username")?.textContent.toLowerCase() || "";
-            const email = row.querySelector("td:nth-child(3)")?.textContent.toLowerCase() || "";
-            const role = row.querySelector(".role-badge")?.textContent.trim().toLowerCase();
-
-            // Match search text
-            const matchesSearch = name.includes(searchValue) || username.includes(searchValue) || email.includes(searchValue);
-
-            // Match role filter
-            let matchesFilter = true;
-            if (activeFilter === "Admins") matchesFilter = role === "admin";
-            else if (activeFilter === "Regular") matchesFilter = role === "user";
-             else if (activeFilter === "Recent") {
-                    // Sort and show users by most recent join date (newest first)
-                    const tbody = document.querySelector(".users-table tbody");
-                    const rowsArray = Array.from(tbody.querySelectorAll("tr"));
-
-                    rowsArray.sort((a, b) => {
-                        const dateA = new Date(a.querySelector("td:nth-child(6)")?.textContent.trim());
-                        const dateB = new Date(b.querySelector("td:nth-child(6)")?.textContent.trim());
-                        return dateB - dateA; // Sort newest → oldest
-                    });
-
-                    // Re-append sorted rows
-                    rowsArray.forEach(row => tbody.appendChild(row));
-
-                    // Show all rows (no filtering)
-                    rowsArray.forEach(row => {
-                        row.style.display = "";
-                    });
-
-                    return; // Exit early
-                }
-
-            // Show/hide row
-            if (matchesSearch && matchesFilter) {
-                row.style.display = "";
-            } else {
-                row.style.display = "none";
-                }
-            });
-        }
-
-        // Search event
-        searchInput.addEventListener("keyup", filterTable);
-
-        // Filter buttons event
-        filterButtons.forEach(btn => {
-            btn.addEventListener("click", () => {
-                filterButtons.forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-                filterTable();
-                });
-            });
-        });
-    </script>
-
-    <script>
-        function toggleEditModal(show) {
-        const modal = document.getElementById("editUserModal");
-        modal.style.display = show ? "flex" : "none";
-    }
-
-    // Handle Edit button click
-        document.addEventListener("DOMContentLoaded", function () {
-        const editButtons = document.querySelectorAll(".edit-btn");
-
-        editButtons.forEach(btn => {
-            btn.addEventListener("click", () => {
-                document.getElementById("edit_user_id").value = btn.dataset.userId;
-                document.getElementById("edit_first_name").value = btn.dataset.firstName;
-                document.getElementById("edit_last_name").value = btn.dataset.lastName;
-                document.getElementById("edit_email").value = btn.dataset.email;
-                document.getElementById("edit_role").value = btn.dataset.role;
-            toggleEditModal(true);
-            });
-        });
-
-        // Close modal when clicking outside
-        window.addEventListener("click", (e) => {
-            if (e.target.id === "editUserModal") toggleEditModal(false);
-        });
-    });
-    </script>
-    <script>
-        function toggleAddModal(show) {
-            const modal = document.getElementById("addUserModal");
-                modal.style.display = show ? "flex" : "none";
-            }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            const addButton = document.querySelector(".add-user-btn");
-                if (addButton) {
-                addButton.addEventListener("click", () => toggleAddModal(true));
-                }
-
-            // Close modal when clicking outside
-            window.addEventListener("click", (e) => {
-                if (e.target.id === "addUserModal") toggleAddModal(false);
-            });
-        });
-    </script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-        // Force both modals hidden on page load
-            const editModal = document.getElementById("editUserModal");
-            const addModal = document.getElementById("addUserModal");
-
-                if (editModal) editModal.style.display = "none";
-                if (addModal) addModal.style.display = "none";
-        });
-    </script>
 </body>
 </html>

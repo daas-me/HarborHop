@@ -5,7 +5,10 @@ from .forms import UserRegistrationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import UserProfile
+from django.views.decorators.http import require_http_methods
 from django.contrib.auth.models import User
+from django.http import JsonResponse
+import json
 
 
 def home(request):
@@ -129,83 +132,223 @@ def admin_users(request):
     users = User.objects.all().select_related('profile')
 
     if request.method == "POST":
-        action = request.POST.get("action")
-        user_id = request.POST.get("user_id")
+        user_id = request.POST.get('user_id')
+        action = request.POST.get('action')
+        
+        try:
+            target_user = User.objects.get(id=user_id)
+            profile = target_user.profile
+            
+            # Prevent admin from changing their own role
+            if target_user.id == request.user.id:
+                messages.error(request, "You cannot change your own role.")
+                return redirect('admin_users')
 
-        # 🗑 DELETE USER
-        if action == "delete":
-            try:
-                user_to_delete = User.objects.get(id=user_id)
-                username = user_to_delete.username
-                user_to_delete.delete()
-                messages.success(request, f"User '{username}' has been deleted successfully.")
-            except User.DoesNotExist:
-                messages.error(request, "User not found.")
-
-        # ➕ ADD USER
-        elif action == "add_user":
-            username = request.POST.get("username")
-            email = request.POST.get("email")
-            password = request.POST.get("password")
-            first_name = request.POST.get("first_name")
-            last_name = request.POST.get("last_name")
-            role = request.POST.get("role")
-
-            if username and email and password:
-                if User.objects.filter(username=username).exists():
-                    messages.error(request, "That username is already taken.")
-                else:
-                    new_user = User.objects.create_user(
-                        username=username,
-                        email=email,
-                        password=password,
-                        first_name=first_name,
-                        last_name=last_name
-                    )
-                    profile = UserProfile.objects.create(user=new_user)
-                    if role == "admin":
-                        profile.is_admin_user = True
-                        profile.save()
-                    messages.success(request, f"User '{username}' has been created successfully.")
-            else:
-                messages.error(request, "Please fill out all required fields.")
-
-        # ✏️ EDIT USER
-        elif action == "edit_user" and user_id:
-            try:
-                user = User.objects.get(id=user_id)
-                profile = user.profile
-                user.first_name = request.POST.get("first_name")
-                user.last_name = request.POST.get("last_name")
-                user.email = request.POST.get("email")
-                profile.is_admin_user = True if request.POST.get("role") == "admin" else False
-                user.save()
+            if action == "make_admin":
+                profile.is_admin_user = True
                 profile.save()
-                messages.success(request, f"User '{user.username}' has been updated successfully.")
-            except User.DoesNotExist:
-                messages.error(request, "User not found.")
+                messages.success(request, f"{target_user.username} is now an admin.")
+            elif action == "remove_admin":
+                profile.is_admin_user = False
+                profile.save()
+                messages.success(request, f"{target_user.username} is no longer an admin.")
+            else:
+                messages.error(request, "Invalid action.")
+        
+        except User.DoesNotExist:
+            messages.error(request, "User not found.")
+        except UserProfile.DoesNotExist:
+            messages.error(request, "User profile not found.")
+        
+        return redirect('admin_users')
 
-        return redirect("admin_users")
+    return render(request, 'admin_users.html', {'users': users})
+
+
+@login_required
+@require_http_methods(["POST"])
+def change_user_role(request):
+    """Handle role changes for users"""
+    try:
+        # Check if the current user is an admin
+        if not hasattr(request.user, 'profile') or not request.user.profile.is_admin_user:
+            return JsonResponse({
+                'success': False,
+                'message': 'Unauthorized. Admin privileges required.'
+            }, status=403)
+        
+        # Parse JSON body
+        data = json.loads(request.body)
+        user_id = data.get('user_id')
+        action = data.get('action')
+        
+        # Validate input
+        if not user_id or not action:
+            return JsonResponse({
+                'success': False,
+                'message': 'Missing required fields: user_id and action'
+            }, status=400)
+        
+        # Get the user to modify
+        try:
+            target_user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'User not found'
+            }, status=404)
+        
+        # Prevent users from modifying their own role
+        if target_user.id == request.user.id:
+            return JsonResponse({
+                'success': False,
+                'message': 'You cannot modify your own role'
+            }, status=400)
+        
+        # Ensure the user has a profile
+        if not hasattr(target_user, 'profile'):
+            return JsonResponse({
+                'success': False,
+                'message': 'User profile not found'
+            }, status=404)
+        
+        # Perform the action
+        if action == 'make_admin':
+            target_user.profile.is_admin_user = True
+            target_user.profile.save()
+            message = f'{target_user.username} has been granted admin privileges'
+        elif action == 'remove_admin':
+            target_user.profile.is_admin_user = False
+            target_user.profile.save()
+            message = f'Admin privileges removed from {target_user.username}'
+        else:
+            return JsonResponse({
+                'success': False,
+                'message': 'Invalid action specified'
+            }, status=400)
+        
+        return JsonResponse({
+            'success': True,
+            'message': message,
+            'new_role': 'admin' if target_user.profile.is_admin_user else 'user'
+        })
     
-    total_users = users.count()
-    admin_users = users.filter(profile__is_admin_user=True).count()
-    active_users = users.filter(is_active=True).count()
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid JSON data'
+        }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'An error occurred: {str(e)}'
+        }, status=500)
 
-    from django.utils import timezone
-    now = timezone.now()
-    new_this_month = users.filter(
-        date_joined__year=now.year, 
-        date_joined__month=now.month
-    ).count()
 
-    # ✅ Pass stats to the template
-    context = {
-        "users": users,
-        "total_users": total_users,
-        "admin_users": admin_users,
-        "active_users": active_users,
-        "new_this_month": new_this_month,
-    }
+@login_required
+@require_http_methods(["POST"])
+def add_user(request):
+    """Add a new user"""
+    try:
+        # Check if the current user is an admin
+        if not hasattr(request.user, 'profile') or not request.user.profile.is_admin_user:
+            return JsonResponse({
+                'success': False,
+                'message': 'Unauthorized. Admin privileges required.'
+            }, status=403)
+        
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        first_name = request.POST.get('first_name', '')
+        last_name = request.POST.get('last_name', '')
+        is_admin = request.POST.get('is_admin') == 'on'
+        
+        # Validate required fields
+        if not all([username, email, password]):
+            return JsonResponse({
+                'success': False,
+                'message': 'Username, email, and password are required'
+            }, status=400)
+        
+        # Check if username already exists
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({
+                'success': False,
+                'message': 'Username already exists'
+            }, status=400)
+        
+        # Check if email already exists
+        if User.objects.filter(email=email).exists():
+            return JsonResponse({
+                'success': False,
+                'message': 'Email already exists'
+            }, status=400)
+        
+        # Create the user
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name
+        )
+        
+        # Set admin status if requested
+        if is_admin and hasattr(user, 'profile'):
+            user.profile.is_admin_user = True
+            user.profile.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'User {username} created successfully'
+        })
     
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'An error occurred: {str(e)}'
+        }, status=500)
 
-    return render(request, "admin_users.html", context)
+
+@login_required
+@require_http_methods(["POST"])
+def delete_user(request, user_id):
+    """Delete a user"""
+    try:
+        # Check if the current user is an admin
+        if not hasattr(request.user, 'profile') or not request.user.profile.is_admin_user:
+            return JsonResponse({
+                'success': False,
+                'message': 'Unauthorized. Admin privileges required.'
+            }, status=403)
+        
+        # Get the user to delete
+        try:
+            target_user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'User not found'
+            }, status=404)
+        
+        # Prevent users from deleting themselves
+        if target_user.id == request.user.id:
+            return JsonResponse({
+                'success': False,
+                'message': 'You cannot delete your own account'
+            }, status=400)
+        
+        username = target_user.username
+        target_user.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'User {username} has been deleted'
+        })
+    
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'An error occurred: {str(e)}'
+        }, status=500)
