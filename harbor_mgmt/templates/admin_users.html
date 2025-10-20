@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/admin.css' %}?v=3">
     <script src="https://kit.fontawesome.com/1256e3cde2.js" crossorigin="anonymous"></script>
+    <script src="{% static 'js/admin_users.js' %}"></script>
 </head>
 <body>
     <div class="admin-container">
@@ -157,11 +158,33 @@
                                     </div>
                             </td>
                              <td>{{ u.email }}</td>
-                            <td>
-                                {% if u.profile.is_admin_user %}
-                                    <span class="role-badge admin">Admin</span>
+                           <td>
+                                {% if u.id == user.id %}
+                                    <!-- Can't change own role -->
+                                    {% if u.profile.is_admin_user %}
+                                        <span class="role-badge admin">Admin (You)</span>
+                                    {% else %}
+                                        <span class="role-badge user">User (You)</span>
+                                    {% endif %}
                                 {% else %}
-                                    <span class="role-badge user">User</span>
+                                    <!-- Toggle form for other users -->
+                                    <form method="post" style="display: inline;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="user_id" value="{{ u.id }}">
+                                        {% if u.profile.is_admin_user %}
+                                            <input type="hidden" name="action" value="remove_admin">
+                                            <button type="button" class="role-badge-btn admin">
+                                                <span class="role-text">Admin</span>
+                                                <i class="fa-solid fa-arrow-down"></i>
+                                            </button>
+                                        {% else %}
+                                            <input type="hidden" name="action" value="make_admin">
+                                            <button type="button" class="role-badge-btn user">
+                                                <span class="role-text">User</span>
+                                                <i class="fa-solid fa-arrow-up"></i>
+                                            </button>
+                                        {% endif %}
+                                    </form>
                                 {% endif %}
                             </td>
                              <td>
@@ -205,59 +228,5 @@
             </div>
         </main>
     </div>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const searchInput = document.querySelector(".search-input");
-            const filterButtons = document.querySelectorAll(".filter-btn");
-            const rows = document.querySelectorAll(".users-table tbody tr");
-
-        function filterTable() {
-            const searchValue = searchInput.value.toLowerCase();
-            const activeFilter = document.querySelector(".filter-btn.active").textContent.trim();
-
-        rows.forEach(row => {
-            const name = row.querySelector(".user-name-text")?.textContent.toLowerCase() || "";
-            const username = row.querySelector(".user-username")?.textContent.toLowerCase() || "";
-            const email = row.querySelector("td:nth-child(3)")?.textContent.toLowerCase() || "";
-            const role = row.querySelector(".role-badge")?.textContent.trim().toLowerCase();
-
-            // Match search text
-            const matchesSearch = name.includes(searchValue) || username.includes(searchValue) || email.includes(searchValue);
-
-            // Match role filter
-            let matchesFilter = true;
-            if (activeFilter === "Admins") matchesFilter = role === "admin";
-            else if (activeFilter === "Regular") matchesFilter = role === "user";
-            else if (activeFilter === "Recent") {
-                // Show users joined in last 30 days
-                const joinedText = row.querySelector("td:nth-child(6)")?.textContent.trim();
-                const joinedDate = new Date(joinedText);
-                const now = new Date();
-                const diffDays = (now - joinedDate) / (1000 * 60 * 60 * 24);
-                matchesFilter = diffDays <= 30;
-            }
-
-            // Show/hide row
-            if (matchesSearch && matchesFilter) {
-                row.style.display = "";
-            } else {
-                row.style.display = "none";
-                }
-            });
-        }
-
-        // Search event
-        searchInput.addEventListener("keyup", filterTable);
-
-        // Filter buttons event
-        filterButtons.forEach(btn => {
-            btn.addEventListener("click", () => {
-                filterButtons.forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-                filterTable();
-            });
-        });
-    });
-</script>
 </body>
 </html>
