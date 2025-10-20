@@ -4,11 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store" />
     <title>HarborHop - Admin Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/admin.css' %}?v=4">
     <script src="https://kit.fontawesome.com/1256e3cde2.js" crossorigin="anonymous"></script>
 </head>
+
+<script>
+window.addEventListener('pageshow', function(event) {
+  if (event.persisted) {
+    window.location.reload();
+  }
+});
+</script>
+
 <body>
     <div class="admin-container">
         <!-- Sidebar -->
@@ -126,7 +136,7 @@
                             <span class="icon"><i class="fa-solid fa-ship"></i></span>
                             <span>Add Ferry Route</span>
                         </button>
-                        <button class="action-btn" onclick="window.location.href='{% url 'admin_users' %}'">
+                        <button class="action-btn" onclick='window.location.href="{% url "admin_users" %}"'>
                             <span class="icon"><i class="fa-solid fa-user-plus"></i></span>
                             <span>Add User</span>
                         </button>

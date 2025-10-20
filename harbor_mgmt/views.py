@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from .models import UserProfile
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.cache import never_cache
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.utils import timezone
@@ -44,7 +45,7 @@ def register(request):
         form = UserRegistrationForm()
     return render(request, 'register.html', {'form': form})
 
-
+@never_cache
 def user_login(request):
     """Handle user login"""
     # Only redirect if user is authenticated AND it's a GET request (not after logout)
@@ -92,7 +93,7 @@ def user_logout(request):
     messages.success(request, 'You have been logged out successfully!')
     return redirect('login')
 
-
+@never_cache
 @login_required
 def admin_dashboard(request):
     """Admin dashboard - only accessible to admin users"""
@@ -125,7 +126,7 @@ def admin_dashboard(request):
     }
     return render(request, 'admin_dashboard.html', context)
 
-
+@never_cache
 @login_required
 def admin_users(request):
     """Admin users management page - with statistics"""
