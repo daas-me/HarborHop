@@ -813,19 +813,22 @@ body {
     cursor: not-allowed;
 }
 
-.add-user-modal .form-group input[type="checkbox"] {
+.add-user-modal .form-group input[type="checkbox"],
+.edit-user-modal .form-group input[type="checkbox"] {
     width: auto;
     margin-right: 8px;
     vertical-align: middle;
     cursor: pointer;
 }
 
-.add-user-modal .form-group.checkbox-group {
+.add-user-modal .form-group.checkbox-group,
+.edit-user-modal .form-group.checkbox-group {
     margin-bottom: 20px;
     padding: 10px 0;
 }
 
-.add-user-modal .form-group.checkbox-group label {
+.add-user-modal .form-group.checkbox-group label,
+.edit-user-modal .form-group.checkbox-group label {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -834,17 +837,20 @@ body {
     color: #2c3e50;
 }
 
-.add-user-modal .form-group.checkbox-group label:hover {
+.add-user-modal .form-group.checkbox-group label:hover,
+.edit-user-modal .form-group.checkbox-group label:hover {
     color: #667eea;
 }
 
-.add-user-modal .form-group.checkbox-group input[type="checkbox"] {
+.add-user-modal .form-group.checkbox-group input[type="checkbox"],
+.edit-user-modal .form-group.checkbox-group input[type="checkbox"] {
     width: 18px;
     height: 18px;
     margin: 0;
 }
 
-.add-user-modal .form-group.checkbox-group span {
+.add-user-modal .form-group.checkbox-group span,
+.edit-user-modal .form-group.checkbox-group span {
     user-select: none;
 }
 
