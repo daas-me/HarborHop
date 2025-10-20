@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HarborHop - Admin Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/admin.css' %}?v=2">
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}?v=4">
     <script src="https://kit.fontawesome.com/1256e3cde2.js" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -57,6 +57,7 @@
             </div>
         </aside>
 
+        
         <!-- Main Content -->
         <main class="main-content">
             <!-- Top Header -->
@@ -69,49 +70,49 @@
             </header>
 
             <!-- Dashboard Content -->
-            <!-- Stats Grid -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fa-solid fa-ticket"></i></div>
+            <div class="dashboard-content">
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fa-solid fa-ticket"></i></div>
                         <div class="stat-info">
                             <h3>Total Bookings</h3>
                             <p class="stat-number">0</p>
-                </div>
-            </div>
-    
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
-                    <div class="stat-info">
-                        <h3>Total Users</h3>
-                        <p class="stat-number">{{ total_users }}</p>
+                        </div>
                     </div>
-            </div>
-    
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fa-solid fa-user-shield"></i></div>
-                <div class="stat-info">
-                    <h3>Admin Users</h3>
-                    <p class="stat-number">{{ admin_users }}</p>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                        <div class="stat-info">
+                            <h3>Total Users</h3>
+                            <p class="stat-number">{{ total_users }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fa-solid fa-crown"></i></div>
+                        <div class="stat-info">
+                            <h3>Admin Users</h3>
+                            <p class="stat-number">{{ admin_users }}</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+                        <div class="stat-info">
+                            <h3>Active Users</h3>
+                            <p class="stat-number">{{ active_users }}</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fa-solid fa-calendar-days"></i></div>
+                        <div class="stat-info">
+                            <h3>New This Month</h3>
+                            <p class="stat-number">{{ new_this_month }}</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fa-solid fa-user-check"></i></div>
-                <div class="stat-info">
-                    <h3>Active Users</h3>
-                    <p class="stat-number">{{ active_users }}</p>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fa-solid fa-calendar-plus"></i></div>
-                <div class="stat-info">
-                <h3>New This Month</h3>
-                <p class="stat-number">{{ new_this_month }}</p>
-            </div>
-        </div>
-        </div>
-
 
                 <!-- Quick Actions -->
                 <div class="quick-actions">
@@ -125,8 +126,8 @@
                             <span class="icon"><i class="fa-solid fa-ship"></i></span>
                             <span>Add Ferry Route</span>
                         </button>
-                        <button class="action-btn">
-                            <span class="icon"><i class="fa-solid fa-user"></i></span>
+                        <button class="action-btn" onclick="window.location.href='{% url 'admin_users' %}'">
+                            <span class="icon"><i class="fa-solid fa-user-plus"></i></span>
                             <span>Add User</span>
                         </button>
                         <button class="action-btn">

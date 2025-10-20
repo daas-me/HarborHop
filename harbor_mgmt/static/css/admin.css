@@ -1004,6 +1004,64 @@ body {
         min-width: 800px;
     }
 }
+
+
+/* Quick Actions Section */
+.quick-actions {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.quick-actions h3 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 20px;
+    background: #f5f7fa;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    font-family: 'Alan Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #2c3e50;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.action-btn:hover {
+    background: #ff9800;
+    color: white;
+    border-color: #ff9800;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+}
+
+.action-btn .icon {
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.action-btn:active {
+    transform: translateY(0);
+}
+
 /* Hide modals by default */
 .modal {
   display: none; /* Hidden initially */
