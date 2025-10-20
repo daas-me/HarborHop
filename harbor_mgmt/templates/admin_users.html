@@ -81,7 +81,7 @@
                         <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
                         <div class="stat-info">
                             <h3>Total Users</h3>
-                            <p class="stat-number">247</p>
+                            <p class="stat-number">{{ total_users }}</p>
                         </div>
                     </div>
                     
@@ -89,7 +89,7 @@
                         <div class="stat-icon"><i class="fa-solid fa-crown"></i></div>
                         <div class="stat-info">
                             <h3>Admin Users</h3>
-                            <p class="stat-number">5</p>
+                            <p class="stat-number">{{ admin_users }}</p>
                         </div>
                     </div>
                     
@@ -97,7 +97,7 @@
                         <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
                         <div class="stat-info">
                             <h3>Active Users</h3>
-                            <p class="stat-number">238</p>
+                            <p class="stat-number">{{ active_users }}</p>
                         </div>
                     </div>
                     
@@ -105,7 +105,7 @@
                         <div class="stat-icon"><i class="fa-solid fa-calendar-days"></i></div>
                         <div class="stat-info">
                             <h3>New This Month</h3>
-                            <p class="stat-number">42</p>
+                            <p class="stat-number">{{ new_this_month }}</p>
                         </div>
                     </div>
                 </div>
@@ -198,8 +198,24 @@
                              <td>
                                 <div class="action-buttons">
                                     <button class="action-icon-btn" title="View"><i class="fa-solid fa-eye"></i></button>
-                                    <button class="action-icon-btn" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
-                                    <button class="action-icon-btn delete" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                    <button
+                                            class="action-icon-btn edit-btn" 
+                                            title="Edit"
+                                            data-user-id="{{ u.id }}"
+                                            data-first-name="{{ u.first_name }}"
+                                            data-last-name="{{ u.last_name }}"
+                                            data-email="{{ u.email }}"
+                                            data-role="{% if u.profile.is_admin_user %}admin{% else %}user{% endif %}">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    <form method="post" style="display:inline;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="user_id" value="{{ u.id }}">
+                                        <button type="submit" name="action" value="delete" class="action-icon-btn delete" title="Delete" 
+                                            onclick="return confirm('Are you sure you want to delete this user?');">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
@@ -212,21 +228,39 @@
                     </table>
                 </div>
 
-                <!-- Pagination -->
-                <div class="pagination">
-                    <button class="pagination-btn" disabled><i class="fa-solid fa-chevron-left"></i> Previous</button>
-                    <div class="pagination-numbers">
-                        <button class="pagination-num active">1</button>
-                        <button class="pagination-num">2</button>
-                        <button class="pagination-num">3</button>
-                        <span>...</span>
-                        <button class="pagination-num">10</button>
-                    </div>
-                    <button class="pagination-btn">Next <i class="fa-solid fa-chevron-right"></i></button>
-                </div>
+                <div id="editUserModal" class="modal">
+    <div class="modal-content">
+        <h2>Edit User</h2>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="edit_user">
+            <input type="hidden" id="edit_user_id" name="user_id">
 
+            <div class="form-group">
+                <label>First Name</label>
+                <input type="text" id="edit_first_name" name="first_name" required>
             </div>
-        </main>
+            <div class="form-group">
+                <label>Last Name</label>
+                <input type="text" id="edit_last_name" name="last_name" required>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="edit_email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label>Role</label>
+                <select id="edit_role" name="role" required>
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+
+            <div class="modal-buttons">
+                <button type="submit" class="add-btn">Save Changes</button>
+                <button type="button" class="close-btn" onclick="toggleEditModal(false)">Cancel</button>
+            </div>
+        </form>
     </div>
 </body>
 </html>

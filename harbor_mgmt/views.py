@@ -124,7 +124,7 @@ def admin_dashboard(request):
 
 @login_required
 def admin_users(request):
-    """Admin users management page - list users and allow role updates"""
+    """Admin users management page - handle list, add, edit, and delete"""
     if not hasattr(request.user, 'profile') or not request.user.profile.is_admin_user:
         messages.error(request, "You don't have permission to access this page.")
         return redirect('home')
