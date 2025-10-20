@@ -61,7 +61,7 @@
         <main class="main-content">
             <!-- Top Header -->
             <header class="top-header">
-                <h1>Welcome back, {{ user.username }}!</h1>
+                <h1>Welcome back, {{ user.first_name|default:user.username }}!</h1>
                 <div class="user-info">
                     <span class="user-avatar"><i class="fa-solid fa-user"></i></span>
                     <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
