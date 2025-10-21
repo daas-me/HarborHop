@@ -20,8 +20,11 @@
         }
 
         .logo {
-            font-size: 28px;
+            font-size: 35px;
             font-weight: bold;
+            color: #333;
+            text-decoration: none;
+            letter-spacing: -0.5px;
         }
 
         .logo span:first-child {
@@ -332,4 +335,49 @@
             .tabs {
                 flex-wrap: wrap;
             }
+        }
+        input[readonly] {
+            background-color: #f9f9f9;
+            cursor: not-allowed;
+        }
+        #updateMessage {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            margin-top: 15px;
+            color: green;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        #updateMessage.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .tagline {
+            margin: 0;
+            font-size: 12px;
+            color: #ff9800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+        
+        /* Personal-information inputs */
+        #personal input[type="text"],
+        #personal input[type="email"],
+        #personal input[type="tel"],
+        #personal input[type="date"],
+        #personal textarea {
+            font-family: 'Alan Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 400;
+            color: #222;
         }
