@@ -19,4 +19,5 @@ urlpatterns = [
     path('search-voyages/', views.search_voyages_page, name='search_voyages_page'),
     path('search-voyages-barkota/', views.search_voyages_barkota, name='search_voyages_barkota'),
     path('api/locations/', views.get_all_locations, name='get_all_locations'),
+    path('update-profile-ajax/', views.update_profile_ajax, name='update_profile_ajax'),
 ]

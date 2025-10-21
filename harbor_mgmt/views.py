@@ -12,6 +12,7 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.utils import timezone
+from datetime import datetime
 import json
 import logging
 import requests
@@ -892,3 +893,89 @@ def search_voyages_barkota(request):
             'success': False,
             'message': f'An error occurred: {str(e)}'
         }, status=500)
+    user = request.user
+    profile = getattr(user, 'profile', None)
+
+    if request.method == "POST":
+        # Get form data
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        email = request.POST.get("email")
+        phone = request.POST.get("phone")
+        address = request.POST.get("address")
+        date_of_birth = request.POST.get("date_of_birth")
+
+        # Update User fields
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        user.save()
+
+        # Update UserProfile fields
+        if profile:
+            profile.phone = phone
+            profile.address = address
+            profile.date_of_birth = date_of_birth or None
+            profile.save()
+
+        messages.success(request, "Profile updated successfully!")
+        return redirect('profile_settings')
+
+    context = {
+        'user': user,
+        'profile': profile,
+    }
+    return render(request, 'profile_settings.html', context)
+
+@login_required
+def update_profile_ajax(request):
+    """Handles updating the user profile via AJAX without page reload."""
+    if request.method == "POST":
+        user = request.user
+        profile = user.profile  # get the linked UserProfile
+
+        # Get fields from POST data
+        first_name = request.POST.get("first_name", user.first_name)
+        last_name = request.POST.get("last_name", user.last_name)
+        email = request.POST.get("email", user.email)
+        phone = request.POST.get("phone", profile.phone)
+        address = request.POST.get("address", profile.address)
+        date_of_birth = request.POST.get("date_of_birth")
+
+        # Update user fields
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        user.save()
+
+        # Update profile fields
+        profile.phone = phone
+        profile.address = address
+
+        # ✅ Safely convert date string to a Python date
+        if date_of_birth:
+            try:
+                profile.date_of_birth = datetime.strptime(date_of_birth, "%Y-%m-%d").date()
+            except ValueError:
+                return JsonResponse({
+                    "success": False,
+                    "message": "Invalid date format. Please use YYYY-MM-DD."
+                }, status=400)
+
+        profile.save()
+
+        # Return success JSON
+        return JsonResponse({
+            "success": True,
+            "message": "Profile updated successfully!",
+            "updated_data": {
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "email": user.email,
+                "phone": profile.phone,
+                "address": profile.address,
+                "date_of_birth": profile.date_of_birth.strftime("%Y-%m-%d") if profile.date_of_birth else "",
+            }
+        })
+
+    return JsonResponse({"success": False, "message": "Invalid request method."}, status=400)
