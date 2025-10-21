@@ -14,6 +14,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 import json
 import logging
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -604,3 +605,290 @@ def test_csrf(request):
 def profile_settings(request):
     """Display the user's profile settings page"""
     return render(request, 'profile_settings.html', {'user': request.user})
+
+@login_required
+def search_trips(request):
+    """Handle trip search using Barkota API"""
+    if request.method == 'POST':
+        # Get form data
+        trip_type = request.POST.get('trip_type', 'one_way')
+        origin = request.POST.get('origin')
+        destination = request.POST.get('destination')
+        departure_date = request.POST.get('departure_date')
+        return_date = request.POST.get('return_date') if trip_type == 'round_trip' else None
+        adults = int(request.POST.get('adults', 1))
+        children = int(request.POST.get('children', 0))
+        
+        # Calculate total passengers
+        total_passengers = max(adults + children, 1)  # At least 1 passenger
+        
+        try:
+            # First, fetch all locations to get the names
+            locations_url = "https://barkota-reseller-php-prod-4kl27j34za-uc.a.run.app/ob/routes/passageenabled"
+            locations_headers = {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Referer": "https://booking.barkota.com/",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            }
+            locations_payload = {"companyId": None}
+            
+            locations_response = requests.post(locations_url, json=locations_payload, headers=locations_headers, timeout=10)
+            locations_response.raise_for_status()
+            routes_data = locations_response.json()
+            
+            # Find the location names from routes data
+            origin_name = f"Origin {origin}"
+            destination_name = f"Destination {destination}"
+            
+            # Create a dictionary of all unique locations
+            locations_dict = {}
+            for route in routes_data:
+                if isinstance(route, dict):
+                    route_origin = route.get('origin', {})
+                    route_destination = route.get('destination', {})
+                    
+                    if isinstance(route_origin, dict) and 'id' in route_origin:
+                        locations_dict[route_origin['id']] = route_origin.get('name', '')
+                    
+                    if isinstance(route_destination, dict) and 'id' in route_destination:
+                        locations_dict[route_destination['id']] = route_destination.get('name', '')
+            
+            # Get the names using the dictionary
+            origin_id = int(origin)
+            destination_id = int(destination)
+            
+            if origin_id in locations_dict:
+                origin_name = locations_dict[origin_id]
+            
+            if destination_id in locations_dict:
+                destination_name = locations_dict[destination_id]
+            
+            logger.info(f"Location names: {origin_name} -> {destination_name}")
+            
+            # Search for outbound voyages using Barkota API
+            url = "https://barkota-reseller-php-prod-4kl27j34za-uc.a.run.app/ob/voyages/search/bylocation"
+            
+            headers = {
+                "Content-Type": "application/json",
+                "Accept": "application/json, text/plain, */*",
+                "Origin": "https://booking.barkota.com",
+                "Referer": "https://booking.barkota.com/"
+            }
+            
+            payload = {
+                "origin": int(origin),
+                "destination": int(destination),
+                "departureDate": departure_date,
+                "passengerCount": total_passengers,
+                "shippingCompany": None,
+                "cargoItemId": None,
+                "withDriver": 1
+            }
+            
+            logger.info(f"Searching voyages: {payload}")
+            
+            response = requests.post(url, json=payload, headers=headers, timeout=10)
+            response.raise_for_status()
+            
+            outbound_voyages = response.json()
+            
+            # If roundtrip, search for return voyages
+            return_voyages = []
+            if trip_type == 'round_trip' and return_date:
+                return_payload = {
+                    "origin": int(destination),  # Swapped
+                    "destination": int(origin),  # Swapped
+                    "departureDate": return_date,
+                    "passengerCount": total_passengers,
+                    "shippingCompany": None,
+                    "cargoItemId": None,
+                    "withDriver": 1
+                }
+                
+                return_response = requests.post(url, json=return_payload, headers=headers, timeout=10)
+                return_response.raise_for_status()
+                return_voyages = return_response.json()
+            
+            # Get first voyage times for display
+            departure_time = ""
+            return_time = ""
+            
+            if outbound_voyages and len(outbound_voyages) > 0:
+                first_outbound = outbound_voyages[0].get('voyage', {})
+                departure_time = first_outbound.get('departureDateTime', '')
+            
+            if return_voyages and len(return_voyages) > 0:
+                first_return = return_voyages[0].get('voyage', {})
+                return_time = first_return.get('departureDateTime', '')
+            
+            # Format dates to "Wed, 22 Oct 2025"
+            from datetime import datetime
+            departure_date_formatted = departure_date
+            return_date_formatted = return_date
+            
+            try:
+                dep_date_obj = datetime.strptime(departure_date, '%Y-%m-%d')
+                departure_date_formatted = dep_date_obj.strftime('%a, %d %b %Y')
+            except:
+                pass
+            
+            if return_date:
+                try:
+                    ret_date_obj = datetime.strptime(return_date, '%Y-%m-%d')
+                    return_date_formatted = ret_date_obj.strftime('%a, %d %b %Y')
+                except:
+                    pass
+            
+            # Render results page
+            context = {
+                'trip_type': trip_type,
+                'origin': origin,
+                'destination': destination,
+                'origin_name': origin_name,
+                'destination_name': destination_name,
+                'departure_date': departure_date,
+                'return_date': return_date,
+                'departure_date_formatted': departure_date_formatted,
+                'return_date_formatted': return_date_formatted,
+                'departure_time': departure_time,
+                'return_time': return_time,
+                'adults': adults,
+                'children': children,
+                'outbound_voyages': outbound_voyages,
+                'return_voyages': return_voyages,
+            }
+            
+            return render(request, 'available_trips_search.html', context)
+            
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Barkota API error: {str(e)}")
+            messages.error(request, f'Failed to search voyages: {str(e)}')
+            return redirect('home')
+        except Exception as e:
+            logger.error(f"Error in search_trips: {str(e)}", exc_info=True)
+            messages.error(request, f'An error occurred: {str(e)}')
+            return redirect('home')
+    
+    return redirect('home')
+
+@login_required
+def search_voyages_page(request):
+    """Display the voyage search page"""
+    return render(request, 'search_voyages.html')
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def get_all_locations(request):
+    """Fetch all available locations/routes from Barkota API"""
+    try:
+        # Barkota routes endpoint (found via DevTools - returns locations)
+        url = "https://barkota-reseller-php-prod-4kl27j34za-uc.a.run.app/ob/routes/passageenabled"
+        
+        # Headers matching the Barkota website
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Referer": "https://booking.barkota.com/",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        }
+        
+        # Payload as seen in DevTools
+        payload = {
+            "companyId": None
+        }
+        
+        logger.info(f"Fetching all locations from Barkota API")
+        
+        # Make API request with POST method and payload
+        response = requests.post(url, json=payload, headers=headers, timeout=10)
+        response.raise_for_status()
+        
+        # Return the API response
+        return JsonResponse({
+            'success': True,
+            'data': response.json()
+        })
+        
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Barkota Locations API error: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'message': f'API request failed: {str(e)}'
+        }, status=500)
+    except Exception as e:
+        logger.error(f"Error in get_all_locations: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'success': False,
+            'message': f'An error occurred: {str(e)}'
+        }, status=500)
+
+@login_required
+@require_http_methods(["POST"])
+def search_voyages_barkota(request):
+    """Search for voyages using Barkota API"""
+    try:
+        # Parse request data
+        data = json.loads(request.body) if request.body else {}
+        
+        # Get search parameters from request or use defaults
+        origin = data.get('origin', 93)
+        destination = data.get('destination', 96)
+        departure_date = data.get('departureDate', '2025-10-22')
+        passenger_count = data.get('passengerCount', 1)
+        shipping_company = data.get('shippingCompany', None)
+        cargo_item_id = data.get('cargoItemId', None)
+        with_driver = data.get('withDriver', 1)
+        
+        # Barkota API endpoint
+        url = "https://barkota-reseller-php-prod-4kl27j34za-uc.a.run.app/ob/voyages/search/bylocation"
+        
+        # Request headers
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://booking.barkota.com",
+            "Referer": "https://booking.barkota.com/"
+        }
+        
+        # Request payload
+        payload = {
+            "origin": origin,
+            "destination": destination,
+            "departureDate": departure_date,
+            "passengerCount": passenger_count,
+            "shippingCompany": shipping_company,
+            "cargoItemId": cargo_item_id,
+            "withDriver": with_driver
+        }
+        
+        logger.info(f"Searching voyages with payload: {payload}")
+        
+        # Make API request
+        response = requests.post(url, json=payload, headers=headers, timeout=10)
+        response.raise_for_status()
+        
+        # Return the API response
+        return JsonResponse({
+            'success': True,
+            'data': response.json()
+        })
+        
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Barkota API error: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'message': f'API request failed: {str(e)}'
+        }, status=500)
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid JSON data'
+        }, status=400)
+    except Exception as e:
+        logger.error(f"Error in search_voyages_barkota: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'success': False,
+            'message': f'An error occurred: {str(e)}'
+        }, status=500)

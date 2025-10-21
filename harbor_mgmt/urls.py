@@ -15,4 +15,8 @@ urlpatterns = [
     path('test-csrf/', views.test_csrf, name='test_csrf'),
     path('toggle-user-active-ajax/<int:user_id>/', views.toggle_user_active_ajax, name='toggle_user_active_ajax'),
     path('profile/', views.profile_settings, name='profile_settings'),
+    path('search-trips/', views.search_trips, name='search_trips'),
+    path('search-voyages/', views.search_voyages_page, name='search_voyages_page'),
+    path('search-voyages-barkota/', views.search_voyages_barkota, name='search_voyages_barkota'),
+    path('api/locations/', views.get_all_locations, name='get_all_locations'),
 ]

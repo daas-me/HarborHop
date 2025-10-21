@@ -54,23 +54,45 @@
             <h2 class="booking-title">Find Your Trip</h2>
             <p class="booking-subtitle">Book ferry tickets and explore the wonders of the PH!</p>
             
-            <form class="booking-form">
+            <form class="booking-form" method="POST" action="{% url 'search_trips' %}">
+                {% csrf_token %}
+                
+                <!-- Trip Type Selection -->
+                <div class="form-row trip-type-row">
+                    <div class="trip-type-group">
+                        <label class="trip-type-option">
+                            <input type="radio" name="trip_type" value="round_trip" checked>
+                            <span class="radio-custom"></span>
+                            <span class="radio-label">Round Trip</span>
+                        </label>
+                        <label class="trip-type-option">
+                            <input type="radio" name="trip_type" value="one_way">
+                            <span class="radio-custom"></span>
+                            <span class="radio-label">One Way</span>
+                        </label>
+                    </div>
+                </div>
+                
                 <div class="form-row">
                     <div class="input-group">
-                        <label>Travel Destination</label>
+                        <label>From</label>
                         <div class="input-wrapper">
                             <i class="fa-solid fa-location-dot input-icon"></i>
-                            <input type="text" placeholder="Enter Origin City/Port" class="form-input">
+                            <select name="origin" id="origin-select" class="form-input" required>
+                                <option value="">Loading locations...</option>
+                            </select>
                         </div>
                     </div>
                     
-                    <div class="swap-icon"><i class="fa-solid fa-right-left"></i></div>
+                    <div class="swap-icon" onclick="swapLocations()"><i class="fa-solid fa-right-left"></i></div>
                     
                     <div class="input-group">
-                        <label>&nbsp;</label>
+                        <label>To</label>
                         <div class="input-wrapper">
                             <i class="fa-solid fa-location-dot input-icon"></i>
-                            <input type="text" placeholder="Enter Destination City/Port" class="form-input">
+                            <select name="destination" id="destination-select" class="form-input" required>
+                                <option value="">Select origin first</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -80,15 +102,26 @@
                         <label>Departure Date</label>
                         <div class="input-wrapper">
                             <i class="fa-solid fa-calendar-days input-icon"></i>
-                            <input type="date" class="form-input">
+                            <input type="date" name="departure_date" class="form-input" required>
                         </div>
                     </div>
                     
+                    <div class="input-group" id="return-date-group">
+                        <label>Return Date</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-calendar-days input-icon"></i>
+                            <input type="date" name="return_date" class="form-input" id="return-date-input">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
                     <div class="input-group">
                         <label>Select Shipping Lines</label>
                         <div class="input-wrapper">
                             <i class="fa-solid fa-ship input-icon"></i>
-                            <select class="form-input">
+                            <select name="shipping_line" class="form-input">
+                                <option value="">Any Shipping Line</option>
                                 <option value="Lite Ferries">Lite Ferries</option>
                                 <option value="Starlite Ferries">Starlite Ferries</option>
                                 <option value="OceanJet">OceanJet</option>
@@ -118,6 +151,7 @@
                                 <i class="fa-solid fa-minus"></i>
                             </button>
                             <span class="counter-value">0</span>
+                            <input type="hidden" name="adults" value="0">
                             <button type="button" class="counter-btn" onclick="incrementCounter(this)">
                                 <i class="fa-solid fa-plus"></i>
                             </button>
@@ -135,6 +169,7 @@
                                 <i class="fa-solid fa-minus"></i>
                             </button>
                             <span class="counter-value">0</span>
+                            <input type="hidden" name="children" value="0">
                             <button type="button" class="counter-btn" onclick="incrementCounter(this)">
                                 <i class="fa-solid fa-plus"></i>
                             </button>
@@ -143,8 +178,7 @@
                 </div>
                 
                 <div class="form-buttons">
-                    <button type="submit" class="btn-submit">Find Your Ticket</button>
-                    <button type="button" class="btn-secondary">Manage My Bookings</button>
+                    <button type="submit" class="btn-submit">View Available Trips</button>
                 </div>
             </form>
         </div>
@@ -365,19 +399,151 @@
     </footer>
 
     <script>
+        // Store routes data globally
+        let routesData = [];
+        
         function incrementCounter(btn) {
-            const counterValue = btn.previousElementSibling;
+            const counterValue = btn.previousElementSibling.previousElementSibling;
+            const hiddenInput = btn.previousElementSibling;
             let count = parseInt(counterValue.textContent);
-            counterValue.textContent = count + 1;
+            count++;
+            counterValue.textContent = count;
+            hiddenInput.value = count;
         }
 
         function decrementCounter(btn) {
             const counterValue = btn.nextElementSibling;
+            const hiddenInput = btn.nextElementSibling.nextElementSibling;
             let count = parseInt(counterValue.textContent);
             if (count > 0) {
-                counterValue.textContent = count - 1;
+                count--;
+                counterValue.textContent = count;
+                hiddenInput.value = count;
             }
         }
+        
+        function swapLocations() {
+            const origin = document.querySelector('select[name="origin"]');
+            const destination = document.querySelector('select[name="destination"]');
+            const temp = origin.value;
+            origin.value = destination.value;
+            destination.value = temp;
+            
+            // Update destinations for the new origin
+            if (origin.value) {
+                updateDestinations(parseInt(origin.value));
+            }
+        }
+        
+        // Load locations from Barkota API
+        async function loadLocations() {
+            try {
+                const response = await fetch('/api/locations/');
+                const data = await response.json();
+                
+                if (data.success) {
+                    routesData = data.data;
+                    populateOrigins();
+                } else {
+                    console.error('Failed to load locations:', data.message);
+                    showLocationError();
+                }
+            } catch (error) {
+                console.error('Error loading locations:', error);
+                showLocationError();
+            }
+        }
+        
+        function populateOrigins() {
+            const originSelect = document.getElementById('origin-select');
+            originSelect.innerHTML = '<option value="">Select Origin Port</option>';
+            
+            // Sort routes by origin name
+            const sortedRoutes = [...routesData].sort((a, b) => 
+                a.origin.name.localeCompare(b.origin.name)
+            );
+            
+            sortedRoutes.forEach(route => {
+                const origin = route.origin;
+                const option = document.createElement('option');
+                option.value = origin.id;
+                option.textContent = `${origin.name}${origin.province ? ' (' + origin.province + ')' : ''}`;
+                originSelect.appendChild(option);
+            });
+        }
+        
+        function updateDestinations(originId) {
+            const destSelect = document.getElementById('destination-select');
+            destSelect.innerHTML = '<option value="">Select Destination Port</option>';
+            
+            // Find the route for this origin
+            const route = routesData.find(r => r.origin.id === originId);
+            
+            if (route && route.destinations && route.destinations.length > 0) {
+                // Sort destinations by name
+                const sortedDests = [...route.destinations].sort((a, b) => 
+                    a.name.localeCompare(b.name)
+                );
+                
+                sortedDests.forEach(dest => {
+                    const option = document.createElement('option');
+                    option.value = dest.id;
+                    option.textContent = `${dest.name}${dest.province ? ' (' + dest.province + ')' : ''}`;
+                    destSelect.appendChild(option);
+                });
+            } else {
+                destSelect.innerHTML = '<option value="">No destinations available</option>';
+            }
+        }
+        
+        function showLocationError() {
+            const originSelect = document.getElementById('origin-select');
+            originSelect.innerHTML = '<option value="">Error loading locations. Please refresh.</option>';
+        }
+        
+        // Handle trip type change
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load locations from API
+            {% if user.is_authenticated %}
+                loadLocations();
+            {% else %}
+                document.getElementById('origin-select').innerHTML = '<option value="">Please login to search</option>';
+                document.getElementById('destination-select').innerHTML = '<option value="">Please login to search</option>';
+            {% endif %}
+            
+            const tripTypeRadios = document.querySelectorAll('input[name="trip_type"]');
+            const returnDateGroup = document.getElementById('return-date-group');
+            const returnDateInput = document.getElementById('return-date-input');
+            
+            tripTypeRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'one_way') {
+                        returnDateGroup.style.opacity = '0.5';
+                        returnDateInput.disabled = true;
+                        returnDateInput.required = false;
+                    } else {
+                        returnDateGroup.style.opacity = '1';
+                        returnDateInput.disabled = false;
+                        returnDateInput.required = true;
+                    }
+                });
+            });
+            
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelector('input[name="departure_date"]').setAttribute('min', today);
+            returnDateInput.setAttribute('min', today);
+            
+            // Handle origin change
+            document.getElementById('origin-select').addEventListener('change', function(e) {
+                const originId = parseInt(e.target.value);
+                if (originId) {
+                    updateDestinations(originId);
+                } else {
+                    document.getElementById('destination-select').innerHTML = '<option value="">Select origin first</option>';
+                }
+            });
+        });
     </script>
 </body>
 </html>
