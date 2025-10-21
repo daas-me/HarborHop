@@ -1079,3 +1079,61 @@ footer {
     color: #ff9900;
 }
 
+/* Trip Type Radio Buttons */
+.trip-type-row {
+    margin-bottom: 20px;
+}
+
+.trip-type-group {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.trip-type-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.trip-type-option input[type="radio"] {
+    display: none;
+}
+
+.radio-custom {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #3498db;
+    border-radius: 50%;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.trip-type-option input[type="radio"]:checked + .radio-custom {
+    background: #3498db;
+    border-color: #3498db;
+}
+
+.trip-type-option input[type="radio"]:checked + .radio-custom::after {
+    content: '';
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+}
+
+ .trip-type-row,
+  .trip-type-row .radio-label {
+    color: white;
+  }
+
+.radio-label {
+    user-select: none;
+}
