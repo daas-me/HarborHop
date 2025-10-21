@@ -485,6 +485,44 @@ function showAddUserModal() {
     });
 }
 
+// Custom status confirmation modal
+function showStatusConfirmModal(isActive) {
+  return new Promise((resolve) => {
+    const modal = document.createElement('div');
+    modal.className = 'confirm-modal';
+    modal.id = 'confirm-modal-' + Date.now();
+    modal.style.display = 'flex';
+    modal.innerHTML = `
+      <div class="confirm-modal-overlay"></div>
+      <div class="confirm-modal-content">
+        <div class="confirm-modal-header">
+          <h2>Confirm Status Change</h2>
+          <button class="confirm-modal-close">&times;</button>
+        </div>
+        <div class="confirm-modal-body">
+          <p>Are you sure you want to ${isActive ? 'deactivate' : 'activate'} this user?</p>
+        </div>
+        <div class="confirm-modal-footer">
+          <button class="confirm-modal-btn cancel">Cancel</button>
+          <button class="confirm-modal-btn confirm">Confirm</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    const confirmBtn = modal.querySelector('.confirm-modal-btn.confirm');
+    const cancelBtn = modal.querySelector('.confirm-modal-btn.cancel');
+    const closeBtn = modal.querySelector('.confirm-modal-close');
+    const overlay = modal.querySelector('.confirm-modal-overlay');
+    const cleanup = () => modal.remove();
+    confirmBtn.addEventListener('click', () => { cleanup(); resolve(true); });
+    cancelBtn.addEventListener('click', () => { cleanup(); resolve(false); });
+    closeBtn.addEventListener('click', () => { cleanup(); resolve(false); });
+    overlay.addEventListener('click', () => { cleanup(); resolve(false); });
+    document.onkeydown = (e) => { if (e.key === 'Escape') { cleanup(); resolve(false); } };
+  });
+}
+
+
 // Main initialization
 function initializeAdminUsers() {
     const searchInput = document.querySelector(".search-input");
@@ -675,7 +713,87 @@ function initializeAdminUsers() {
 
 // Run when DOM is ready
 if (document.readyState === 'loading') {
+}
+
+
+// Run when DOM is ready
+if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeAdminUsers);
 } else {
     initializeAdminUsers();
 }
+
+// ✅ Manage Active/Inactive user toggle
+document.addEventListener('click', async function (e) {
+  const badge = e.target.closest('.toggle-status');
+  if (!badge) return;
+
+  const userId = badge.dataset.userId;
+  const isActive = badge.dataset.active === 'true';
+
+  // Prevent toggling your own status
+  if (badge.closest('tr')?.querySelector('.role-badge')?.textContent.includes('(You)')) {
+    showNotification("You can't change your own status.", 'error');
+    return;
+  }
+
+  // Confirmation modal
+  const confirmed = await showStatusConfirmModal(isActive);
+  if (!confirmed) return;
+
+  // 🔄 Create spinner badge
+  const originalHTML = badge.outerHTML;
+  const spinnerBadge = document.createElement('span');
+  spinnerBadge.className = 'status-badge updating';
+  spinnerBadge.innerHTML = `<i class="fa-solid fa-spinner custom-spin"></i> Updating...`;
+
+  // Optional: control spinner speed via JS
+  spinnerBadge.querySelector('.custom-spin').style.animationDuration = '8s';
+
+  badge.replaceWith(spinnerBadge);
+
+  try {
+    const csrfToken = getCookie('csrftoken');
+    if (!csrfToken) throw new Error('CSRF token not found');
+
+    const resp = await fetch(`/toggle-user-active-ajax/${userId}/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrfToken,
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    });
+
+    const data = await resp.json();
+
+    if (data.success) {
+      // CASE 1: Full row HTML returned
+      if (data.row_html) {
+        const row = spinnerBadge.closest('tr');
+        const tempDiv = document.createElement('tbody');
+        tempDiv.innerHTML = data.row_html.trim();
+        const newRow = tempDiv.firstElementChild;
+        if (row && newRow) row.replaceWith(newRow);
+      }
+      // CASE 2: Only badge HTML returned
+      else if (data.badge_html) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = data.badge_html.trim();
+        const newBadge = tempDiv.firstElementChild;
+        newBadge.classList.add('toggle-status');
+        newBadge.dataset.userId = userId;
+        newBadge.dataset.active = data.is_active ? 'true' : 'false';
+        spinnerBadge.replaceWith(newBadge);
+      }
+
+      showNotification('User status updated!', 'success');
+    } else {
+      showNotification(data.message || 'Error updating status', 'error');
+      spinnerBadge.outerHTML = originalHTML;
+    }
+  } catch (error) {
+    console.error(error);
+    showNotification('An error occurred.', 'error');
+    spinnerBadge.outerHTML = originalHTML;
+  }
+});

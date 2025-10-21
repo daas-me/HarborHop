@@ -443,6 +443,75 @@ body {
     font-weight: 600;
 }
 
+.status-badge.toggle-status {
+  cursor: pointer;
+  position: relative;
+  transition: color 0.18s, box-shadow 0.18s;
+}
+
+.status-badge.toggle-status:hover {
+  background: #d1fae5 !important;
+  color: #155724 !important;
+  box-shadow: 0 8px 24px 0 rgba(34,197,94,0.14);
+  transform: translateY(-6px) scale(1.08);
+  z-index: 10;
+}
+
+/* Confirmation Modal Buttons */
+.confirm-modal-btn, .modal-btns button {
+  padding: 10px 28px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  background: #f3f4f6;
+  color: #222;
+  margin: 0 6px;
+  transition: background 0.18s, color 0.18s, transform 0.18s;
+}
+.confirm-modal-btn.confirm, .modal-btns .confirm {
+  background: #6366f1;
+  color: #fff;
+}
+.confirm-modal-btn.confirm:hover, .modal-btns .confirm:hover {
+  background: #4338ca;
+  color: #fff;
+  transform: translateY(-3px) scale(1.04);
+}
+.confirm-modal-btn.cancel, .modal-btns .cancel {
+  background: #e5e7eb;
+  color: #222;
+}
+.confirm-modal-btn.cancel:hover, .modal-btns .cancel:hover {
+  background: #cbd5e1;
+  color: #222;
+  transform: translateY(-3px) scale(1.04);
+}
+
+
+.status-badge.toggle-status::after {
+  content: attr(data-tooltip);
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  top: 110%;
+  transform: translateX(-50%) scale(0.98);
+  background: #222;
+  color: #fff;
+  font-size: 0.93em;
+  padding: 5px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+  z-index: 30;
+  transition: opacity 0.13s;
+}
+
+.status-badge.toggle-status:hover::after {
+  opacity: 1;
+}
+
 .status-badge.active {
     background: #d4edda;
     color: #155724;
@@ -574,9 +643,9 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 3000;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
     justify-content: center;
     align-items: center;
     font-family: 'Alan Sans', sans-serif;
@@ -1189,4 +1258,37 @@ body {
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes customSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.custom-spin {
+  display: inline-block;
+  animation: customSpin 3.5s linear infinite;
+}
+
+.status-badge.active {
+  background: #d4edda;
+  color: #155724;
+  transition: background 0.2s, color 0.2s;
+}
+.status-badge.active:hover {
+  background: #22c55e !important;
+  color: #fff !important;
+  cursor: pointer;
+}
+
+.status-badge.inactive {
+  background-color: #f8d7da;
+  color: #842029;
+  border: 1px solid #f5c2c7;
+  transition: background-color 0.2s, color 0.2s;
+}
+.status-badge.inactive:hover {
+  background: #dc3545 !important;
+  color: #fff !important;
+  cursor: pointer;
 }

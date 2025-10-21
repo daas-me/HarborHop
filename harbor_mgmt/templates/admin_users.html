@@ -198,11 +198,12 @@ window.addEventListener('pageshow', function(event) {
                                 {% endif %}
                             </td>
                              <td>
-                                {% if u.is_active %}
-                                <span class="status-badge active">Active</span>
-                                {% else %}
-                                <span class="status-badge inactive">Inactive</span>
-                                {% endif %}
+                                <span class="status-badge {% if u.is_active %}active{% else %}inactive{% endif %} toggle-status"
+                                data-user-id="{{ u.id }}"
+                                data-active="{{ u.is_active|yesno:'true,false' }}"
+                                data-tooltip="Click to deactivate user">
+                                {% if u.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
                             </td>
                                  <td>{{ u.date_joined|date:"M d, Y" }}</td>
                              <td>

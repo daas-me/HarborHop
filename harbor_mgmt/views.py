@@ -8,6 +8,7 @@ from .models import UserProfile
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_POST
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.utils import timezone
@@ -192,6 +193,29 @@ def admin_users(request):
     
     return render(request, 'admin_users.html', context)
 
+@login_required
+@require_POST
+def toggle_user_active_ajax(request, user_id):
+    if not hasattr(request.user, 'profile') or not request.user.profile.is_admin_user:
+        return JsonResponse({'success': False, 'message': 'Unauthorized.'}, status=403)
+    if int(user_id) == request.user.id:
+        return JsonResponse({'success': False, 'message': 'Cannot change your own status.'}, status=400)
+    from django.contrib.auth.models import User
+    try:
+        user = User.objects.get(id=user_id)
+        user.is_active = not user.is_active
+        user.save()
+        return JsonResponse({
+            'success': True,
+            'new_status': user.is_active,
+            'badge_html': (
+                '<span class="status-badge active" style="cursor:pointer;">Active</span>'
+                if user.is_active else
+                '<span class="status-badge inactive" style="cursor:pointer;">Inactive</span>'
+            )
+        })
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'User not found.'}, status=404)
 
 @login_required
 @require_http_methods(["POST"])
