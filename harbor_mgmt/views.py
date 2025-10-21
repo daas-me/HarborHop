@@ -599,3 +599,8 @@ def test_csrf(request):
         'is_admin': request.user.profile.is_admin_user if (request.user.is_authenticated and hasattr(request.user, 'profile')) else False,
         'post_data': dict(request.POST) if request.method == 'POST' else None,
     })
+
+@login_required
+def profile_settings(request):
+    """Display the user's profile settings page"""
+    return render(request, 'profile_settings.html', {'user': request.user})
