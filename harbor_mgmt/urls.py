@@ -14,4 +14,5 @@ urlpatterns = [
     path('delete-user/<int:user_id>/', views.delete_user, name='delete_user'),
     path('test-csrf/', views.test_csrf, name='test_csrf'),
     path('toggle-user-active-ajax/<int:user_id>/', views.toggle_user_active_ajax, name='toggle_user_active_ajax'),
+    path('profile/', views.profile_settings, name='profile_settings'),
 ]
