@@ -602,5 +602,13 @@ def test_csrf(request):
 
 @login_required
 def profile_settings(request):
-    """Display the user's profile settings page"""
-    return render(request, 'profile_settings.html', {'user': request.user})
+    """Display and handle updates for the user's profile"""
+    user = request.user  # get the logged-in user
+    profile = getattr(user, 'profile', None)  # get the related UserProfile if it exists
+
+    context = {
+        'user': user,
+        'profile': profile,
+    }
+
+    return render(request, 'profile_settings.html', context)
