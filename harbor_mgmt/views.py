@@ -608,8 +608,39 @@ def test_csrf(request):
 
 @login_required
 def profile_settings(request):
-    """Display the user's profile settings page"""
-    return render(request, 'profile_settings.html', {'user': request.user})
+    user = request.user
+    profile = getattr(user, 'profile', None)
+
+    if request.method == "POST":
+        # Get form data
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        email = request.POST.get("email")
+        phone = request.POST.get("phone")
+        address = request.POST.get("address")
+        date_of_birth = request.POST.get("date_of_birth")
+
+        # Update User fields
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        user.save()
+
+        # Update UserProfile fields
+        if profile:
+            profile.phone = phone
+            profile.address = address
+            profile.date_of_birth = date_of_birth or None
+            profile.save()
+
+        messages.success(request, "Profile updated successfully!")
+        return redirect('profile_settings')
+    
+    context = {
+        'user': user,
+        'profile': profile,
+    }
+    return render(request, 'profile_settings.html', context)
 
 @login_required
 def search_trips(request):
