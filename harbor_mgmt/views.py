@@ -98,7 +98,7 @@ def user_logout(request):
     """Handle user logout"""
     logout(request)
     messages.success(request, 'You have been logged out successfully!')
-    return redirect('login')
+    return redirect('home')
 
 @never_cache
 @login_required
@@ -641,6 +641,47 @@ def profile_settings(request):
         'profile': profile,
     }
     return render(request, 'profile_settings.html', context)
+
+@login_required
+@require_POST
+def upload_profile_photo(request):
+    """Handle profile photo uploads."""
+    profile = request.user.profile
+    photo = request.FILES.get("photo")
+
+    if not photo:
+        return JsonResponse({"success": False, "message": "No photo uploaded."}, status=400)
+
+    # Save new photo
+    profile.photo = photo
+    profile.save()
+
+    return JsonResponse({
+        "success": True,
+        "message": "Photo updated successfully!",
+        "photo_url": profile.photo.url
+    })
+
+@login_required
+@require_POST
+def delete_profile_photo(request):
+    """Removes the user's profile photo and reverts to initials."""
+    profile = request.user.profile
+
+    # If user has a photo, delete it from storage
+    if profile.photo:
+        profile.photo.delete(save=False)
+        profile.photo = None
+        profile.save()
+        return JsonResponse({
+            "success": True,
+            "message": "Profile photo removed successfully!"
+        })
+
+    return JsonResponse({
+        "success": False,
+        "message": "No profile photo to delete."
+    }, status=400)
 
 @login_required
 def search_trips(request):

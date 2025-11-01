@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile - HarborHop</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/profile_settings.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/profile_settings.css' %}?v=2">
     <script src="{% static 'js/profile_settings.js' %}?v=1"></script>
 </head>
 <body>
@@ -20,17 +20,34 @@
             <a href="#">Transaction</a>
             <a href="#">Latest Offers</a>
             <a href="#">Contact Us</a>
-            <button class="btn-logout">Log out</button>
+            <form action="{% url 'logout' %}" method="post" style="display:inline;">
+            {% csrf_token %}
+                <button type="submit" class="btn-logout">Log out</button>
+            </form>
         </div>
     </nav>
 
     <div class="container">
         <div class="profile-header">
             <div class="profile-photo-section">
-                <div class="profile-photo">
-                    {{ user.first_name|first }}{{ user.last_name|first }}
+                <div class="profile-photo" id="profilePhotoWrapper">
+                    {% if profile.photo %}
+                        <img src="{{ profile.photo.url }}" alt="Profile Photo" id="profilePhoto">
+                    {% else %}
+                        <span id="profilePhotoPlaceholder">
+                            {{ user.first_name|first }}{{ user.last_name|first }}
+                        </span>
+                    {% endif %}
                 </div>
-                <button class="change-photo-btn">Change Photo</button>
+
+                <form id="photoForm" method="POST" enctype="multipart/form-data" action="{% url 'upload_profile_photo' %}">
+                    {% csrf_token %}
+                    <input type="file" name="photo" id="photoInput" style="display: none;" accept="image/*">
+                    <div class="photo-buttons">
+                            <button type="button" class="change-photo-btn" id="changePhotoBtn">Change Photo</button>
+                            <button type="button" class="remove-photo-btn" id="removePhotoBtn">Remove Photo</button>
+                    </div>
+                </form>
             </div>
             <div class="profile-info">
                 <h1>{{ user.first_name }} {{ user.last_name }}</h1>

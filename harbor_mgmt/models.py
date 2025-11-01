@@ -13,6 +13,7 @@ class UserProfile(models.Model):
     is_admin_user = models.BooleanField(default=False, help_text="Designates whether this user can access the admin dashboard.")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    photo = models.ImageField(upload_to="profile_photos/", blank=True, null=True)
     
     def __str__(self):
         return f"{self.user.username}'s Profile"
@@ -69,3 +70,4 @@ class Booking(models.Model):
         verbose_name = 'Booking'
         verbose_name_plural = 'Bookings'
         ordering = ['-created_at']
+
