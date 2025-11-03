@@ -503,12 +503,7 @@
         // Handle trip type change
         document.addEventListener('DOMContentLoaded', function() {
             // Load locations from API
-            {% if user.is_authenticated %}
                 loadLocations();
-            {% else %}
-                document.getElementById('origin-select').innerHTML = '<option value="">Please login to search</option>';
-                document.getElementById('destination-select').innerHTML = '<option value="">Please login to search</option>';
-            {% endif %}
             
             const tripTypeRadios = document.querySelectorAll('input[name="trip_type"]');
             const returnDateGroup = document.getElementById('return-date-group');

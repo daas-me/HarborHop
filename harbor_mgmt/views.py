@@ -683,7 +683,6 @@ def delete_profile_photo(request):
         "message": "No profile photo to delete."
     }, status=400)
 
-@login_required
 def search_trips(request):
     """Handle trip search using Barkota API"""
     if request.method == 'POST':
@@ -855,7 +854,6 @@ def search_voyages_page(request):
     return render(request, 'search_voyages.html')
 
 
-@login_required
 @require_http_methods(["GET", "POST"])
 def get_all_locations(request):
     """Fetch all available locations/routes from Barkota API"""
@@ -901,7 +899,6 @@ def get_all_locations(request):
             'message': f'An error occurred: {str(e)}'
         }, status=500)
 
-@login_required
 @require_http_methods(["POST"])
 def search_voyages_barkota(request):
     """Search for voyages using Barkota API"""
