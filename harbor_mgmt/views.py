@@ -19,10 +19,6 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-def splash(request):
-    """Display splash screen with animation"""
-    return render(request, 'harborhop_splash.html')
-
 def home(request):
     # Ensure user has a profile if authenticated
     if request.user.is_authenticated:
