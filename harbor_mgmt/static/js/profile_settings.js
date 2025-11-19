@@ -1,18 +1,31 @@
-function switchTab(tabName, event) {
+function switchTab(tabName, event = null) {
     const tabs = document.querySelectorAll('.tab');
     const sections = document.querySelectorAll('.content-section');
 
     tabs.forEach(tab => tab.classList.remove('active'));
     sections.forEach(section => section.classList.remove('active'));
 
-    event.target.classList.add('active');
-    document.getElementById(tabName).classList.add('active');
+    const targetTab = event ? event.target : document.querySelector(`.tab[data-tab="${tabName}"]`);
+    if (targetTab) {
+        targetTab.classList.add('active');
+    }
+
+    const targetSection = document.getElementById(tabName);
+    if (targetSection) {
+        targetSection.classList.add('active');
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     const profileForm = document.getElementById("profileForm");
     const updateMessage = document.getElementById("updateMessage");
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const container = document.querySelector('.container[data-active-tab]');
+    const initialTab = container ? container.dataset.activeTab : null;
+
+    if (initialTab) {
+        switchTab(initialTab);
+    }
 
     // ==============================
     //  PROFILE INFO UPDATE (AJAX)

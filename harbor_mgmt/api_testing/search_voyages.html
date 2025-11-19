@@ -1,0 +1,279 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Voyages - HarborHop</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .voyage-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .voyage-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .voyage-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{% url 'home' %}" class="back-link">← Back to Home</a>
+        
+        <h1>🚢 Search Voyages</h1>
+
+        <form id="searchForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="origin">Origin Port ID</label>
+                <input type="number" id="origin" name="origin" value="93" required>
+            </div>
+
+            <div class="form-group">
+                <label for="destination">Destination Port ID</label>
+                <input type="number" id="destination" name="destination" value="96" required>
+            </div>
+
+            <div class="form-group">
+                <label for="departureDate">Departure Date</label>
+                <input type="date" id="departureDate" name="departureDate" value="2025-10-22" required>
+            </div>
+
+            <div class="form-group">
+                <label for="passengerCount">Passenger Count</label>
+                <input type="number" id="passengerCount" name="passengerCount" value="1" min="1" required>
+            </div>
+
+            <div class="form-group">
+                <label for="withDriver">With Driver</label>
+                <select id="withDriver" name="withDriver">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn" id="searchBtn">Search Voyages</button>
+        </form>
+
+        <div class="error" id="errorMsg"></div>
+        
+        <div class="results" id="results">
+            <h2>Search Results</h2>
+            <div id="voyagesList"></div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('searchForm');
+        const searchBtn = document.getElementById('searchBtn');
+        const results = document.getElementById('results');
+        const voyagesList = document.getElementById('voyagesList');
+        const errorMsg = document.getElementById('errorMsg');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Clear previous results
+            results.classList.remove('show');
+            errorMsg.classList.remove('show');
+            voyagesList.innerHTML = '<div class="loading">Searching voyages...</div>';
+            results.classList.add('show');
+            
+            // Disable button
+            searchBtn.disabled = true;
+            searchBtn.textContent = 'Searching...';
+
+            // Get form data
+            const formData = {
+                origin: parseInt(document.getElementById('origin').value),
+                destination: parseInt(document.getElementById('destination').value),
+                departureDate: document.getElementById('departureDate').value,
+                passengerCount: parseInt(document.getElementById('passengerCount').value),
+                shippingCompany: null,
+                cargoItemId: null,
+                withDriver: parseInt(document.getElementById('withDriver').value)
+            };
+
+            try {
+                const response = await fetch('{% url "search_voyages_barkota" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResults(data.data);
+                } else {
+                    showError(data.message || 'Failed to search voyages');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.textContent = 'Search Voyages';
+            }
+        });
+
+        function displayResults(data) {
+            voyagesList.innerHTML = '';
+            
+            if (!data || (Array.isArray(data) && data.length === 0)) {
+                voyagesList.innerHTML = '<p>No voyages found for the selected criteria.</p>';
+                return;
+            }
+
+            // Display raw JSON for now (you can customize this based on actual API response structure)
+            voyagesList.innerHTML = `
+                <div class="voyage-card">
+                    <h3>API Response</h3>
+                    <pre style="background: #f0f0f0; padding: 15px; border-radius: 5px; overflow-x: auto;">${JSON.stringify(data, null, 2)}</pre>
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            errorMsg.textContent = message;
+            errorMsg.classList.add('show');
+            results.classList.remove('show');
+        }
+    </script>
+</body>
+</html>

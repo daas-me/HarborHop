@@ -1,0 +1,103 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - HarborHop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/payment.css' %}">
+    <script src="https://kit.fontawesome.com/1256e3cde2.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <a href="{% url 'home' %}" class="logo">HARBOR<span>hop</span></a>
+            <p class="tagline">Hop aboard. Sail beyond</p>
+        </div>
+        <nav>
+            <a href="{% url 'home' %}">Transaction</a>
+            <a href="{% url 'reservations' %}">Reservations</a>
+            <a href="#">Latest Offers</a>
+            <a href="#">Contact Us</a>
+            <div class="nav-divider"></div>
+            <a href="#" class="language-link">PH</a>
+            <span class="language-separator">|</span>
+            <a href="#" class="language-link">EN</a>
+            <a href="{% url 'profile_settings' %}" class="user-name-btn">{{ user.username }}</a>
+            <a href="{% url 'logout' %}" class="login-btn">Log out</a>
+        </nav>
+    </header>
+    <div class="payment-main-card" style="max-width: 700px; margin: 48px auto 0 auto; background: #fff; border-radius: 16px; box-shadow: 0 4px 32px rgba(0,0,0,0.13); padding: 36px 40px 32px 40px;">
+        <div class="reservation-section">
+            <div class="reservation-label">Trip</div>
+            <div class="reservation-value" style="display:flex;align-items:center;gap:10px;font-size:1.25em;font-weight:600;">
+                <span>{{ booking.origin }}</span>
+                <span style="color:#ff9900;font-size:1.3em;">&#8594;</span>
+                <span>{{ booking.destination }}</span>
+                {% if route_distance %}
+                    <span style="font-size:0.95em;font-weight:400;color:#888;margin-left:10px;">({{ route_distance }} km)</span>
+                {% endif %}
+            </div>
+        </div>
+        <!-- Outbound Trip Details -->
+        {% if booking.details.outbound %}
+        <div class="reservation-section" style="border: 1px solid #eee; border-radius: 8px; margin-bottom: 16px; padding: 18px;">
+            <div style="font-weight: bold; margin-bottom: 6px;">DEPARTURE</div>
+            <div><b>Company:</b> {{ booking.details.outbound.company }}</div>
+            <div><b>Vessel:</b> {{ booking.details.outbound.vessel }}</div>
+            <div><b>Route:</b> {{ booking.details.outbound.originName }} → {{ booking.details.outbound.destinationName }}</div>
+            <div><b>Departure Date:</b> {{ booking.details.outbound.departureDate }}</div>
+            <div><b>Departure Time:</b> {{ booking.details.outbound.departureTime }}</div>
+            <div><b>Accommodation:</b> {{ booking.details.outbound.accommodationName }}</div>
+            <div><b>Seat Type:</b> {{ booking.details.outbound.seatType }}</div>
+            <div><b>Aircon:</b> {{ booking.details.outbound.aircon|yesno:"YES,NO" }}</div>
+            <div><b>Price:</b> ₱{{ booking.details.outbound.price|floatformat:2 }}</div>
+        </div>
+        {% endif %}
+        <!-- Return Trip Details -->
+        {% if booking.details.return %}
+        <div class="reservation-section" style="border: 1px solid #eee; border-radius: 8px; margin-bottom: 16px; padding: 18px;">
+            <div style="font-weight: bold; margin-bottom: 6px;">RETURN</div>
+            <div><b>Company:</b> {{ booking.details.return.company }}</div>
+            <div><b>Vessel:</b> {{ booking.details.return.vessel }}</div>
+            <div><b>Route:</b> {{ booking.details.return.originName }} → {{ booking.details.return.destinationName }}</div>
+            <div><b>Departure Date:</b> {{ booking.details.return.departureDate }}</div>
+            <div><b>Departure Time:</b> {{ booking.details.return.departureTime }}</div>
+            <div><b>Accommodation:</b> {{ booking.details.return.accommodationName }}</div>
+            <div><b>Seat Type:</b> {{ booking.details.return.seatType }}</div>
+            <div><b>Aircon:</b> {{ booking.details.return.aircon|yesno:"YES,NO" }}</div>
+            <div><b>Price:</b> ₱{{ booking.details.return.price|floatformat:2 }}</div>
+        </div>
+        {% endif %}
+        <div class="reservation-section">
+            <div class="reservation-label">Passengers</div>
+            <div class="reservation-value">
+                Adults: {{ booking.adults }} | Children: {{ booking.children }}{% if booking.details.infants %} | Infants: {{ booking.details.infants }}{% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="payment-container" style="margin-top: 32px;">
+        <form class="simple-payment-form" method="post" style="max-width: 420px; margin: 0 auto;">
+            {% csrf_token %}
+            <div class="section-title">Payment</div>
+            <div style="margin-bottom: 18px; font-size: 1.1em;">
+                <strong>Total Amount:</strong> <span style="font-size:1.3em;color:#0077b6;font-weight:700;">₱{{ booking.total_price|floatformat:2 }}</span>
+            </div>
+            <div style="margin-bottom: 22px;">
+                <label style="display:block;margin-bottom:8px;color:#555;font-weight:600;">Payment Method</label>
+                <select name="payment_method" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid #ccc;">
+                    <option value="gcash">GCash</option>
+                    <option value="credit_card">Credit Card</option>
+                    <option value="paypal">PayPal</option>
+                </select>
+            </div>
+            <div class="action-row" style="display:flex;justify-content:center;gap:18px;margin-top:36px;">
+                <a href="{% url 'reservation_confirmation' booking.id %}" style="padding:12px 28px;border-radius:30px;border:1.5px solid #ff9900;background:transparent;color:#ff9900;font-weight:700;font-size:15px;text-decoration:none;transition:background 0.15s, color 0.15s;">Back</a>
+                <button type="submit" class="btn-main" style="background:#ff9900;color:#fff;padding:12px 30px;border-radius:30px;font-weight:700;font-size:15px;border:none;">Confirm and Continue</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

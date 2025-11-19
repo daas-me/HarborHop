@@ -1,0 +1,174 @@
+
+
+.reservations-container {
+width: 90%;
+max-width: 1100px;
+margin: 40px auto;
+font-family: 'Alan Sans', sans-serif;
+}
+
+/* Page Header */
+.page-header {
+text-align: center;
+margin-bottom: 35px;
+}
+
+.page-header h1 {
+font-size: 28px;
+font-weight: 700;
+margin-bottom: 5px;
+}
+
+
+.reservations-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+gap: 25px;
+}
+
+.reservation-card {
+background: #ffffff;
+border-radius: 12px;
+padding: 18px 20px;
+border: 1px solid #e4e4e4;
+box-shadow: 0px 2px 7px rgba(0,0,0,0.08);
+display: flex;
+flex-direction: column;
+gap: 12px; /* Smaller gap between parts */
+}
+
+/* Header tightened */
+.reservation-card__header {
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+margin-bottom: 6px; /* Reduced space */
+}
+
+/* Body starts right under header */
+.reservation-card__body {
+margin: 0; /* Remove big top gap */
+padding-top: 8px;
+border-top: 1px solid #f0f0f0;
+}
+
+/* Detail rows closer together */
+.reservation-detail {
+display: flex;
+justify-content: space-between;
+margin: 4px 0;
+}
+
+/* Fix card grid so cards don't stretch weirdly */
+.reservations-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+gap: 25px;
+align-items: start;
+}
+
+/* Reduce header font margins */
+.route {
+font-size: 15px;
+font-weight: 700;
+margin: 0;
+}
+
+.trip-type {
+font-size: 13px;
+margin-top: 2px;
+color: #6c6c6c;
+}
+
+/* STATUS BADGES */
+.status-badge {
+font-size: 12px;
+padding: 6px 10px;
+border-radius: 6px;
+text-transform: uppercase;
+font-weight: 600;
+}
+
+/* Example color styling */
+.status-pending {
+background: #ffeec2;
+color: #aa7a00;
+}
+.status-confirmed {
+background: #dbffdc;
+color: #1c7f2b;
+}
+.status-expired {
+background: #ffe0e0;
+color: #b51f1f;
+}
+
+
+.reservation-card__body {
+border-top: 1px solid #f0f0f0;
+padding-top: 10px;
+}
+
+.reservation-detail {
+display: flex;
+justify-content: space-between;
+margin: 6px 0;
+}
+
+.reservation-detail .label {
+color: #6b6b6b;
+font-size: 13px;
+}
+
+.reservation-detail .value {
+font-weight: 600;
+font-size: 13.5px;
+}
+
+
+
+.reservation-card__footer {
+margin-top: 10px;
+display: flex;
+justify-content: flex-end;
+}
+
+.btn-primary {
+background: rgba(255, 136, 0, 0.15);
+color: #FF8C00;
+border: 1px solid #FF8C00;
+padding: 8px 16px;
+border-radius: 8px;
+text-decoration: none;
+font-size: 14px;
+transition: 0.2s;
+font-weight: 600;
+}
+
+.btn-primary:hover {
+background: rgba(255, 136, 0, 0.3);
+}
+
+
+
+.empty-state {
+text-align: center;
+margin-top: 60px;
+color: #505050;
+}
+
+.empty-state i {
+font-size: 48px;
+color: #aaaaaa;
+margin-bottom: 10px;
+}
+
+.btn-outline {
+border: 1px solid #FF8C00;
+padding: 8px 16px;
+color: #FF8C00;
+border-radius: 8px;
+background: transparent;
+text-decoration: none;
+font-weight: 600;
+}

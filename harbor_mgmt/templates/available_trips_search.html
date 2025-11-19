@@ -14,7 +14,16 @@
     <link rel="manifest" href="{% static 'images/favicon_io/site.webmanifest' %}">
     <script src="https://kit.fontawesome.com/1256e3cde2.js" crossorigin="anonymous"></script>
 </head>
-<body>
+<body
+    data-trip-type="{{ trip_type }}"
+    data-is-authenticated="{{ user.is_authenticated|yesno:'true,false' }}"
+    data-adults="{{ adults|default:0 }}"
+    data-children="{{ children|default:0 }}"
+    data-origin-name="{{ origin_name }}"
+    data-destination-name="{{ destination_name }}"
+    data-departure-date="{{ departure_date|default:'' }}"
+    data-return-date="{{ return_date|default:'' }}"
+>
     <!-- Header -->
     <header>
         <div class="logo-container">
@@ -30,8 +39,9 @@
                     </a>
                 {% endif %}
                 <a href="{% url 'home' %}">Transaction</a>
-                <a href="#">Latest Offers</a>
-                <a href="#">Contact Us</a>
+            <a href="{% url 'reservations' %}">Reservations</a>
+            <a href="#">Latest Offers</a>
+            <a href="#">Contact Us</a>
                 <div class="nav-divider"></div>
                 <a href="#" class="language-link">PH</a>
                 <span class="language-separator">|</span>
@@ -82,9 +92,9 @@
                 <div class="info-date-value">{% if return_date_formatted %}{{ return_date_formatted }}{% else %}--{% endif %}</div>
             </div>
             <div class="info-item">
-                <a href="{% url 'home' %}" class="modify-link">
+                {% comment %} <a href="{% url 'home' %}" class="modify-link">
                     <i class="fa-solid fa-pen"></i> MODIFY
-                </a>
+                </a> {% endcomment %}
             </div>
         </div>
 
@@ -124,9 +134,17 @@
 
                 {% if outbound_voyages %}
                     {% for item in outbound_voyages %}
-                        <div class="schedule-card">
+                        <div class="schedule-card"
+                             data-direction="outbound"
+                             data-vessel="{{ item.voyage.vesselName|default_if_none:'' }}"
+                             data-company="{{ item.voyage.shippingLine.name|default_if_none:'Ferry Company' }}"
+                             data-departure-datetime="{{ item.voyage.departureDateTime|default_if_none:'' }}"
+                             data-departure-date="{{ item.voyage.departureDateTime|slice:":10" }}"
+                             data-departure-time="{{ item.voyage.departureDateTime|slice:"11:" }}"
+                             data-origin-name="{{ origin_name }}"
+                             data-destination-name="{{ destination_name }}">
                             <div class="time-box">
-                                <div class="time">{{ item.voyage.departureDateTime|slice:":10" }}</div>
+                                <div class="date">{{ item.voyage.departureDateTime|slice:":10" }}</div>
                                 <div class="time">{{ item.voyage.departureDateTime|slice:"11:" }}</div>
                             </div>
 
@@ -134,22 +152,52 @@
                                 <div class="company-logo">
                                     <i class="fa-solid fa-ship"></i>
                                 </div>
-                                <div class="company-name">{{ item.voyage.shippingLine.name|default:"Ferry Company" }}</div>
-                                <div class="vessel-name">{{ item.voyage.vesselName }} ({{ item.voyage.vessel.type|default:"FASTCRAFT" }})</div>
+                                <div>
+                                    <div class="company-name">{{ item.voyage.shippingLine.name|default:"Ferry Company" }}</div>
+                                    <div class="vessel-name">{{ item.voyage.vesselName }} ({{ item.voyage.vessel.type|default:"FASTCRAFT" }})</div>
+                                </div>
+                            </div>
+
+                            <div class="seat-select">
+                                <label for="outbound-seat-{{ forloop.counter }}" class="seat-select-label">Seat Type</label>
+                                {% if item.accommodations %}
+                                    <select id="outbound-seat-{{ forloop.counter }}" class="seat-type-select">
+                                        {% for accommodation in item.accommodations %}
+                                            <option value="{{ accommodation.priceId }}"
+                                                    data-name="{{ accommodation.name }}"
+                                                    data-price="{{ accommodation.price }}"
+                                                    data-seat-type="{{ accommodation.seatType|default_if_none:accommodation.name }}"
+                                                    data-aircon="{{ accommodation.isAircon|yesno:"true,false" }}"
+                                                    data-remaining="{{ accommodation.remaining|default:0 }}">
+                                                {{ accommodation.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% with first_acc=item.accommodations.0 %}
+                                        <div class="seat-meta">
+                                            <span class="seat-type-display">{{ first_acc.seatType|default:first_acc.name }}</span>
+                                            <span class="seat-remaining">{{ first_acc.remaining|default:"0" }} left</span>
+                                        </div>
+                                    {% endwith %}
+                                {% else %}
+                                    <div class="seat-meta seat-meta-empty">{{ item.cutoff_message|default:'No seat types available' }}</div>
+                                {% endif %}
                             </div>
 
                             <div class="price-box">
-                                <div class="price">₱800.00</div>
+                                {% with first_acc=item.accommodations.0 %}
+                                    <div class="price">{% if first_acc %}₱{{ first_acc.price }}{% else %}--{% endif %}</div>
+                                {% endwith %}
                                 <div class="price-label">Ticket Price</div>
                             </div>
 
-                            <button class="select-btn">Select</button>
+                            <button class="select-btn" {% if not item.accommodations %}disabled{% endif %}>Select</button>
                         </div>
                     {% endfor %}
                 {% else %}
                     <div class="no-results">
                         <i class="fa-solid fa-ship"></i>
-                        <h3>No trips found</h3>
+                        <h3>No available trips for today</h3>
                         <p>Try adjusting your search criteria or selecting a different date</p>
                     </div>
                 {% endif %}
@@ -157,31 +205,70 @@
                 <!-- Return Trips Section -->
                 {% if trip_type == 'round_trip' and return_voyages %}
                     <div class="route-header" style="margin-top: 40px;">
-                        <h2>Return Trip</h2>
+                        <h2>{{ destination_name }}</h2>
+                        <span class="arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                        <h2>{{ origin_name }}</h2>
                     </div>
 
                     {% for item in return_voyages %}
-                        <div class="schedule-card">
+                        <div class="schedule-card"
+                             data-direction="return"
+                             data-vessel="{{ item.voyage.vesselName|default_if_none:'' }}"
+                             data-company="{{ item.voyage.shippingLine.name|default_if_none:'Ferry Company' }}"
+                             data-departure-datetime="{{ item.voyage.departureDateTime|default_if_none:'' }}"
+                             data-departure-date="{{ item.voyage.departureDateTime|slice:":10" }}"
+                             data-departure-time="{{ item.voyage.departureDateTime|slice:"11:" }}"
+                             data-origin-name="{{ destination_name }}"
+                             data-destination-name="{{ origin_name }}">
                             <div class="time-box">
-                                <div class="time">{{ item.voyage.departureDateTime|slice:":10" }}</div>
+                                <div class="date">{{ item.voyage.departureDateTime|slice:":10" }}</div>
                                 <div class="time">{{ item.voyage.departureDateTime|slice:"11:" }}</div>
-                                <div class="duration">{{ item.voyage.route.duration|default:item.voyage.duration|default:"" }}</div>
                             </div>
 
                             <div class="vessel-info">
                                 <div class="company-logo">
                                     <i class="fa-solid fa-ship"></i>
                                 </div>
-                                <div class="company-name">{{ item.voyage.shippingLine.name|default:"Ferry Company" }}</div>
-                                <div class="vessel-name">{{ item.voyage.vesselName }} ({{ item.voyage.vessel.type|default:"FASTCRAFT" }})</div>
+                                <div>
+                                    <div class="company-name">{{ item.voyage.shippingLine.name|default:"Ferry Company" }}</div>
+                                    <div class="vessel-name">{{ item.voyage.vesselName }} ({{ item.voyage.vessel.type|default:"FASTCRAFT" }})</div>
+                                </div>
+                            </div>
+
+                            <div class="seat-select">
+                                <label for="return-seat-{{ forloop.counter }}" class="seat-select-label">Seat Type</label>
+                                {% if item.accommodations %}
+                                    <select id="return-seat-{{ forloop.counter }}" class="seat-type-select">
+                                        {% for accommodation in item.accommodations %}
+                                            <option value="{{ accommodation.priceId }}"
+                                                    data-name="{{ accommodation.name }}"
+                                                    data-price="{{ accommodation.price }}"
+                                                    data-seat-type="{{ accommodation.seatType|default_if_none:accommodation.name }}"
+                                                    data-aircon="{{ accommodation.isAircon|yesno:"true,false" }}"
+                                                    data-remaining="{{ accommodation.remaining|default:0 }}">
+                                                {{ accommodation.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% with first_acc=item.accommodations.0 %}
+                                        <div class="seat-meta">
+                                            <span class="seat-type-display">{{ first_acc.seatType|default:first_acc.name }}</span>
+                                            <span class="seat-remaining">{{ first_acc.remaining|default:"0" }} left</span>
+                                        </div>
+                                    {% endwith %}
+                                {% else %}
+                                    <div class="seat-meta seat-meta-empty">{{ item.cutoff_message|default:'No seat types available' }}</div>
+                                {% endif %}
                             </div>
 
                             <div class="price-box">
-                                <div class="price">₱800.00</div>
+                                {% with first_acc=item.accommodations.0 %}
+                                    <div class="price">{% if first_acc %}₱{{ first_acc.price }}{% else %}--{% endif %}</div>
+                                {% endwith %}
                                 <div class="price-label">Ticket Price</div>
                             </div>
 
-                            <button class="select-btn">Select</button>
+                            <button class="select-btn" {% if not item.accommodations %}disabled{% endif %}>Select</button>
                         </div>
                     {% endfor %}
                 {% endif %}
@@ -189,19 +276,23 @@
 
             <!-- Sidebar Summary -->
             <div class="sidebar">
-                <div class="summary-card">
+                <div class="summary-card" data-trip-type="{{ trip_type }}">
                     <h3>Summary</h3>
 
-                    <div class="summary-section">
-                        <h4>Departure</h4>
-                        <div class="summary-content">
+                    <div class="summary-section" data-summary="outbound">
+                        <div class="summary-section-header">
+                            <h4>Departure</h4>
+                        </div>
+                        <div class="summary-content empty">
                             <p><i class="fa-solid fa-circle-info"></i> No departure voyage selected yet.</p>
                         </div>
                     </div>
 
-                    <div class="summary-section">
-                        <h4>Return</h4>
-                        <div class="summary-content">
+                    <div class="summary-section" data-summary="return">
+                        <div class="summary-section-header">
+                            <h4>Return</h4>
+                        </div>
+                        <div class="summary-content empty">
                             {% if trip_type == 'round_trip' %}
                                 <p><i class="fa-solid fa-circle-info"></i> No return voyage selected yet.</p>
                             {% else %}
@@ -210,7 +301,14 @@
                         </div>
                     </div>
 
-                    <button class="continue-btn">Continue</button>
+                    <div class="summary-section total">
+                        <div class="summary-row">
+                            <span>Total Price</span>
+                            <span class="summary-total-amount">₱0.00</span>
+                        </div>
+                    </div>
+
+                    <button class="continue-btn" disabled>Continue</button>
                 </div>
             </div>
         </div>
@@ -272,5 +370,8 @@
             <p>&copy; 2025 HarborHop. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
         </div>
     </footer>
+
+    <script src="{% static 'js/available_trips.js' %}"></script>
+    <script src="{% static 'js/available_trips_continue.js' %}"></script>
 </body>
 </html>

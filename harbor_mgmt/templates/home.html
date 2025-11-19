@@ -12,7 +12,8 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
     <link rel="manifest" href="{% static 'images/favicon_io/site.webmanifest' %}">
     <script src="https://kit.fontawesome.com/1256e3cde2.js" crossorigin="anonymous"></script>
-    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body>
   <!-- Header -->
@@ -31,6 +32,7 @@
             {% endif %}
             
             <a href="{% url 'home' %}">Transaction</a>
+            <a href="{% url 'reservations' %}">Reservations</a>
             <a href="#">Latest Offers</a>
             <a href="#">Contact Us</a>
             <div class="nav-divider"></div>
@@ -106,7 +108,7 @@
                         <label>Departure Date</label>
                         <div class="input-wrapper">
                             <i class="fa-solid fa-calendar-days input-icon"></i>
-                            <input type="date" name="departure_date" class="form-input" required>
+                            <input type="date" name="departure_date" class="form-input" required min="{{ today|default:'' }}">
                         </div>
                     </div>
                     
@@ -114,7 +116,7 @@
                         <label>Return Date</label>
                         <div class="input-wrapper">
                             <i class="fa-solid fa-calendar-days input-icon"></i>
-                            <input type="date" name="return_date" class="form-input" id="return-date-input">
+                            <input type="date" name="return_date" class="form-input" id="return-date-input" min="{{ today|default:'' }}">
                         </div>
                     </div>
                 </div>
@@ -402,6 +404,7 @@
         </div>
     </footer>
 
+    <script src="{% static 'js/home_form_guard.js' %}"></script>
     <script>
         // Store routes data globally
         let routesData = [];
@@ -542,6 +545,17 @@
                     document.getElementById('destination-select').innerHTML = '<option value="">Select origin first</option>';
                 }
             });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var today = new Date();
+            var yyyy = today.getFullYear();
+            var mm = String(today.getMonth() + 1).padStart(2, '0');
+            var dd = String(today.getDate()).padStart(2, '0');
+            var minDate = yyyy + '-' + mm + '-' + dd;
+            flatpickr('input[name="departure_date"]', { minDate: minDate, dateFormat: 'Y-m-d' });
+            flatpickr('input[name="return_date"]', { minDate: minDate, dateFormat: 'Y-m-d' });
         });
     </script>
 </body>

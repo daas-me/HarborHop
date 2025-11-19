@@ -1,11 +1,12 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from .forms import UserRegistrationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import UserProfile
-from django.views.decorators.http import require_http_methods
+from .models import UserProfile, Booking
+from django.views.decorators.http import require_http_methods, require_POST
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
@@ -27,7 +28,9 @@ def home(request):
         except UserProfile.DoesNotExist:
             UserProfile.objects.create(user=request.user)
     
-    return render(request, 'home.html')
+    from datetime import date
+    today = date.today().isoformat()
+    return render(request, 'home.html', {'today': today})
 
 def register(request):
     """Handle user registration"""
@@ -95,6 +98,304 @@ def user_logout(request):
     logout(request)
     messages.success(request, 'You have been logged out successfully!')
     return redirect('home')
+
+@require_POST
+@login_required
+def store_booking_selection(request):
+    """API endpoint to store booking selections in session."""
+    try:
+        import json
+        data = json.loads(request.body)
+        selections = data.get('selections', {})
+        meta = data.get('meta', {})
+        total_price = data.get('total_price', 0)
+        # Save selections, meta, and total_price to session
+        request.session['booking_selections'] = selections
+        request.session['booking_selections_meta'] = meta
+        request.session['booking_selections_total_price'] = total_price
+        request.session.modified = True
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+@login_required
+def passenger_info(request):
+    summary = request.session.get('passenger_info_summary')
+
+    if not summary:
+        messages.error(request, 'Please select your trips before entering passenger information.')
+        return redirect('home')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'reserve':
+            from .models import Booking
+            from django.utils.crypto import get_random_string
+            from datetime import timedelta
+            now = timezone.now()
+            reserved_until = now + timedelta(days=1)
+            # Minimal: get summary/session data for booking fields
+            summary = request.session.get('passenger_info_summary', {})
+            user = request.user
+            booking_reference = get_random_string(12).upper()
+
+            from datetime import datetime
+            dep_date = summary.get('departure_date_formatted', '')
+            ret_date = summary.get('return_date_formatted', None)
+            try:
+                if dep_date:
+                    dep_date = datetime.strptime(dep_date, '%a, %d %b %Y').date()
+            except Exception:
+                dep_date = None
+            try:
+                if ret_date:
+                    ret_date = datetime.strptime(ret_date, '%a, %d %b %Y').date()
+            except Exception:
+                ret_date = None
+            # Get trip selection details from session (JS saves to sessionStorage, backend must load from POST or session)
+            selections = request.session.get('booking_selections', {})
+            outbound = selections.get('outbound', {})
+            return_trip = selections.get('return', {})
+            # Compute total price
+            total_price = 0
+            if outbound and isinstance(outbound.get('price'), (int, float)):
+                total_price += outbound['price']
+            if return_trip and isinstance(return_trip.get('price'), (int, float)):
+                total_price += return_trip['price']
+            # Enforce 2hr rule for reservation
+            from datetime import datetime, timedelta
+            dep_time_str = outbound.get('departureDateTime') or outbound.get('departureTime')
+            dep_dt = None
+            try:
+                if dep_time_str:
+                    # Try ISO first, fallback to HH:MM
+                    try:
+                        dep_dt = datetime.fromisoformat(dep_time_str)
+                    except Exception:
+                        today = datetime.now().date()
+                        dep_dt = datetime.strptime(str(today) + ' ' + dep_time_str, '%Y-%m-%d %I:%M %p')
+            except Exception:
+                dep_dt = None
+            now = timezone.now()
+            if dep_dt and (dep_dt - now) < timedelta(hours=2):
+                messages.error(request, 'You can only reserve if your trip is at least 2 hours away. Please proceed to payment directly.')
+                return redirect('reservation_confirmation', booking_id=None)
+            details = {
+                'outbound': outbound,
+                'return': return_trip,
+                'total_price': total_price,
+            }
+            booking = Booking.objects.create(
+                user=user,
+                trip_type=summary.get('trip_type', 'one_way'),
+                origin=summary.get('origin_name', ''),
+                destination=summary.get('destination_name', ''),
+                departure_date=dep_date,
+                return_date=ret_date,
+                adults=summary.get('adults', 1),
+                children=summary.get('children', 0),
+                booking_reference=booking_reference,
+                status='reserved',
+                reserved_until=now + timedelta(hours=48),
+                total_price=total_price,
+                details=details,
+            )
+            return redirect('reservation_confirmation', booking_id=booking.id)
+        # fallback: default behavior
+        form_data = {
+            key: value for key, value in request.POST.items() if key != 'csrfmiddlewaretoken'
+        }
+        request.session['passenger_info_form'] = form_data
+        request.session['passenger_info_completed'] = True
+        return redirect('passenger_info')
+
+    passenger_form_data = request.session.pop('passenger_info_form', {})
+    show_booking_options = request.session.pop('passenger_info_completed', False)
+
+    context = {
+        'trip_type': summary.get('trip_type', 'one_way'),
+        'origin_name': summary.get('origin_name', 'Origin'),
+        'destination_name': summary.get('destination_name', 'Destination'),
+        'departure_date_formatted': summary.get('departure_date_formatted', ''),
+        'return_date_formatted': summary.get('return_date_formatted', ''),
+        'adults': summary.get('adults', 1),
+        'children': summary.get('children', 0),
+        'show_booking_options': show_booking_options,
+        'passenger_form_data': passenger_form_data,
+    }
+    return render(request, 'passenger_info.html', context)
+
+@login_required
+def reservation_confirmation(request, booking_id):
+    from datetime import datetime, timedelta
+    booking = Booking.objects.get(id=booking_id, user=request.user)
+    # Determine if Reserve Booking is allowed (more than 2 hours before departure)
+    can_reserve_booking = False
+    outbound = booking.details.get('outbound') if booking.details else None
+    dep_time_str = outbound.get('departureDateTime') or outbound.get('departureTime') if outbound else None
+    dep_dt = None
+    try:
+        if dep_time_str:
+            try:
+                dep_dt = datetime.fromisoformat(dep_time_str)
+            except Exception:
+                today = datetime.now().date()
+                dep_dt = datetime.strptime(str(today) + ' ' + dep_time_str, '%Y-%m-%d %I:%M %p')
+    except Exception:
+        dep_dt = None
+    now = datetime.now()
+    if dep_dt and (dep_dt - now) > timedelta(hours=2):
+        can_reserve_booking = True
+    context = {
+        'booking': booking,
+        'user': request.user,
+        'can_reserve_booking': can_reserve_booking,
+    }
+    return render(request, 'reservation_confirmation.html', context)
+
+
+@login_required
+@require_POST
+def cancel_reservation(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+
+    if booking.user != request.user:
+        messages.error(request, "You do not have permission to modify this reservation.")
+        return redirect('reservation_confirmation', booking_id=booking_id)
+
+    if booking.status == 'cancelled':
+        messages.info(request, 'This reservation is already cancelled.')
+        return redirect('reservation_confirmation', booking_id=booking_id)
+
+    booking.status = 'cancelled'
+    booking.reserved_until = None
+    booking.save(update_fields=['status', 'reserved_until', 'updated_at'])
+
+    messages.success(request, 'Your reservation has been cancelled.')
+    return redirect('reservation_confirmation', booking_id=booking_id)
+
+
+@login_required
+def reservations_view(request):
+    active_statuses = ['pending', 'reserved', 'confirmed']
+    reservations = (
+        Booking.objects
+        .filter(user=request.user, status__in=active_statuses)
+        .order_by('departure_date', '-created_at')
+    )
+
+    return render(request, 'reservations.html', {
+        'reservations': reservations,
+        'active_statuses': active_statuses,
+    })
+
+
+@login_required
+def payment_view(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+
+    if request.method == 'POST':
+        payment_method = request.POST.get('payment_method', '').strip() or 'unspecified'
+
+        details = booking.details or {}
+        payment_info = {
+            'method': payment_method,
+            'paid_at': timezone.now().isoformat(),
+            'paid_at_display': timezone.localtime().strftime('%b %d, %Y %I:%M %p'),
+        }
+        details['payment'] = payment_info
+        booking.details = details
+        booking.status = 'completed'
+        booking.reserved_until = None
+        booking.save(update_fields=['details', 'status', 'reserved_until', 'updated_at'])
+
+        messages.success(request, 'Payment confirmed! Your booking was added to your history.')
+        profile_url = reverse('profile_settings')
+        return redirect(f"{profile_url}?tab=booking")
+
+    details = booking.details or {}
+    distance = details.get('distance')
+    if not distance:
+        outbound = details.get('outbound') if isinstance(details, dict) else None
+        if isinstance(outbound, dict):
+            distance = outbound.get('distance')
+
+    context = {
+        'booking': booking,
+        'user': request.user,
+        'route_distance': distance,
+    }
+    return render(request, 'payment.html', context)
+
+@login_required
+def booking_history_view(request):
+    bookings = (
+        Booking.objects
+        .filter(user=request.user)
+        .order_by('-created_at')
+    )
+
+    return render(request, 'booking_history.html', {
+        'bookings': bookings,
+    })
+
+    summary = request.session.get('passenger_info_summary')
+
+    if not summary:
+        messages.error(request, 'Please select your trips before entering passenger information.')
+        return redirect('home')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'reserve':
+            from .models import Booking
+            from django.utils.crypto import get_random_string
+            from datetime import timedelta
+            now = timezone.now()
+            reserved_until = now + timedelta(days=1)
+            # Minimal: get summary/session data for booking fields
+            summary = request.session.get('passenger_info_summary', {})
+            user = request.user
+            booking_reference = get_random_string(12).upper()
+            booking = Booking.objects.create(
+                user=user,
+                trip_type=summary.get('trip_type', 'one_way'),
+                origin=summary.get('origin_name', ''),
+                destination=summary.get('destination_name', ''),
+                departure_date=summary.get('departure_date_formatted', ''),
+                return_date=summary.get('return_date_formatted', None),
+                adults=summary.get('adults', 1),
+                children=summary.get('children', 0),
+                booking_reference=booking_reference,
+                status='pending',
+                reserved_until=reserved_until,
+                total_price=0,  # Placeholder
+                details={},     # Placeholder
+            )
+            return redirect('reservation_confirmation', booking_id=booking.id)
+        # fallback: default behavior
+        form_data = {
+            key: value for key, value in request.POST.items() if key != 'csrfmiddlewaretoken'
+        }
+        request.session['passenger_info_form'] = form_data
+        request.session['passenger_info_completed'] = True
+        return redirect('passenger_info')
+
+    passenger_form_data = request.session.pop('passenger_info_form', {})
+    show_booking_options = request.session.pop('passenger_info_completed', False)
+
+    context = {
+        'trip_type': summary.get('trip_type', 'one_way'),
+        'origin_name': summary.get('origin_name', 'Origin'),
+        'destination_name': summary.get('destination_name', 'Destination'),
+        'departure_date_formatted': summary.get('departure_date_formatted', ''),
+        'return_date_formatted': summary.get('return_date_formatted', ''),
+        'adults': summary.get('adults', 1),
+        'children': summary.get('children', 0),
+        'show_booking_options': show_booking_options,
+        'passenger_form_data': passenger_form_data,
+    }
+    return render(request, 'passenger_info.html', context)
 
 @never_cache
 @login_required
@@ -631,10 +932,17 @@ def profile_settings(request):
 
         messages.success(request, "Profile updated successfully!")
         return redirect('profile_settings')
-    
+
+    completed_bookings = (
+        user.bookings.filter(status='completed')
+        .order_by('-updated_at')
+    )
+
     context = {
         'user': user,
         'profile': profile,
+        'bookings': completed_bookings,
+        'active_tab': request.GET.get('tab', 'personal'),
     }
     return render(request, 'profile_settings.html', context)
 
@@ -812,6 +1120,46 @@ def search_trips(request):
                 except:
                     pass
             
+            # Enforce cutoff: 1 hour 30 minutes before departure
+            from datetime import timedelta
+            now = timezone.now()
+            cutoff_delta = timedelta(hours=1, minutes=30)
+
+            def apply_cutoff(voyages):
+                for item in voyages:
+                    voyage = item.get('voyage', {})
+                    dt_str = voyage.get('departureDateTime')
+                    cutoff_message = None
+                    if dt_str:
+                        try:
+                            # Handle both 'YYYY-MM-DDTHH:MM:SS' and 'YYYY-MM-DD HH:MM:SS' formats
+                            dt = None
+                            for fmt in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M"):
+                                try:
+                                    dt = datetime.strptime(dt_str[:16], fmt)
+                                    break
+                                except Exception:
+                                    continue
+                            if dt is not None:
+                                # Assume naive datetimes are in local time
+                                if timezone.is_naive(dt):
+                                    dt = timezone.make_aware(dt, timezone.get_current_timezone())
+                                cutoff_time = dt - cutoff_delta
+                                logger.info(f"[CUTOFF DEBUG] Now: {now}, Departure: {dt}, Cutoff: {cutoff_time}, dt_str: {dt_str}")
+                                if now > cutoff_time:
+                                    item['accommodations'] = []
+                                    cutoff_time_str = cutoff_time.strftime('%m/%d/%Y %-I:%M %p').replace('AM', 'am').replace('PM', 'pm')
+                                    item['cutoff_message'] = f"Cut Off for this voyage was at {cutoff_time_str}"
+                                    logger.info(f"[CUTOFF DEBUG] Set cutoff_message for voyage {dt_str}: {item['cutoff_message']}")
+                                else:
+                                    logger.info(f"[CUTOFF DEBUG] Booking still allowed for voyage {dt_str}")
+                        except Exception as e:
+                            logger.warning(f"[CUTOFF DEBUG] Exception for voyage {dt_str}: {e}")
+                return voyages
+
+            outbound_voyages = apply_cutoff(outbound_voyages)
+            return_voyages = apply_cutoff(return_voyages)
+
             # Render results page
             context = {
                 'trip_type': trip_type,
@@ -829,6 +1177,16 @@ def search_trips(request):
                 'children': children,
                 'outbound_voyages': outbound_voyages,
                 'return_voyages': return_voyages,
+            }
+
+            request.session['passenger_info_summary'] = {
+                'trip_type': trip_type,
+                'origin_name': origin_name,
+                'destination_name': destination_name,
+                'departure_date_formatted': departure_date_formatted,
+                'return_date_formatted': return_date_formatted,
+                'adults': adults,
+                'children': children,
             }
             
             return render(request, 'available_trips_search.html', context)
