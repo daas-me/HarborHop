@@ -1,0 +1,200 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservation Confirmation - HarborHop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/available_trips.css' %}">
+    <link rel="stylesheet" href="{% static 'css/passenger_info.css' %}">
+    <script src="https://kit.fontawesome.com/1256e3cde2.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{% static 'css/reservation_confirmation.css' %}">
+</head>
+<body>
+<header>
+        <div class="logo-container">
+            <a href="{% url 'home' %}" class="logo">HARBOR<span>hop</span></a>
+            <p class="tagline">Hop aboard. Sail beyond</p>
+        </div>
+        <nav>
+            {% if user.is_authenticated %}
+                {% if user.profile.is_admin_user %}
+                    <a href="{% url 'admin_dashboard' %}" class="admin-dashboard-link">
+                        <i class="fa-solid fa-chart-line dashboard-icon"></i> Admin Access
+                    </a>
+                {% endif %}
+                <a href="{% url 'home' %}">Transaction</a>
+                <a href="{% url 'reservations' %}">Reservations</a>
+                <a href="#">Latest Offers</a>
+                <a href="#">Contact Us</a>
+                <div class="nav-divider"></div>
+                <a href="#" class="language-link">PH</a>
+                <span class="language-separator">|</span>
+                <a href="#" class="language-link">EN</a>
+                <a href="{% url 'profile_settings' %}" class="user-name-btn">{{ user.username }}</a>
+                <a href="{% url 'logout' %}" class="login-btn">Log out</a>
+            {% else %}
+                <a href="{% url 'home' %}">Home</a>
+                <a href="#">Latest Offers</a>
+                <a href="#">Contact Us</a>
+                <div class="nav-divider"></div>
+                <a href="#" class="language-link">PH</a>
+                <span class="language-separator">|</span>
+                <a href="#" class="language-link">EN</a>
+                <a href="{% url 'login' %}" class="login-btn">Log In</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <div class="reservation-summary">
+        <div class="reservation-status">
+            {% if booking.status == 'pending' %}
+                <i class="fa-solid fa-hourglass-half"></i> Your seats are temporarily reserved! Complete payment within 1 day.
+            {% elif booking.status == 'confirmed' %}
+                <span style="color: #4caf50"><i class="fa-solid fa-circle-check"></i> Booking Confirmed</span>
+            {% elif booking.status == 'expired' %}
+                <span style="color: #e53935"><i class="fa-solid fa-circle-xmark"></i> Reservation Expired</span>
+            {% endif %}
+        </div>
+        {% if booking.status == 'pending' %}
+            <div class="countdown-timer" id="countdown-timer"></div>
+        {% endif %}
+
+        <div class="reservation-section">
+            <div class="reservation-label">Trip</div>
+            <div class="reservation-value">{{ booking.origin }} → {{ booking.destination }} ({{ booking.get_trip_type_display }})</div>
+        </div>
+        <!-- Outbound Trip Details -->
+        {% if booking.details.outbound %}
+        <div class="reservation-section" style="border: 1px solid #eee; border-radius: 8px; margin-bottom: 16px; padding: 18px;">
+            <div style="font-weight: bold; margin-bottom: 6px;">DEPARTURE</div>
+            <div><b>Company:</b> {{ booking.details.outbound.company }}</div>
+            <div><b>Vessel:</b> {{ booking.details.outbound.vessel }}</div>
+            <div><b>Route:</b> {{ booking.details.outbound.originName }} → {{ booking.details.outbound.destinationName }}</div>
+            <div><b>Departure Date:</b> {{ booking.details.outbound.departureDate }}</div>
+            <div><b>Departure Time:</b> {{ booking.details.outbound.departureTime }}</div>
+            <div><b>Accommodation:</b> {{ booking.details.outbound.accommodationName }}</div>
+            <div><b>Seat Type:</b> {{ booking.details.outbound.seatType }}</div>
+            <div><b>Aircon:</b> {{ booking.details.outbound.aircon|yesno:"YES,NO" }}</div>
+            <div><b>Price:</b> ₱{{ booking.details.outbound.price|floatformat:2 }}</div>
+        </div>
+        {% endif %}
+        <!-- Return Trip Details -->
+        {% if booking.details.return %}
+        <div class="reservation-section" style="border: 1px solid #eee; border-radius: 8px; margin-bottom: 16px; padding: 18px;">
+            <div style="font-weight: bold; margin-bottom: 6px;">RETURN</div>
+            <div><b>Company:</b> {{ booking.details.return.company }}</div>
+            <div><b>Vessel:</b> {{ booking.details.return.vessel }}</div>
+            <div><b>Route:</b> {{ booking.details.return.originName }} → {{ booking.details.return.destinationName }}</div>
+            <div><b>Departure Date:</b> {{ booking.details.return.departureDate }}</div>
+            <div><b>Departure Time:</b> {{ booking.details.return.departureTime }}</div>
+            <div><b>Accommodation:</b> {{ booking.details.return.accommodationName }}</div>
+            <div><b>Seat Type:</b> {{ booking.details.return.seatType }}</div>
+            <div><b>Aircon:</b> {{ booking.details.return.aircon|yesno:"YES,NO" }}</div>
+            <div><b>Price:</b> ₱{{ booking.details.return.price|floatformat:2 }}</div>
+        </div>
+        {% endif %}
+        <div class="reservation-section">
+            <div class="reservation-label">Passengers</div>
+            <div class="reservation-value">
+                Adults: {{ booking.adults }} | Children: {{ booking.children }}{% if booking.details.infants %} | Infants: {{ booking.details.infants }}{% endif %}
+            </div>
+        </div>
+        <div class="reservation-section">
+            <div class="reservation-label">Total Price</div>
+            <div class="reservation-value" style="font-size:1.2em;font-weight:bold;">₱{{ booking.total_price|floatformat:2 }}</div>
+        </div>
+        <div class="reservation-actions">
+            <a href="{% url 'passenger_info' %}" class="btn">Back</a>
+            <a href="{% url 'payment' booking.id %}" class="btn btn-primary">Proceed to Payment</a>
+            <form action="{% url 'cancel_reservation' booking.id %}" method="post" style="display:inline-block; margin-left: 8px;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger"
+                    onclick="return confirm('Are you sure you want to cancel this reservation?');">
+                    Cancel Reservation
+                </button>
+            </form>
+        </div>
+    </div>
+<footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <div class="footer-logo">
+                    <div class="logo-text">HARBOR<span class="highlight">hop</span></div>
+                    <p class="tagline">Hop Aboard. Sail Beyond</p>
+                </div>
+                <p style="color: #2c3e50; margin-top: 20px;">Experience the best cruise booking platform with exclusive deals and premium customer service.</p>
+            </div>
+
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <div class="contact-info">
+                    <p><i class="fa-solid fa-envelope"></i> Steven@harborhop.com</p>
+                    <p><i class="fa-solid fa-phone"></i> +1 (555) 123-4567</p>
+                    <p><i class="fa-solid fa-location-dot"></i> 123 Marina Blvd, Beach City, CA</p>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h4>Connect With Us</h4>
+                <div class="social-media">
+                    <a href="#" title="Facebook">
+                        <img src="https://cdn-icons-png.flaticon.com/512/124/124010.png" alt="Facebook">
+                    </a>
+                    <a href="#" title="Twitter">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3256/3256013.png" alt="Twitter">
+                    </a>
+                    <a href="#" title="Instagram">
+                        <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram">
+                    </a>
+                </div>
+                <div style="margin-top: 20px;">
+                    <h4>Newsletter</h4>
+                    <form style="display: flex; gap: 10px;">
+                        <input type="email" placeholder="Enter your email" style="padding: 8px; border-radius: 4px; border: none; flex: 1;">
+                        <button type="submit" style="background: #ff9900; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 HarborHop. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+        </div>
+    </footer>
+    <script>
+    {% if booking.status == 'pending' %}
+    function startCountdown(until) {
+        const timerEl = document.getElementById('countdown-timer');
+        function update() {
+            const now = new Date();
+            const expire = new Date(until);
+            let diff = Math.floor((expire - now) / 1000);
+            if (diff <= 0) {
+                timerEl.textContent = 'Reservation expired.';
+                clearInterval(interval);
+                return;
+            }
+            const hours = Math.floor(diff / 3600);
+            diff %= 3600;
+            const minutes = Math.floor(diff / 60);
+            const seconds = diff % 60;
+            timerEl.textContent = `Time left: ${hours}h ${minutes}m ${seconds}s`;
+        }
+        update();
+        const interval = setInterval(update, 1000);
+    }
+    startCountdown("{{ booking.reserved_until|date:'Y-m-d\TH:i:s' }}");
+    {% endif %}
+    </script>
+</body>
+</html>

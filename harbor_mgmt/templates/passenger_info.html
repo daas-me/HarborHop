@@ -1,0 +1,269 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passenger Information - HarborHop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/available_trips.css' %}">
+    <link rel="stylesheet" href="{% static 'css/passenger_info.css' %}">
+    <script src="https://kit.fontawesome.com/1256e3cde2.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="{% static 'js/passenger_info_flatpickr.js' %}"></script>
+</head>
+<body data-is-authenticated="{{ user.is_authenticated|yesno:'true,false' }}">
+    <header>
+        <div class="logo-container">
+            <a href="{% url 'home' %}" class="logo">HARBOR<span>hop</span></a>
+            <p class="tagline">Hop aboard. Sail beyond</p>
+        </div>
+        <nav>
+            {% if user.is_authenticated %}
+                {% if user.profile.is_admin_user %}
+                    <a href="{% url 'admin_dashboard' %}" class="admin-dashboard-link">
+                        <i class="fa-solid fa-chart-line dashboard-icon"></i> Admin Access
+                    </a>
+                {% endif %}
+                <a href="{% url 'home' %}">Transaction</a>
+            <a href="{% url 'reservations' %}">Reservations</a>
+            <a href="#">Latest Offers</a>
+            <a href="#">Contact Us</a>
+                <div class="nav-divider"></div>
+                <a href="#" class="language-link">PH</a>
+                <span class="language-separator">|</span>
+                <a href="#" class="language-link">EN</a>
+                <a href="{% url 'profile_settings' %}" class="user-name-btn">{{ user.username }}</a>
+                <a href="{% url 'logout' %}" class="login-btn">Log out</a>
+            {% else %}
+                <a href="{% url 'home' %}">Home</a>
+                <a href="#">Latest Offers</a>
+                <a href="#">Contact Us</a>
+                <div class="nav-divider"></div>
+                <a href="#" class="language-link">PH</a>
+                <span class="language-separator">|</span>
+                <a href="#" class="language-link">EN</a>
+                <a href="{% url 'login' %}" class="login-btn">Log In</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <div class="page-wrapper passenger-info-page">
+        <div class="top-info">
+            <div class="info-item route">
+                <div>
+                    <div class="info-label">FROM</div>
+                    <div class="info-value">{{ origin_name }}</div>
+                </div>
+                <span class="route-arrow"><i class="fa-solid fa-arrows-left-right"></i></span>
+                <div>
+                    <div class="info-label">TO</div>
+                    <div class="info-value">{{ destination_name }}</div>
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Passengers</div>
+                <div class="info-value">{{ adults }}{% if children and children|add:0 > 0 %} + {{ children }}{% endif %}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-date-label">Departure</div>
+                <div class="info-date-value">{{ departure_date_formatted }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-date-label">Return</div>
+                <div class="info-date-value">{% if return_date_formatted %}{{ return_date_formatted }}{% else %}--{% endif %}</div>
+            </div>
+            {% comment %} <div class="info-item">
+                <a href="{% url 'home' %}" class="modify-link">
+                    <i class="fa-solid fa-pen"></i> MODIFY
+                </a>
+            </div> {% endcomment %}
+        </div>
+
+        <div class="progress-steps passenger-progress">
+            <div class="steps">
+                <div class="step completed">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Schedules</div>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step active">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Passenger Info</div>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Payment</div>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-label">Complete</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="passenger-content">
+            <form class="card passenger-info-card" method="post" action="{% url 'passenger_info' %}">
+                {% csrf_token %}
+
+                <div class="section-title">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <div>
+                        <div>Contact Information</div>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="field">
+                        <label>Contact Person *</label>
+                        <input type="text" name="contact_name" required>
+                    </div>
+                    <div class="field">
+                        <label>Mobile Number *</label>
+                        <input type="tel" name="contact_phone" placeholder="e.g. +63 9XXXXXXXXX" required>
+                    </div>
+                    <div class="field">
+                        <label>Email Address *</label>
+                        <input type="email" name="contact_email" required>
+                    </div>
+                    <div class="field">
+                        <label>Confirm Email Address *</label>
+                        <input type="email" name="contact_email_confirm" required>
+                    </div>
+                    <div class="field form-grid full-width">
+                        <label>Address *</label>
+                        <input type="text" name="contact_address" required>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <div class="section-title">
+                    <i class="fa-solid fa-users"></i>
+                    <div>
+                        <div>Passenger Details</div>
+                        <div class="section-subtitle">Please provide accurate passenger information as it appears on valid ID.</div>
+                    </div>
+                </div>
+
+                <div class="passenger-card">
+                    <h2>Passenger 1</h2>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label>First Name *</label>
+                            <input type="text" name="passenger_1_first_name" required>
+                        </div>
+                        <div class="field">
+                            <label>Middle Name</label>
+                            <input type="text" name="passenger_1_middle_name">
+                        </div>
+                        <div class="field">
+                            <label>Last Name *</label>
+                            <input type="text" name="passenger_1_last_name" required>
+                        </div>
+                        <div class="field">
+                            <label>Suffix</label>
+                            <input type="text" name="passenger_1_suffix" placeholder="Jr., Sr., III, etc.">
+                        </div>
+                        <div class="field">
+                            <label>Gender *</label>
+                            <select name="passenger_1_gender" required>
+                                <option value="">Select</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Date of Birth *</label>
+                            <input type="date" name="passenger_1_dob" required>
+                        </div>
+                        <div class="field">
+                            <label>Passenger Type *</label>
+                            <select name="passenger_1_type" required>
+                                <option value="Adult">Adult</option>
+                                <option value="Child">Child</option>
+                                <option value="Infant">Infant</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Nationality *</label>
+                            <select name="passenger_1_nationality" required>
+                                <option value="">Select</option>
+                                <option value="Filipino">Filipino</option>
+                                <option value="American">American</option>
+                                <option value="Canadian">Canadian</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-row">
+                    <a href="{% url 'home' %}" class="btn back">Back</a>
+                    <button type="submit" name="action" value="reserve" class="btn reserve-btn">Reserve Booking</button>
+                    <button type="submit" name="action" value="payment" class="btn payment-btn">Proceed To Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <div class="footer-logo">
+                    <div class="logo-text">HARBOR<span class="highlight">hop</span></div>
+                    <p class="tagline">Hop Aboard. Sail Beyond</p>
+                </div>
+                <p style="color: #2c3e50; margin-top: 20px;">Experience the best cruise booking platform with exclusive deals and premium customer service.</p>
+            </div>
+
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <div class="contact-info">
+                    <p><i class="fa-solid fa-envelope"></i> Steven@harborhop.com</p>
+                    <p><i class="fa-solid fa-phone"></i> +1 (555) 123-4567</p>
+                    <p><i class="fa-solid fa-location-dot"></i> 123 Marina Blvd, Beach City, CA</p>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h4>Connect With Us</h4>
+                <div class="social-media">
+                    <a href="#" title="Facebook">
+                        <img src="https://cdn-icons-png.flaticon.com/512/124/124010.png" alt="Facebook">
+                    </a>
+                    <a href="#" title="Twitter">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3256/3256013.png" alt="Twitter">
+                    </a>
+                    <a href="#" title="Instagram">
+                        <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram">
+                    </a>
+                </div>
+                <div style="margin-top: 20px;">
+                    <h4>Newsletter</h4>
+                    <form style="display: flex; gap: 10px;">
+                        <input type="email" placeholder="Enter your email" style="padding: 8px; border-radius: 4px; border: none; flex: 1;">
+                        <button type="submit" style="background: #ff9900; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 HarborHop. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+        </div>
+    </footer>
+</body>
+</html>

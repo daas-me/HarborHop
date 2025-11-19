@@ -1,0 +1,148 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Reservations - HarborHop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/reservations.css' %}">
+    <script src="https://kit.fontawesome.com/1256e3cde2.js" crossorigin="anonymous"></script>
+</head>
+<body class="reservations-page">
+    <header>
+        <div class="logo-container">
+            <a href="{% url 'home' %}" class="logo">HARBOR<span>hop</span></a>
+            <p class="tagline">Hop aboard. Sail beyond</p>
+        </div>
+        <nav>
+            <a href="{% url 'home' %}">Transaction</a>
+            <a href="{% url 'reservations' %}" class="active">Reservations</a>
+            <a href="#">Latest Offaers</a>
+            <a href="#">Contact Us</a>
+            <div class="nav-divider"></div>
+            <a href="#" class="language-link">PH</a>
+            <span class="language-separator">|</span>
+            <a href="#" class="language-link">EN</a>
+            <a href="{% url 'profile_settings' %}" class="user-name-btn">{{ user.username }}</a>
+            <a href="{% url 'logout' %}" class="login-btn">Log out</a>
+        </nav>
+    </header>
+
+    <main class="reservations-container">
+        <section class="page-header">
+            <h1>My Reservations</h1>
+            <p>Track your active and upcoming ferry reservations.</p>
+        </section>
+
+        {% if reservations %}
+            <div class="reservations-grid">
+                {% for booking in reservations %}
+                    <article class="reservation-card">
+                        <header class="reservation-card__header">
+                            <div>
+                                <div class="route">{{ booking.origin }} → {{ booking.destination }}</div>
+                                <div class="trip-type">{{ booking.get_trip_type_display }}</div>
+                            </div>
+                            <span class="status-badge status-{{ booking.status }}">{{ booking.get_status_display }}</span>
+                        </header>
+
+                        <div class="reservation-card__body">
+                            <div class="reservation-detail">
+                                <span class="label">Booking Reference</span>
+                                <span class="value">{{ booking.booking_reference }}</span>
+                            </div>
+                            <div class="reservation-detail">
+                                <span class="label">Departure Date</span>
+                                <span class="value">{{ booking.departure_date|date:"M d, Y" }}</span>
+                            </div>
+                            {% if booking.return_date %}
+                            <div class="reservation-detail">
+                                <span class="label">Return Date</span>
+                                <span class="value">{{ booking.return_date|date:"M d, Y" }}</span>
+                            </div>
+                            {% endif %}
+                            <div class="reservation-detail">
+                                <span class="label">Passengers</span>
+                                <span class="value">Adults: {{ booking.adults }}{% if booking.children %}, Children: {{ booking.children }}{% endif %}</span>
+                            </div>
+                            <div class="reservation-detail">
+                                <span class="label">Total Price</span>
+                                <span class="value">₱{{ booking.total_price|floatformat:2 }}</span>
+                            </div>
+                        </div>
+
+                        <footer class="reservation-card__footer">
+                            <a href="{% url 'reservation_confirmation' booking.id %}" class="btn btn-primary">View Details</a>
+                        </footer>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="fa-solid fa-calendar-xmark"></i>
+                <h3>No reservations yet</h3>
+                <p>Ready for your next adventure? Browse ferry schedules and reserve a trip today.</p>
+                <a href="{% url 'home' %}" class="btn btn-outline">Search Trips</a>
+            </div>
+        {% endif %}
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <div class="footer-logo">
+                    <div class="logo-text">HARBOR<span class="highlight">hop</span></div>
+                    <p class="tagline">Hop Aboard. Sail Beyond</p>
+                </div>
+                <p style="color: #2c3e50; margin-top: 20px;">Experience the best cruise booking platform with exclusive deals and premium customer service.</p>
+            </div>
+
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="{% url 'reservations' %}">Reservations</a></li>
+                    <li></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <div class="contact-info">
+                    <p><i class="fa-solid fa-envelope"></i> Steven@harborhop.com</p>
+                    <p><i class="fa-solid fa-phone"></i> +1 (555) 123-4567</p>
+                    <p><i class="fa-solid fa-location-dot"></i> 123 Marina Blvd, Beach City, CA</p>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h4>Connect With Us</h4>
+                <div class="social-media">
+                    <a href="#" title="Facebook">
+                        <img src="https://cdn-icons-png.flaticon.com/512/124/124010.png" alt="Facebook">
+                    </a>
+                    <a href="#" title="Twitter">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3256/3256013.png" alt="Twitter">
+                    </a>
+                    <a href="#" title="Instagram">
+                        <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram">
+                    </a>
+                </div>
+                <div style="margin-top: 20px;">
+                    <h4>Newsletter</h4>
+                    <form style="display: flex; gap: 10px;">
+                        <input type="email" placeholder="Enter your email" style="padding: 8px; border-radius: 4px; border: none; flex: 1;">
+                        <button type="submit" style="background: #ff9900; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 HarborHop. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+        </div>
+    </footer>
+</body>
+</html>

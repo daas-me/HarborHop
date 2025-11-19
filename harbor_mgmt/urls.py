@@ -19,7 +19,13 @@ urlpatterns = [
     path('search-voyages/', views.search_voyages_page, name='search_voyages_page'),
     path('search-voyages-barkota/', views.search_voyages_barkota, name='search_voyages_barkota'),
     path('api/locations/', views.get_all_locations, name='get_all_locations'),
+    path('api/store-booking-selection/', views.store_booking_selection, name='store_booking_selection'),
     path('update-profile-ajax/', views.update_profile_ajax, name='update_profile_ajax'),
+    path('passenger-info/', views.passenger_info, name='passenger_info'),
+    path('reservation-confirmation/<int:booking_id>/', views.reservation_confirmation, name='reservation_confirmation'),
+    path('reservation-cancel/<int:booking_id>/', views.cancel_reservation, name='cancel_reservation'),
+    path('reservations/', views.reservations_view, name='reservations'),
+    path('payment/<int:booking_id>/', views.payment_view, name='payment'),
     path('upload-profile-photo/', views.upload_profile_photo, name='upload_profile_photo'),
     path('delete-profile-photo/', views.delete_profile_photo, name='delete_profile_photo'),
 ]

@@ -34,6 +34,8 @@ class Booking(models.Model):
     
     STATUS_CHOICES = [
         ('pending', 'Pending'),
+        ('reserved', 'Reserved'),
+        ('expired', 'Expired'),
         ('confirmed', 'Confirmed'),
         ('cancelled', 'Cancelled'),
         ('completed', 'Completed'),
@@ -59,15 +61,28 @@ class Booking(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     
+    # Reservation expiration
+    reserved_until = models.DateTimeField(null=True, blank=True, help_text="If reserved, booking is held until this datetime.")
+
+    # Stores passenger, pricing, and voyage metadata captured during reservation
+    details = models.JSONField(blank=True, null=True, default=dict)
+
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return f"{self.booking_reference} - {self.user.username} ({self.origin} to {self.destination})"
+
+    @property
+    def is_expired(self):
+        return self.status == 'expired'
+
+    @property
+    def is_confirmed(self):
+        return self.status == 'confirmed'
     
     class Meta:
         verbose_name = 'Booking'
         verbose_name_plural = 'Bookings'
         ordering = ['-created_at']
-

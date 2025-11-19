@@ -1,0 +1,120 @@
+/* ===============================
+   RESERVATION CONFIRMATION PAGE
+   =============================== */
+
+.reservation-status {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #ff9800;
+    margin-bottom: 12px;
+}
+
+.countdown-timer {
+    font-size: 1.1rem;
+    color: #e53935;
+}
+
+.reservation-summary {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    padding: 32px;
+    margin: 40px auto 0 auto;
+    max-width: 650px;
+}
+
+/* Add space between card sections */
+.reservation-section {
+    margin-bottom: 28px;
+}
+
+.reservation-label {
+    color: #888;
+    font-size: 0.95rem;
+}
+
+.reservation-value {
+    font-weight: 600;
+    font-size: 1.05rem;
+}
+
+/* ===============================
+   PRICING TABLE
+   =============================== */
+.pricing-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    margin-bottom: 14px;
+}
+
+.pricing-table th,
+.pricing-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+}
+
+.pricing-table th {
+    background: #f8f8f8;
+    font-weight: 600;
+}
+
+.pricing-table .total-row {
+    font-weight: 700;
+    background: #f8f8f8;
+}
+
+/* ===============================
+   ACTION BUTTONS
+   =============================== */
+.reservation-actions {
+    margin-top: 35px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: 0.25s;
+    color: #e38400;
+}
+
+/* Primary – Orange */
+.btn-primary {
+    background: #ff9800;
+    border-color: #ff9800;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: #e38400;
+}
+
+/* Secondary – gray */
+.btn-secondary {
+    background: #e38400;
+    border-color: #e38400;
+    color: #e38400;
+}
+
+.btn-secondary:hover {
+    background: #bcbcbc;
+}
+
+/* Danger – red */
+.btn-danger {
+    background: #e38400;
+    border-color: #e38400;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background: #e38400;
+}

@@ -1,0 +1,133 @@
+body.payment-page {
+    background: #f7f8fa;
+}
+
+.payment-container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    padding: 32px 40px;
+}
+
+.section-title {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: #ff9900;
+    margin-bottom: 18px;
+}
+
+.summary-section {
+    margin-bottom: 36px;
+}
+
+.summary-section .row {
+    display: flex;
+    gap: 32px;
+}
+
+.summary-section .col {
+    flex: 1;
+}
+
+.summary-section .label {
+    font-size: 0.92em;
+    color: #888;
+}
+
+.summary-section .value {
+    font-size: 1.05em;
+    font-weight: 500;
+    color: #222;
+    margin-bottom: 7px;
+}
+
+.summary-section .route {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.summary-section .aircon {
+    font-size: 0.93em;
+    color: #666;
+}
+
+.summary-section .company-logo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.summary-section .company-logo img {
+    height: 22px;
+}
+
+.summary-section .divider {
+    border-top: 1px solid #eee;
+    margin: 28px 0 20px 0;
+}
+
+.info-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+}
+
+.info-table th, .info-table td {
+    padding: 7px 10px;
+    text-align: left;
+    font-size: 0.97em;
+}
+
+.info-table th {
+    color: #888;
+    font-weight: 500;
+}
+
+.info-table td {
+    color: #222;
+}
+
+.action-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.btn-main {
+    background: #ff9900;
+    color: #fff;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 1.07em;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn-main:hover {
+    background: #e68a00;
+}
+
+.btn-outline {
+    background: #fff;
+    color: #ff9900;
+    border: 2px solid #ff9900;
+    padding: 11px 28px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 1.07em;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.btn-outline:hover {
+    background: #ff9900;
+    color: #fff;
+}

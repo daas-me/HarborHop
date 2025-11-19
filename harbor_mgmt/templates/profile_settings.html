@@ -20,8 +20,8 @@
         <p class="tagline">Hop aboard. Sail beyond</p>
     </div>
         <div class="nav-links">
-            <a href="{% url 'home' %}">Home</a>
-            <a href="#">Transaction</a>
+            <a href="{% url 'home' %}">Transaction</a>
+            <a href="{% url 'reservations' %}">Reservations</a>
             <a href="#">Latest Offers</a>
             <a href="#">Contact Us</a>
             <form action="{% url 'logout' %}" method="post" style="display:inline;">
@@ -31,7 +31,7 @@
         </div>
     </nav>
 
-    <div class="container">
+    <div class="container" data-active-tab="{{ active_tab }}">
         <div class="profile-header">
             <div class="profile-photo-section">
                 <div class="profile-photo" id="profilePhotoWrapper">
@@ -62,12 +62,12 @@
         </div>
 
         <div class="tabs">
-            <div class="tab active" onclick="switchTab('personal', event)">Personal Information</div>
-            <div class="tab" onclick="switchTab('booking', event)">Booking History</div>
-            <div class="tab" onclick="switchTab('security', event)">Security Settings</div>
+            <div class="tab {% if active_tab == 'personal' %}active{% endif %}" data-tab="personal" onclick="switchTab('personal', event)">Personal Information</div>
+            <div class="tab {% if active_tab == 'booking' %}active{% endif %}" data-tab="booking" onclick="switchTab('booking', event)">Booking History</div>
+            <div class="tab {% if active_tab == 'security' %}active{% endif %}" data-tab="security" onclick="switchTab('security', event)">Security Settings</div>
         </div>
 
-        <div id="personal" class="content-section active">
+        <div id="personal" class="content-section {% if active_tab == 'personal' %}active{% endif %}">
     <h2 style="margin-bottom: 30px; color: #333;">Personal Information</h2>
 
     
@@ -112,111 +112,62 @@
     <div id="updateMessage"></div>
 </div>
 
-
-        <div id="booking" class="content-section">
-            <h2 style="margin-bottom: 30px; color: #333;">Booking History</h2>
-            
-            <div class="booking-card">
-                <div class="booking-header">
-                    <div class="booking-route">Manila → Batangas</div>
-                    <div class="booking-status status-completed">Completed</div>
+        <div id="booking" class="content-section {% if active_tab == 'booking' %}active{% endif %}">
+            {% if bookings %}
+                {% for booking in bookings %}
+                    <div class="booking-card">
+                        <div class="booking-header">
+                            <div class="booking-route">{{ booking.origin }} → {{ booking.destination }}</div>
+                            <div class="booking-status status-{{ booking.status }}">{{ booking.get_status_display }}</div>
+                        </div>
+                        <div class="booking-details">
+                            <div class="booking-detail">
+                                <span class="booking-detail-label">Booking ID</span>
+                                <span class="booking-detail-value">{{ booking.booking_reference }}</span>
+                            </div>
+                            <div class="booking-detail">
+                                <span class="booking-detail-label">Departure</span>
+                                <span class="booking-detail-value">{{ booking.departure_date|date:'M d, Y' }}</span>
+                            </div>
+                            {% if booking.return_date %}
+                            <div class="booking-detail">
+                                <span class="booking-detail-label">Return</span>
+                                <span class="booking-detail-value">{{ booking.return_date|date:'M d, Y' }}</span>
+                            </div>
+                            {% endif %}
+                            <div class="booking-detail">
+                                <span class="booking-detail-label">Passengers</span>
+                                <span class="booking-detail-value">{{ booking.adults }} Adult{% if booking.adults|default:0 != 1 %}s{% endif %}{% if booking.children %}, {{ booking.children }} Child{% if booking.children != 1 %}ren{% endif %}{% endif %}</span>
+                            </div>
+                            <div class="booking-detail">
+                                <span class="booking-detail-label">Total Amount</span>
+                                <span class="booking-detail-value">₱{{ booking.total_price|floatformat:2 }}</span>
+                            </div>
+                            {% if booking.details.payment.paid_at_display %}
+                            <div class="booking-detail">
+                                <span class="booking-detail-label">Paid On</span>
+                                <span class="booking-detail-value">{{ booking.details.payment.paid_at_display }}</span>
+                            </div>
+                            {% endif %}
+                            {% if booking.details.payment.method %}
+                            <div class="booking-detail">
+                                <span class="booking-detail-label">Payment Method</span>
+                                <span class="booking-detail-value">{{ booking.details.payment.method|title }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-bookings">
+                    <h3>No completed bookings yet</h3>
+                    <p>Complete your payment to see bookings appear in your history.</p>
+                    <a href="{% url 'reservations' %}" class="empty-bookings-link">View active reservations</a>
                 </div>
-                <div class="booking-details">
-                    <div class="booking-detail">
-                        <span class="booking-detail-label">Booking ID</span>
-                        <span class="booking-detail-value">#HH2024-0421</span>
-                    </div>
-                    <div class="booking-detail">
-                        <span class="booking-detail-label">Date</span>
-                        <span class="booking-detail-value">Oct 15, 2024</span>
-                    </div>
-                    <div class="booking-detail">
-                        <span class="booking-detail-label">Passengers</span>
-                        <span class="booking-detail-value">2 Adults, 1 Child</span>
-                    </div>
-                    <div class="booking-detail">
-                        <span class="booking-detail-label">Shipping Line</span>
-                        <span class="booking-detail-value">Lite Ferries</span>
-                    </div>
-                    <div class="booking-detail">
-                        <span class="booking-detail-label">Total Amount</span>
-                        <span class="booking-detail-value">₱2,500.00</span>
-                    </div>
-                    <div class="booking-detail">
-                        <span class="booking-detail-label">Payment</span>
-                        <span class="booking-detail-value">Paid</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="booking-card">
-                <div class="booking-header">
-                    <div class="booking-route">Cebu → Bohol</div>
-                    <div class="booking-status status-confirmed">Confirmed</div>
-                </div>
-                <div class="booking-details">
-                    <div class="booking-detail">
-                        <span class="booking-detail-label">Booking ID</span>
-                        <span class="booking-detail-value">#HH2024-0822</span>
-                    </div>
-                    <div class="booking-detail">
-                        <span class="booking-detail-label">Date</span>
-                        <span class="booking-detail-value">Oct 28, 2024</span>
-                    </div>
-                    <div class="booking-detail">
-                        <span class="booking-detail-label">Passengers</span>
-                        <span class="booking-detail-value">1 Adult</span>
-                    </div>
-                    <div class="booking-detail">
-                        <span class="booking-detail-label">Shipping Line</span>
-                        <span class="booking-detail-value">Lite Ferries</span>
-                    </div>
-                    <div class="booking-detail">
-                        <span class="booking-detail-label">Total Amount</span>
-                        <span class="booking-detail-value">₱1,200.00</span>
-                    </div>
-                    <div class="booking-detail">
-                        <span class="booking-detail-label">Payment</span>
-                        <span class="booking-detail-value">Paid</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="booking-card">
-                <div class="booking-header">
-                    <div class="booking-route">Iloilo → Bacolod</div>
-                    <div class="booking-status status-cancelled">Cancelled</div>
-                </div>
-                <div class="booking-details">
-                    <div class="booking-detail">
-                        <span class="booking-detail-label">Booking ID</span>
-                        <span class="booking-detail-value">#HH2024-0523</span>
-                    </div>
-                    <div class="booking-detail">
-                        <span class="booking-detail-label">Date</span>
-                        <span class="booking-detail-value">Sep 20, 2024</span>
-                    </div>
-                    <div class="booking-detail">
-                        <span class="booking-detail-label">Passengers</span>
-                        <span class="booking-detail-value">3 Adults</span>
-                    </div>
-                    <div class="booking-detail">
-                        <span class="booking-detail-label">Shipping Line</span>
-                        <span class="booking-detail-value">Lite Ferries</span>
-                    </div>
-                    <div class="booking-detail">
-                        <span class="booking-detail-label">Total Amount</span>
-                        <span class="booking-detail-value">₱3,600.00</span>
-                    </div>
-                    <div class="booking-detail">
-                        <span class="booking-detail-label">Refund</span>
-                        <span class="booking-detail-value">Processed</span>
-                    </div>
-                </div>
-            </div>
+            {% endif %}
         </div>
 
-        <div id="security" class="content-section">
+        <div id="security" class="content-section {% if active_tab == 'security' %}active{% endif %}">
             <h2 style="margin-bottom: 30px; color: #333;">Security Settings</h2>
             <form>
                 <div class="form-group">
