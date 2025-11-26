@@ -13,7 +13,7 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.utils import timezone
-from datetime import datetime
+from datetime import datetime, date 
 import json
 import logging
 import requests
@@ -908,6 +908,12 @@ def profile_settings(request):
     user = request.user
     profile = getattr(user, 'profile', None)
 
+    # Completed bookings (used by the Booking History tab)
+    completed_bookings = (
+        user.bookings.filter(status='completed')
+        .order_by('-updated_at')
+    )
+
     if request.method == "POST":
         # Get form data
         first_name = request.POST.get("first_name")
@@ -915,29 +921,52 @@ def profile_settings(request):
         email = request.POST.get("email")
         phone = request.POST.get("phone")
         address = request.POST.get("address")
-        date_of_birth = request.POST.get("date_of_birth")
+        date_of_birth_str = request.POST.get("date_of_birth")
 
-        # Update User fields
+        # ----- validate birthdate (must be in the past) -----
+        dob = None
+        if date_of_birth_str:
+            try:
+                dob = datetime.strptime(date_of_birth_str, "%Y-%m-%d").date()
+            except ValueError:
+                messages.error(request, "Invalid birthdate format. Please use YYYY-MM-DD.")
+                context = {
+                    'user': user,
+                    'profile': profile,
+                    'bookings': completed_bookings,
+                    'active_tab': 'personal',
+                }
+                return render(request, 'profile_settings.html', context)
+
+            if dob >= date.today():
+                messages.error(request, "Birthdate cannot be today or a future date.")
+                context = {
+                    'user': user,
+                    'profile': profile,
+                    'bookings': completed_bookings,
+                    'active_tab': 'personal',
+                }
+                return render(request, 'profile_settings.html', context)
+
+        # ----- update User fields -----
         user.first_name = first_name
         user.last_name = last_name
         user.email = email
         user.save()
 
-        # Update UserProfile fields
+        # ----- update UserProfile fields -----
         if profile:
             profile.phone = phone
             profile.address = address
-            profile.date_of_birth = date_of_birth or None
+            # only overwrite DOB if user actually submitted something
+            if date_of_birth_str:
+                profile.date_of_birth = dob
             profile.save()
 
         messages.success(request, "Profile updated successfully!")
         return redirect('profile_settings')
 
-    completed_bookings = (
-        user.bookings.filter(status='completed')
-        .order_by('-updated_at')
-    )
-
+    # GET: render page with current values from DB
     context = {
         'user': user,
         'profile': profile,
@@ -945,6 +974,7 @@ def profile_settings(request):
         'active_tab': request.GET.get('tab', 'personal'),
     }
     return render(request, 'profile_settings.html', context)
+
 
 @login_required
 @require_POST
@@ -1379,17 +1409,26 @@ def update_profile_ajax(request):
         profile.phone = phone
         profile.address = address
 
-        # ✅ Safely convert date string to a Python date
+                # ✅ Safely convert & validate birthdate
         if date_of_birth:
             try:
-                profile.date_of_birth = datetime.strptime(date_of_birth, "%Y-%m-%d").date()
+                dob = datetime.strptime(date_of_birth, "%Y-%m-%d").date()
             except ValueError:
                 return JsonResponse({
                     "success": False,
                     "message": "Invalid date format. Please use YYYY-MM-DD."
                 }, status=400)
 
-        profile.save()
+            if dob >= date.today():
+                return JsonResponse({
+                    "success": False,
+                    "message": "Birthdate cannot be today or a future date."
+                }, status=400)
+
+            profile.date_of_birth = dob
+        else:
+            profile.date_of_birth = None
+
 
         # Return success JSON
         return JsonResponse({

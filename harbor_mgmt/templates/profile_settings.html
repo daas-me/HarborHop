@@ -55,8 +55,12 @@
             </div>
             <div class="profile-info">
                 <h1>{{ user.first_name }} {{ user.last_name }}</h1>
-                <p>📧 {{ user.email }}</p>
-                <p>📱 {{ profile.phone|default:"" }}</p>
+                <p class="username-display">@{{ user.username }}</p>
+
+                <!-- add explicit classes here -->
+                <p class="profile-email">📧 {{ user.email }}</p>
+                <p class="profile-phone">📱 {{ profile.phone|default:"" }}</p>
+
                 <p>🎂 Member since {{ user.date_joined|date:"F Y" }}</p>
             </div>
         </div>
@@ -97,7 +101,12 @@
             </div>
             <div class="form-group">
                 <label>Date of Birth</label>
-                <input type="date" name="date_of_birth" value="{{ profile.date_of_birth|date:'Y-m-d' }}">
+                <input
+                    type="date"
+                    name="date_of_birth"
+                    id="date_of_birth"
+                    value="{{ profile.date_of_birth|date:'Y-m-d' }}"
+                >
             </div>
         </div>
 
@@ -109,7 +118,13 @@
         <button type="submit" class="btn-save">Save Changes</button>
     </form>
 
-    <div id="updateMessage"></div>
+    <div id="updateMessage">
+    {% for message in messages %}
+        {% if message.tags == 'success' %}
+            {{ message }}
+        {% endif %}
+    {% endfor %}
+    </div>
 </div>
 
         <div id="booking" class="content-section {% if active_tab == 'booking' %}active{% endif %}">
