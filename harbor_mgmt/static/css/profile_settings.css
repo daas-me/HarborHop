@@ -373,19 +373,14 @@
             cursor: not-allowed;
         }
         #updateMessage {
-            display: none;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
             margin-top: 15px;
             color: green;
             font-weight: 600;
             text-align: left;
         }
 
-        #updateMessage.show {
-            display: block;
-            opacity: 1;
-        }
+
+        
 
         .logo-container {
             display: flex;

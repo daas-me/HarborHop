@@ -17,9 +17,6 @@ function switchTab(tabName, event = null) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const profileForm = document.getElementById("profileForm");
-    const updateMessage = document.getElementById("updateMessage");
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     const container = document.querySelector('.container[data-active-tab]');
     const initialTab = container ? container.dataset.activeTab : null;
 
@@ -27,44 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
         switchTab(initialTab);
     }
 
-    // ==============================
-    //  PROFILE INFO UPDATE (AJAX)
-    // ==============================
-    if (profileForm) {
-        profileForm.addEventListener("submit", async function(e) {
-            e.preventDefault();
-            const formData = new FormData(profileForm);
-
-            try {
-                const response = await fetch("/update-profile-ajax/", {
-                    method: "POST",
-                    body: formData,
-                    headers: { "X-CSRFToken": formData.get("csrfmiddlewaretoken") },
-                });
-
-                const data = await response.json();
-                if (data.success) {
-                    updateMessage.textContent = data.message;
-                    updateMessage.style.display = "block";
-                    updateMessage.classList.add("show");
-
-                    document.querySelector(".profile-info h1").textContent =
-                        `${data.updated_data.first_name} ${data.updated_data.last_name}`;
-                    document.querySelector(".profile-info p:nth-of-type(1)").textContent =
-                        `📧 ${data.updated_data.email}`;
-                    document.querySelector(".profile-info p:nth-of-type(2)").textContent =
-                        `📱 ${data.updated_data.phone || '+63 000 000 0000'}`;
-
-                    setTimeout(() => updateMessage.classList.remove("show"), 3000);
-                } else {
-                    alert("❌ " + data.message);
-                }
-            } catch (error) {
-                console.error("Error:", error);
-                alert("Something went wrong while updating your profile.");
-            }
-        });
-    }
+    const csrfTokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    const csrfToken = csrfTokenInput ? csrfTokenInput.value : null;
 
     // ==============================
     //  PROFILE PHOTO UPLOAD / REMOVE
@@ -78,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const photoForm = document.getElementById('photoForm');
 
         // ✅ CHANGE PHOTO
-        if (changePhotoBtn && photoInput) {
+        if (changePhotoBtn && photoInput && photoForm && csrfToken) {
             changePhotoBtn.addEventListener('click', () => photoInput.click());
 
             photoInput.addEventListener('change', async () => {
@@ -86,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!file) return;
 
                 const formData = new FormData(photoForm);
+
                 try {
                     const response = await fetch(photoForm.action, {
                         method: "POST",
@@ -102,12 +64,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 } catch (err) {
                     console.error("Upload error:", err);
+                    alert("Something went wrong while uploading the photo.");
                 }
             });
         }
 
         // ✅ REMOVE PHOTO
-        if (removePhotoBtn) {
+        if (removePhotoBtn && csrfToken) {
             removePhotoBtn.addEventListener('click', async () => {
                 if (!confirm("Are you sure you want to remove your profile photo?")) return;
 
@@ -121,13 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (data.success) {
                         const wrapper = document.getElementById("profilePhotoWrapper");
                         const initials = getInitialsFromName();
-
-                        // 🧩 Replace image with initials (no DOM rebuild)
                         wrapper.innerHTML = `<span id="profilePhotoPlaceholder">${initials}</span>`;
-
-                        // ✅ Keep both buttons visible all the time
-                        document.getElementById("removePhotoBtn").style.display = "inline-block";
-                        document.getElementById("changePhotoBtn").style.display = "inline-block";
                     } else {
                         alert(data.message || "Failed to remove photo.");
                     }
@@ -140,19 +97,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getInitialsFromName() {
-    const nameElement = document.querySelector(".profile-info h1");
-    if (!nameElement) return "??";
-    const nameParts = nameElement.textContent.trim().split(" ");
-    
-    // ✅ Use only first and last initials
-    if (nameParts.length === 1) return nameParts[0][0].toUpperCase();
-    const first = nameParts[0][0].toUpperCase();
-    const last = nameParts[nameParts.length - 1][0].toUpperCase();
-    return first + last;
-}
-});
+        const nameElement = document.querySelector(".profile-info h1");
+        if (!nameElement) return "??";
+        const nameParts = nameElement.textContent.trim().split(" ");
 
-document.addEventListener("DOMContentLoaded", () => {
+        if (nameParts.length === 1) return nameParts[0][0].toUpperCase();
+        const first = nameParts[0][0].toUpperCase();
+        const last = nameParts[nameParts.length - 1][0].toUpperCase();
+        return first + last;
+    }
+
+    // ==============================
+    //  LOGOUT CONFIRMATION
+    // ==============================
     const logoutForm = document.querySelector("form[action$='logout/']");
     if (logoutForm) {
         logoutForm.addEventListener("submit", (e) => {
@@ -160,5 +117,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 e.preventDefault();
             }
         });
+    }
+
+    // ==============================
+    //  BIRTHDATE MAX (CLIENT-SIDE)
+    // ==============================
+    const dobInput = document.getElementById("date_of_birth");
+    if (dobInput) {
+        const today = new Date();
+        today.setDate(today.getDate() - 1);  // yesterday
+        const max = today.toISOString().split("T")[0];
+        dobInput.setAttribute("max", max);
     }
 });
