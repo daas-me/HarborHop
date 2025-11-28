@@ -13,6 +13,7 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.utils import timezone
+from django.contrib.auth import update_session_auth_hash
 from datetime import datetime, date 
 import json
 import logging
@@ -914,57 +915,125 @@ def profile_settings(request):
         .order_by('-updated_at')
     )
 
+    # variables used to show messages in template without redirect
+    password_error = None
+    password_success = None
+    active_tab = request.GET.get('tab', 'personal')
+
     if request.method == "POST":
-        # Get form data
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
-        email = request.POST.get("email")
-        phone = request.POST.get("phone")
-        address = request.POST.get("address")
-        date_of_birth_str = request.POST.get("date_of_birth")
+        # detect which form was submitted
+        form_type = request.POST.get("form_type", "profile")
 
-        # ----- validate birthdate (must be in the past) -----
-        dob = None
-        if date_of_birth_str:
-            try:
-                dob = datetime.strptime(date_of_birth_str, "%Y-%m-%d").date()
-            except ValueError:
-                messages.error(request, "Invalid birthdate format. Please use YYYY-MM-DD.")
-                context = {
-                    'user': user,
-                    'profile': profile,
-                    'bookings': completed_bookings,
-                    'active_tab': 'personal',
-                }
-                return render(request, 'profile_settings.html', context)
+        # -------------------------
+        # PASSWORD CHANGE SUBMIT
+        # -------------------------
+        if form_type == "password":
+            active_tab = "security"  # remain on security tab
 
-            if dob >= date.today():
-                messages.error(request, "Birthdate cannot be today or a future date.")
-                context = {
-                    'user': user,
-                    'profile': profile,
-                    'bookings': completed_bookings,
-                    'active_tab': 'personal',
-                }
-                return render(request, 'profile_settings.html', context)
+            current_password = request.POST.get("current_password", "")
+            new_password = request.POST.get("new_password", "")
+            confirm_password = request.POST.get("confirm_password", "")
 
-        # ----- update User fields -----
-        user.first_name = first_name
-        user.last_name = last_name
-        user.email = email
-        user.save()
+            # 1) verify current password
+            if not user.check_password(current_password):
+                password_error = "Current password is incorrect."
 
-        # ----- update UserProfile fields -----
-        if profile:
-            profile.phone = phone
-            profile.address = address
-            # only overwrite DOB if user actually submitted something
+            # 2) new/confirm match
+            elif new_password != confirm_password:
+                password_error = "New password and confirmation do not match."
+
+            # 3) basic strength check
+            elif len(new_password) < 8:
+                password_error = "New password must be at least 8 characters long."
+
+            else:
+                # 4) update password and keep user logged in
+                user.set_password(new_password)
+                user.save()
+                update_session_auth_hash(request, user)
+                password_success = "Password updated successfully!"
+
+            # render the page with the result (no redirect so message shows on security tab)
+            context = {
+                'user': user,
+                'profile': profile,
+                'bookings': completed_bookings,
+                'active_tab': active_tab,
+                'password_error': password_error,
+                'password_success': password_success,
+            }
+            return render(request, 'profile_settings.html', context)
+
+        # -------------------------
+        # PROFILE INFO SUBMIT
+        # -------------------------
+        else:
+            active_tab = 'personal'
+
+            # Get form data
+            first_name = request.POST.get("first_name")
+            last_name = request.POST.get("last_name")
+            email = request.POST.get("email")
+            phone = request.POST.get("phone")
+            address = request.POST.get("address")
+            date_of_birth_str = request.POST.get("date_of_birth")
+
+            # ----- validate birthdate (must be in the past) -----
+            dob = None
             if date_of_birth_str:
-                profile.date_of_birth = dob
-            profile.save()
+                try:
+                    dob = datetime.strptime(date_of_birth_str, "%Y-%m-%d").date()
+                except ValueError:
+                    messages.error(request, "Invalid birthdate format. Please use YYYY-MM-DD.")
+                    context = {
+                        'user': user,
+                        'profile': profile,
+                        'bookings': completed_bookings,
+                        'active_tab': 'personal',
+                    }
+                    return render(request, 'profile_settings.html', context)
 
-        messages.success(request, "Profile updated successfully!")
-        return redirect('profile_settings')
+                if dob >= date.today():
+                    messages.error(request, "Birthdate cannot be today or a future date.")
+                    context = {
+                        'user': user,
+                        'profile': profile,
+                        'bookings': completed_bookings,
+                        'active_tab': 'personal',
+                    }
+                    return render(request, 'profile_settings.html', context)
+
+            # ----- update User fields -----
+            user.first_name = first_name
+            user.last_name = last_name
+            user.email = email
+            user.save()
+
+            # ----- update UserProfile fields -----
+            if profile:
+                profile.phone = phone
+                profile.address = address
+                # only overwrite DOB if user actually submitted something
+                if date_of_birth_str:
+                    profile.date_of_birth = dob
+                profile.save()
+
+            messages.success(request, "Profile updated successfully!")
+            # redirect is fine here so the change is reloaded from DB and message appears
+            return redirect('profile_settings')
+
+    # GET: render page with current values from DB
+    context = {
+        'user': user,
+        'profile': profile,
+        'bookings': completed_bookings,
+        'active_tab': request.GET.get('tab', 'personal'),
+        # password messages are None for GET
+        'password_error': None,
+        'password_success': None,
+    }
+    return render(request, 'profile_settings.html', context)
+
 
     # GET: render page with current values from DB
     context = {
