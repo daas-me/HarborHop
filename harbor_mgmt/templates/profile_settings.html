@@ -182,24 +182,60 @@
             {% endif %}
         </div>
 
-        <div id="security" class="content-section {% if active_tab == 'security' %}active{% endif %}">
-            <h2 style="margin-bottom: 30px; color: #333;">Security Settings</h2>
-            <form>
+            <div id="security" class="content-section {% if active_tab == 'security' %}active{% endif %}">
+                <h2 style="margin-bottom: 30px; color: #333;">Security Settings</h2>
+
+            {% if password_error %}
+                <div class="error-message">
+                    {{ password_error }}
+                </div>
+            {% endif %}
+
+            {% if password_success %}
+                <div class="success-message">
+                    {{ password_success }}
+                </div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                <!-- small hidden flag so the view knows this is the password form -->
+                <input type="hidden" name="form_type" value="password">
+
                 <div class="form-group">
                     <label>Current Password</label>
-                    <input type="password" placeholder="Enter current password">
+                    <input
+                        type="password"
+                        name="current_password"
+                        placeholder="Enter current password"
+                        required
+                    >
                 </div>
+
                 <div class="form-group">
                     <label>New Password</label>
-                    <input type="password" placeholder="Enter new password">
+                    <input
+                        type="password"
+                        name="new_password"
+                        placeholder="Enter new password"
+                        required
+                    >
                 </div>
+
                 <div class="form-group">
                     <label>Confirm New Password</label>
-                    <input type="password" placeholder="Confirm new password">
+                    <input
+                        type="password"
+                        name="confirm_password"
+                        placeholder="Confirm new password"
+                        required
+                    >
                 </div>
+
                 <button type="submit" class="btn-save">Update Password</button>
             </form>
         </div>
+
     </div>
 </body>
 </html>

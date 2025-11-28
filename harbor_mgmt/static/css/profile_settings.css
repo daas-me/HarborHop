@@ -412,3 +412,15 @@
         #profilePhotoPlaceholder {
             color: #000 !important;
         }
+
+.success-message {
+    margin-top: 10px;
+    color: green;
+    font-weight: 600;
+}
+
+.error-message {
+    margin-top: 10px;
+    color: #d9534f;
+    font-weight: 600;
+}
