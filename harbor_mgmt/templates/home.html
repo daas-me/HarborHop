@@ -108,7 +108,15 @@
                         <label>Departure Date</label>
                         <div class="input-wrapper">
                             <i class="fa-solid fa-calendar-days input-icon"></i>
-                            <input type="date" name="departure_date" class="form-input" required min="{{ today|default:'' }}">
+                            <input 
+                                type="text" 
+                                name="departure_date" 
+                                class="form-input date-input" 
+                                placeholder="Select Departure Date"
+                                onfocus="(this.type='date')" 
+                                onblur="if(!this.value)this.type='text'"
+                                required 
+                                min="{{ today|default:'' }}">
                         </div>
                     </div>
                     
@@ -116,9 +124,18 @@
                         <label>Return Date</label>
                         <div class="input-wrapper">
                             <i class="fa-solid fa-calendar-days input-icon"></i>
-                            <input type="date" name="return_date" class="form-input" id="return-date-input" min="{{ today|default:'' }}">
+                            <input 
+                                type="text" 
+                                name="return_date" 
+                                class="form-input date-input" 
+                                id="return-date-input"
+                                placeholder="Select Return Date"
+                                onfocus="(this.type='date')" 
+                                onblur="if(!this.value)this.type='text'"
+                                min="{{ today|default:'' }}">
                         </div>
                     </div>
+
                 </div>
                 
                 <div class="form-row">

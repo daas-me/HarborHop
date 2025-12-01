@@ -123,6 +123,23 @@ ul li {
     font-size: 16px;
 }
 
+.date-input[type="text"] {
+    color: #999;
+}
+
+.date-input[type="text"]:focus {
+    color: #2c3e50;
+}
+
+.date-input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+}
+
+/* Style for when date input has a value */
+.date-input[type="date"]:valid {
+    color: #2c3e50;
+}
+
 /* Buttons */
 .btn-book-now {
     display: block;
