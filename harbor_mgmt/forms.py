@@ -1,7 +1,6 @@
 from django import forms 
-from django.contrib.auth.forms import UserCreationForm 
 from django.contrib.auth.models import User
-from decimal import Decimal
+from datetime import date
 
 class UserRegistrationForm(forms.ModelForm):
     password = forms.CharField(
@@ -17,6 +16,19 @@ class UserRegistrationForm(forms.ModelForm):
             'class': 'form-input',
             'placeholder': 'Confirm your password'
         })
+    )
+
+    # Change field name to match your UserProfile model field
+    date_of_birth = forms.DateField(
+        label='Date of birth (must be 15+)',
+        widget=forms.DateInput(attrs={
+            'class': 'form-input',
+            'placeholder': 'YYYY-MM-DD',
+            'type': 'date',
+            'id': 'id_date_of_birth',   # used by client-side JS
+        }),
+        input_formats=['%Y-%m-%d'],
+        required=True
     )
 
     class Meta:
@@ -54,6 +66,18 @@ class UserRegistrationForm(forms.ModelForm):
         if email and User.objects.filter(email=email).exists():
             raise forms.ValidationError('This email is already registered. Please use another email.')
         return email
+
+    def clean_date_of_birth(self):
+        dob = self.cleaned_data.get('date_of_birth')
+        if not dob:
+            raise forms.ValidationError('Date of birth is required.')
+
+        today = date.today()
+        age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+
+        if age < 15:
+            raise forms.ValidationError("You must be at least 15 years old to register.")
+        return dob
 
     def clean(self):
         cleaned_data = super().clean()

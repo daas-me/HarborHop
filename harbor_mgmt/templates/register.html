@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HarborHop - Sign Up</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/login.css' %}?v=3">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}?v=4">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon_io/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
@@ -46,7 +46,7 @@
                 {% endif %}
 
                 <!-- Django Form -->
-                <form method="post">
+                <form method="post" novalidate>
                     {% csrf_token %}
                     
                     {% if form.non_field_errors %}
@@ -69,10 +69,10 @@
                                     <i class="fa-solid fa-lock input-icon"></i>
                                 {% elif field.name == 'password_confirm' %}
                                     <i class="fa-solid fa-circle-check input-icon"></i>
-                                {% elif field.name == 'first_name' %}
+                                {% elif field.name == 'first_name' or field.name == 'last_name' %}
                                     <i class="fa-solid fa-user input-icon"></i>
-                                {% elif field.name == 'last_name' %}
-                                    <i class="fa-solid fa-user input-icon"></i>
+                                {% elif field.name == 'date_of_birth' %}
+                                    <i class="fa-solid fa-calendar-days input-icon"></i>
                                 {% endif %}
                                 {{ field }}
                             </div>
@@ -92,5 +92,8 @@
             </div>
         </div>
     </div>
+
+    <!-- Client-side DOB UX script: sets max date (today - 15 years) & performs quick validation -->
+    <script src="{% static 'js/register_dob.js' %}"></script>
 </body>
 </html>

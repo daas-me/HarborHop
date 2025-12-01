@@ -106,8 +106,12 @@
                     name="date_of_birth"
                     id="date_of_birth"
                     value="{{ profile.date_of_birth|date:'Y-m-d' }}"
+                    readonly
+                    title="Date of birth cannot be changed"
+                    class="form-input"
                 >
             </div>
+
         </div>
 
         <div class="form-group">

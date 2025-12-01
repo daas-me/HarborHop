@@ -38,18 +38,30 @@ def register(request):
     if request.method == "POST":
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
+            # Save the User instance (form is a ModelForm for User)
             user = form.save(commit=False)
             user.set_password(form.cleaned_data['password'])
             user.save()
-            
-            # Create UserProfile for the new user
-            UserProfile.objects.create(user=user)
-            
+
+            # --- IMPORTANT: use the field name that matches your model ---
+            dob = form.cleaned_data.get('date_of_birth')  # <-- correct field name
+
+            # Create or get profile and store date_of_birth
+            profile, created = UserProfile.objects.get_or_create(user=user)
+            profile.date_of_birth = dob
+            profile.save()
+
+            # Log in and redirect
             login(request, user)
-            messages.success(request, f'Welcome, {user.first_name or user.username}! Your account has been created.')
+            messages.success(
+                request,
+                f'Welcome, {user.first_name or user.username}! Your account has been created.'
+            )
             return redirect('home')
+        # if form invalid, fall through to re-render template with errors
     else:
         form = UserRegistrationForm()
+
     return render(request, 'register.html', {'form': form})
 
 @never_cache
@@ -1454,63 +1466,47 @@ def search_voyages_barkota(request):
     return render(request, 'profile_settings.html', context)
 
 @login_required
+@require_POST
 def update_profile_ajax(request):
-    """Handles updating the user profile via AJAX without page reload."""
-    if request.method == "POST":
-        user = request.user
-        profile = user.profile  # get the linked UserProfile
+    """Handles updating the user profile via AJAX without page reload.
+       Note: date_of_birth is intentionally ignored here to keep DOB immutable.
+    """
+    user = request.user
+    profile = getattr(user, 'profile', None)
+    if not profile:
+        # defensive: ensure profile exists
+        profile = UserProfile.objects.create(user=user)
 
-        # Get fields from POST data
-        first_name = request.POST.get("first_name", user.first_name)
-        last_name = request.POST.get("last_name", user.last_name)
-        email = request.POST.get("email", user.email)
-        phone = request.POST.get("phone", profile.phone)
-        address = request.POST.get("address", profile.address)
-        date_of_birth = request.POST.get("date_of_birth")
+    # Get fields from POST data (do NOT accept date_of_birth updates)
+    first_name = request.POST.get("first_name", user.first_name)
+    last_name = request.POST.get("last_name", user.last_name)
+    email = request.POST.get("email", user.email)
+    phone = request.POST.get("phone", profile.phone)
+    address = request.POST.get("address", profile.address)
 
-        # Update user fields
-        user.first_name = first_name
-        user.last_name = last_name
-        user.email = email
-        user.save()
+    # Update user fields
+    user.first_name = first_name
+    user.last_name = last_name
+    user.email = email
+    user.save()
 
-        # Update profile fields
-        profile.phone = phone
-        profile.address = address
+    # Update profile fields (do NOT touch date_of_birth)
+    profile.phone = phone
+    profile.address = address
+    # keep profile.date_of_birth as-is
+    profile.save()
 
-                # ✅ Safely convert & validate birthdate
-        if date_of_birth:
-            try:
-                dob = datetime.strptime(date_of_birth, "%Y-%m-%d").date()
-            except ValueError:
-                return JsonResponse({
-                    "success": False,
-                    "message": "Invalid date format. Please use YYYY-MM-DD."
-                }, status=400)
+    # Return success JSON including the stored DOB for UI display
+    return JsonResponse({
+        "success": True,
+        "message": "Profile updated successfully!",
+        "updated_data": {
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "phone": profile.phone or "",
+            "address": profile.address or "",
+            "date_of_birth": profile.date_of_birth.strftime("%Y-%m-%d") if profile.date_of_birth else "",
+        }
+    })
 
-            if dob >= date.today():
-                return JsonResponse({
-                    "success": False,
-                    "message": "Birthdate cannot be today or a future date."
-                }, status=400)
-
-            profile.date_of_birth = dob
-        else:
-            profile.date_of_birth = None
-
-
-        # Return success JSON
-        return JsonResponse({
-            "success": True,
-            "message": "Profile updated successfully!",
-            "updated_data": {
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-                "email": user.email,
-                "phone": profile.phone,
-                "address": profile.address,
-                "date_of_birth": profile.date_of_birth.strftime("%Y-%m-%d") if profile.date_of_birth else "",
-            }
-        })
-
-    return JsonResponse({"success": False, "message": "Invalid request method."}, status=400)

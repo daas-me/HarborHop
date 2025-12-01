@@ -427,3 +427,36 @@ form button[type="submit"]:hover {
         font-size: 1rem;
     }
 }
+
+.input-wrapper input[type="date"],
+.form-group input[type="date"] {
+    width: 100%;
+    padding: 14px 16px 14px 45px !important;
+    border: 2px solid #e5e5e5 !important;
+    border-radius: 8px !important;
+    font-size: 0.95rem !important;
+    font-family: 'Alan Sans', sans-serif !important;
+    transition: all 0.3s ease;
+    background: #fafafa !important;
+    color: #1a1a1a !important;
+    cursor: pointer;
+}
+
+.input-wrapper input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.6;
+    filter: invert(0.5);
+    margin-left: auto;
+}
+
+.input-wrapper input[type="date"]:hover::-webkit-calendar-picker-indicator {
+    opacity: 1;
+}
+
+.input-wrapper input[type="date"]:focus,
+.form-group input[type="date"]:focus {
+    outline: none !important;
+    border-color: #ff9900 !important;
+    background: white !important;
+    box-shadow: 0 0 0 4px rgba(255, 153, 0, 0.08) !important;
+}
