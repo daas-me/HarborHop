@@ -5,32 +5,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile - HarborHop</title>
+
+    <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/profile_settings.css' %}?v=2">
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="{% static 'css/profile_settings.css' %}?v=4">
+
+    <!-- Favicons -->
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon_io/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
     <link rel="manifest" href="{% static 'images/favicon_io/site.webmanifest' %}">
-    <script src="{% static 'js/profile_settings.js' %}?v=1"></script>
+
+    <!-- External JS (defer to avoid DOM timing issues) -->
+    <script src="{% static 'js/profile_settings.js' %}?v=2" defer></script>
 </head>
 <body>
     <nav class="navbar">
         <div class="logo-container">
-        <a href="{% url 'home' %}" class="logo">HARBOR<span>hop</span></a>
-        <p class="tagline">Hop aboard. Sail beyond</p>
-    </div>
+            <a href="{% url 'home' %}" class="logo">HARBOR<span>hop</span></a>
+            <p class="tagline">Hop aboard. Sail beyond</p>
+        </div>
         <div class="nav-links">
             <a href="{% url 'reservations' %}">Manage Booking</a>
             <a href="#">Latest Offers</a>
             <a href="#">Contact Us</a>
             <form action="{% url 'logout' %}" method="post" style="display:inline;">
-            {% csrf_token %}
+                {% csrf_token %}
                 <button type="submit" class="btn-logout">Log out</button>
             </form>
         </div>
     </nav>
 
-    <div class="container" data-active-tab="{{ active_tab }}">
+    <div class="container"data-active-tab="{{ active_tab|default:'personal' }}"data-remove-photo-url="{% url 'delete_profile_photo' %}">
         <div class="profile-header">
             <div class="profile-photo-section">
                 <div class="profile-photo" id="profilePhotoWrapper">
@@ -47,90 +55,89 @@
                     {% csrf_token %}
                     <input type="file" name="photo" id="photoInput" style="display: none;" accept="image/*">
                     <div class="photo-buttons">
-                            <button type="button" class="change-photo-btn" id="changePhotoBtn">Change Photo</button>
-                            <button type="button" class="remove-photo-btn" id="removePhotoBtn">Remove Photo</button>
+                        <button type="button" class="change-photo-btn" id="changePhotoBtn">Change Photo</button>
+                        <button type="button" class="remove-photo-btn" id="removePhotoBtn">Remove Photo</button>
                     </div>
                 </form>
             </div>
             <div class="profile-info">
                 <h1>{{ user.first_name }} {{ user.last_name }}</h1>
                 <p class="username-display">@{{ user.username }}</p>
-
-                <!-- add explicit classes here -->
                 <p class="profile-email">📧 {{ user.email }}</p>
                 <p class="profile-phone">📱 {{ profile.phone|default:"" }}</p>
-
                 <p>🎂 Member since {{ user.date_joined|date:"F Y" }}</p>
             </div>
         </div>
 
-        <div class="tabs">
-            <div class="tab {% if active_tab == 'personal' %}active{% endif %}" data-tab="personal" onclick="switchTab('personal', event)">Personal Information</div>
-            <div class="tab {% if active_tab == 'booking' %}active{% endif %}" data-tab="booking" onclick="switchTab('booking', event)">Booking History</div>
-            <div class="tab {% if active_tab == 'security' %}active{% endif %}" data-tab="security" onclick="switchTab('security', event)">Security Settings</div>
+        <!-- Tabs (buttons, data-tab) -->
+        <div class="tabs" role="tablist" aria-label="Profile sections">
+            <button class="tab {% if active_tab == 'personal' %}active{% endif %}" type="button" data-tab="personal" aria-selected="{% if active_tab == 'personal' %}true{% else %}false{% endif %}">Personal Information</button>
+            <button class="tab {% if active_tab == 'booking' %}active{% endif %}" type="button" data-tab="booking" aria-selected="{% if active_tab == 'booking' %}true{% else %}false{% endif %}">Booking History</button>
+            <button class="tab {% if active_tab == 'security' %}active{% endif %}" type="button" data-tab="security" aria-selected="{% if active_tab == 'security' %}true{% else %}false{% endif %}">Security Settings</button>
         </div>
 
-        <div id="personal" class="content-section {% if active_tab == 'personal' %}active{% endif %}">
-    <h2 style="margin-bottom: 30px; color: #333;">Personal Information</h2>
+        <!-- PERSONAL -->
+        <div id="personal" class="content-section {% if active_tab == 'personal' %}active{% endif %}" role="tabpanel" {% if active_tab != 'personal' %}hidden{% endif %}>
+            <h2>Personal Information</h2>
 
-    
-    <form id="profileForm" method="POST">
-        {% csrf_token %}
-        
-        <div class="form-row">
-            <div class="form-group">
-                <label>First Name</label>
-                 <input type="text" name="first_name" value="{{ user.first_name }}" readonly style="background-color: #f9f9f9; cursor: not-allowed;">
-            </div>
-            <div class="form-group">
-                <label>Last Name</label>
-                <input type="text" name="last_name" value="{{ user.last_name }}" readonly style="background-color: #f9f9f9; cursor: not-allowed;">
-            </div>
+            <form id="profileForm" method="POST">
+                {% csrf_token %}
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        <input type="text" name="first_name" value="{{ user.first_name }}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <input type="text" name="last_name" value="{{ user.last_name }}" readonly>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" name="email" value="{{ user.email }}" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" name="phone" value="{{ profile.phone|default:'' }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Date of Birth</label>
+                        <input
+                            type="date"
+                            name="date_of_birth"
+                            id="date_of_birth"
+                            value="{{ profile.date_of_birth|date:'Y-m-d' }}"
+                            readonly
+                            title="Date of birth cannot be changed"
+                            class="form-input"
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Address</label>
+                    <input type="text" name="address" value="{{ profile.address|default:'' }}">
+                </div>
+
+                <button type="submit" class="btn-save">Save Changes</button>
+            </form>
+
+            {# Render success message only when present #}
+            {% for message in messages %}
+                {% if 'success' in message.tags %}
+                    <div id="updateMessage" class="success-message">
+                        {{ message }}
+                    </div>
+                {% endif %}
+            {% endfor %}
         </div>
 
-        <div class="form-group">
-            <label>Email Address</label>
-            <input type="email" name="email" value="{{ user.email }}" required>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group">
-                <label>Phone Number</label>
-                <input type="tel" name="phone" value="{{ profile.phone|default:'' }}">
-            </div>
-            <div class="form-group">
-                <label>Date of Birth</label>
-                <input
-                    type="date"
-                    name="date_of_birth"
-                    id="date_of_birth"
-                    value="{{ profile.date_of_birth|date:'Y-m-d' }}"
-                    readonly
-                    title="Date of birth cannot be changed"
-                    class="form-input"
-                >
-            </div>
-
-        </div>
-
-        <div class="form-group">
-            <label>Address</label>
-            <input type="text" name="address" value="{{ profile.address|default:'' }}">
-        </div>
-
-        <button type="submit" class="btn-save">Save Changes</button>
-    </form>
-
-    <div id="updateMessage">
-    {% for message in messages %}
-        {% if message.tags == 'success' %}
-            {{ message }}
-        {% endif %}
-    {% endfor %}
-    </div>
-</div>
-
-        <div id="booking" class="content-section {% if active_tab == 'booking' %}active{% endif %}">
+        <!-- BOOKING -->
+        <div id="booking" class="content-section {% if active_tab == 'booking' %}active{% endif %}" role="tabpanel" {% if active_tab != 'booking' %}hidden{% endif %}>
             {% if bookings %}
                 {% for booking in bookings %}
                     <div class="booking-card">
@@ -148,10 +155,10 @@
                                 <span class="booking-detail-value">{{ booking.departure_date|date:'M d, Y' }}</span>
                             </div>
                             {% if booking.return_date %}
-                            <div class="booking-detail">
-                                <span class="booking-detail-label">Return</span>
-                                <span class="booking-detail-value">{{ booking.return_date|date:'M d, Y' }}</span>
-                            </div>
+                                <div class="booking-detail">
+                                    <span class="booking-detail-label">Return</span>
+                                    <span class="booking-detail-value">{{ booking.return_date|date:'M d, Y' }}</span>
+                                </div>
                             {% endif %}
                             <div class="booking-detail">
                                 <span class="booking-detail-label">Passengers</span>
@@ -162,16 +169,16 @@
                                 <span class="booking-detail-value">₱{{ booking.total_price|floatformat:2 }}</span>
                             </div>
                             {% if booking.details.payment.paid_at_display %}
-                            <div class="booking-detail">
-                                <span class="booking-detail-label">Paid On</span>
-                                <span class="booking-detail-value">{{ booking.details.payment.paid_at_display }}</span>
-                            </div>
+                                <div class="booking-detail">
+                                    <span class="booking-detail-label">Paid On</span>
+                                    <span class="booking-detail-value">{{ booking.details.payment.paid_at_display }}</span>
+                                </div>
                             {% endif %}
                             {% if booking.details.payment.method %}
-                            <div class="booking-detail">
-                                <span class="booking-detail-label">Payment Method</span>
-                                <span class="booking-detail-value">{{ booking.details.payment.method|title }}</span>
-                            </div>
+                                <div class="booking-detail">
+                                    <span class="booking-detail-label">Payment Method</span>
+                                    <span class="booking-detail-value">{{ booking.details.payment.method|title }}</span>
+                                </div>
                             {% endif %}
                         </div>
                     </div>
@@ -185,8 +192,9 @@
             {% endif %}
         </div>
 
-            <div id="security" class="content-section {% if active_tab == 'security' %}active{% endif %}">
-                <h2 style="margin-bottom: 30px; color: #333;">Security Settings</h2>
+        <!-- SECURITY -->
+        <div id="security" class="content-section {% if active_tab == 'security' %}active{% endif %}" role="tabpanel" {% if active_tab != 'security' %}hidden{% endif %}>
+            <h2>Security Settings</h2>
 
             {% if password_error %}
                 <div class="error-message">
@@ -202,7 +210,6 @@
 
             <form method="POST">
                 {% csrf_token %}
-                <!-- small hidden flag so the view knows this is the password form -->
                 <input type="hidden" name="form_type" value="password">
 
                 <div class="form-group">
@@ -238,7 +245,6 @@
                 <button type="submit" class="btn-save">Update Password</button>
             </form>
         </div>
-
     </div>
 </body>
 </html>

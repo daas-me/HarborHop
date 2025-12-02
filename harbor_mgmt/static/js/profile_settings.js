@@ -1,171 +1,232 @@
-function switchTab(tabName, event = null) {
-    const tabs = document.querySelectorAll('.tab');
-    const sections = document.querySelectorAll('.content-section');
+document.addEventListener('DOMContentLoaded', function () {
+  // ---------- helpers ----------
+  function log(...args) { /* console.log('[profile_settings]', ...args); */ }
+  function getCookie(name) {
+    const cookie = document.cookie.split('; ').find(r => r.trim().startsWith(name + '='));
+    return cookie ? decodeURIComponent(cookie.split('=')[1]) : null;
+  }
+  function showAlert(msg) {
+    // simple alert (keeps behavior consistent). Replace with custom UI if needed.
+    alert(msg);
+  }
 
-    tabs.forEach(tab => tab.classList.remove('active'));
-    sections.forEach(section => section.classList.remove('active'));
+  // ---------- tabs wiring ----------
+  const container = document.querySelector('.container');
+  const defaultTab = container?.dataset?.activeTab || 'personal';
+  const tabsContainer = document.querySelector('.tabs');
+  const tabs = document.querySelectorAll('.tab');
+  const sections = document.querySelectorAll('.content-section');
 
-    const targetTab = event ? event.target : document.querySelector(`.tab[data-tab="${tabName}"]`);
-    if (targetTab) targetTab.classList.add('active');
+  function setActiveTab(tabName) {
+    tabs.forEach(t => {
+      const active = t.dataset.tab === tabName;
+      t.classList.toggle('active', active);
+      t.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    sections.forEach(s => {
+      const active = s.id === tabName;
+      s.classList.toggle('active', active);
+      if (active) s.removeAttribute('hidden'); else s.setAttribute('hidden', 'true');
+    });
+  }
 
-    const targetSection = document.getElementById(tabName);
-    if (targetSection) targetSection.classList.add('active');
-}
+  setActiveTab(defaultTab);
 
-document.addEventListener('DOMContentLoaded', () => {
-    const container = document.querySelector('.container[data-active-tab]');
-    const initialTab = container ? container.dataset.activeTab : null;
-    if (initialTab) switchTab(initialTab);
+  if (tabsContainer) {
+    tabsContainer.addEventListener('click', (e) => {
+      const btn = e.target.closest('.tab');
+      if (!btn) return;
+      const name = btn.dataset.tab;
+      if (!name) return;
+      setActiveTab(name);
+    });
 
-    const csrfTokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
-    const csrfToken = csrfTokenInput ? csrfTokenInput.value : null;
+    tabsContainer.addEventListener('keydown', (e) => {
+      const btn = e.target.closest('.tab');
+      if (!btn) return;
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const name = btn.dataset.tab;
+        setActiveTab(name);
+      }
+    });
+  }
 
-    // Photo upload/remove
-    attachPhotoEventListeners();
-    function attachPhotoEventListeners() {
-        const changePhotoBtn = document.getElementById('changePhotoBtn');
-        const removePhotoBtn = document.getElementById('removePhotoBtn');
-        const photoInput = document.getElementById('photoInput');
-        const photoForm = document.getElementById('photoForm');
+  // ---------- photo upload / remove wiring ----------
+  const changeBtn = document.getElementById('changePhotoBtn');
+  const removeBtn = document.getElementById('removePhotoBtn');
+  const photoInput = document.getElementById('photoInput');
+  const photoForm = document.getElementById('photoForm');
+  const profilePhotoWrapper = document.getElementById('profilePhotoWrapper');
 
-        if (changePhotoBtn && photoInput && photoForm && csrfToken) {
-            changePhotoBtn.addEventListener('click', () => photoInput.click());
-            photoInput.addEventListener('change', async () => {
-                const file = photoInput.files[0];
-                if (!file) return;
-                const formData = new FormData(photoForm);
-                try {
-                    const response = await fetch(photoForm.action, {
-                        method: "POST",
-                        headers: { "X-CSRFToken": csrfToken },
-                        body: formData,
-                    });
-                    const data = await response.json();
-                    if (data.success) {
-                        const wrapper = document.getElementById("profilePhotoWrapper");
-                        wrapper.innerHTML = `<img src="${data.photo_url}" alt="Profile Photo" id="profilePhoto">`;
-                    } else {
-                        alert(data.message || "Failed to upload photo.");
-                    }
-                } catch (err) {
-                    console.error("Upload error:", err);
-                    alert("Something went wrong while uploading the photo.");
-                }
-            });
-        }
+  // If wrapper not present, create a safe stub to avoid crashes
+  if (!profilePhotoWrapper) {
+    console.warn('[profile_settings] profilePhotoWrapper not found in DOM');
+  }
 
-        if (removePhotoBtn && csrfToken) {
-            removePhotoBtn.addEventListener('click', async () => {
-                if (!confirm("Are you sure you want to remove your profile photo?")) return;
-                try {
-                    const response = await fetch("/delete-profile-photo/", {
-                        method: "POST",
-                        headers: { "X-CSRFToken": csrfToken },
-                    });
-                    const data = await response.json();
-                    if (data.success) {
-                        const wrapper = document.getElementById("profilePhotoWrapper");
-                        const initials = getInitialsFromName();
-                        wrapper.innerHTML = `<span id="profilePhotoPlaceholder">${initials}</span>`;
-                    } else {
-                        alert(data.message || "Failed to remove photo.");
-                    }
-                } catch (error) {
-                    console.error("Error removing photo:", error);
-                    alert("Something went wrong while removing the photo.");
-                }
-            });
-        }
-    }
+  // Upload handler (AJAX with fallback)
+  if (changeBtn && photoInput && photoForm) {
+    changeBtn.addEventListener('click', () => photoInput.click());
 
-    function getInitialsFromName() {
-        const nameElement = document.querySelector(".profile-info h1");
-        if (!nameElement) return "??";
-        const nameParts = nameElement.textContent.trim().split(" ");
-        if (nameParts.length === 1) return nameParts[0][0].toUpperCase();
-        const first = nameParts[0][0].toUpperCase();
-        const last = nameParts[nameParts.length - 1][0].toUpperCase();
-        return first + last;
-    }
+    photoInput.addEventListener('change', async () => {
+      if (!photoInput.files || photoInput.files.length === 0) return;
+      const file = photoInput.files[0];
 
-    // Logout confirmation
-    const logoutForm = document.querySelector("form[action$='logout/']");
-    if (logoutForm) {
-        logoutForm.addEventListener("submit", (e) => {
-            if (!confirm("Are you sure you want to log out?")) e.preventDefault();
+      // optional client-side size limit
+      const maxMB = 8;
+      if (file.size > maxMB * 1024 * 1024) {
+        showAlert(`File is too large. Max ${maxMB} MB allowed.`);
+        photoInput.value = '';
+        return;
+      }
+
+      const action = photoForm.getAttribute('action');
+      if (!action) {
+        console.error('[profile_settings] photoForm action attribute missing; falling back to full submit.');
+        photoForm.submit();
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('photo', file);
+
+      try {
+        const resp = await fetch(action, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: formData
         });
-    }
 
-    // Birthdate validation (client-side)
-    const dobInput = document.getElementById("date_of_birth");
-    const profileForm = document.getElementById("profileForm");
-    const updateMessage = document.getElementById("updateMessage");
-
-    function showInlineMessage(text, isError = true) {
-        if (!updateMessage) {
-            alert(text);
-            return;
+        // If response isn't OK, fallback to form submit (handles redirects/login pages)
+        if (!resp.ok) {
+          console.warn('[profile_settings] upload response not ok (status ' + resp.status + '), falling back to full submit.');
+          photoForm.submit();
+          return;
         }
-        updateMessage.textContent = text;
-        updateMessage.style.display = "block";
-        updateMessage.style.color = isError ? "#d9534f" : "green";
-        updateMessage.classList.add("show");
-        clearTimeout(showInlineMessage._timer);
-        showInlineMessage._timer = setTimeout(() => {
-            updateMessage.classList.remove("show");
-            updateMessage.style.display = "";
-            updateMessage.textContent = "";
-        }, 4000);
-    }
 
-    if (dobInput) {
-        // Allow user to pick recent years (2010-2025 etc). Only disallow future dates.
-        const today = new Date();
-        const maxDate = new Date(today.getFullYear(), today.getMonth(), today.getDate()); // today
-        dobInput.setAttribute("max", maxDate.toISOString().split("T")[0]);
-        dobInput.setAttribute("min", "1900-01-01");
-        // NOTE: we DO NOT set max to (today - 15 years) so years 2010-2025 remain visible/selectable.
-    }
+        const contentType = resp.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+          // server returned HTML or redirect — fallback to full submit
+          photoForm.submit();
+          return;
+        }
 
-    if (profileForm) {
-        profileForm.addEventListener("submit", (e) => {
-            if (!dobInput) return;
-            const val = dobInput.value;
-            if (!val) return; // empty allowed if server accepts empty
+        const data = await resp.json();
 
-            // parse YYYY-MM-DD
-            const [y, m, d] = val.split("-");
-            if (!y || !m || !d) {
-                e.preventDefault();
-                showInlineMessage("Invalid birthdate format. Please use YYYY-MM-DD.");
-                return;
+        if (data && data.success) {
+          // tolerate multiple key names returned by different backends
+          const imageUrlRaw = data.image_url || data.photo_url || data.photoUrl || data.url || data.path || null;
+
+          if (imageUrlRaw) {
+            // convert relative path ("/media/...") to absolute
+            let src = imageUrlRaw;
+            if (src.startsWith('/')) {
+              src = window.location.origin + src;
             }
 
-            const dob = new Date(Number(y), Number(m) - 1, Number(d));
-            const today = new Date();
-            const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            // cache-bust query param to force browser to fetch new image
+            const busted = src + (src.includes('?') ? '&' : '?') + 'v=' + Date.now();
 
-            // reject future/today
-            if (dob >= todayOnly) {
-                e.preventDefault();
-                showInlineMessage("Birthdate cannot be today or in the future.");
-                return;
+            if (profilePhotoWrapper) {
+              profilePhotoWrapper.innerHTML = `<img src="${busted}" alt="Profile Photo" id="profilePhoto">`;
+              // store initials if dataset not present (used by remove fallback)
+              if (!profilePhotoWrapper.dataset.initials) {
+                profilePhotoWrapper.dataset.initials = (profilePhotoWrapper.textContent || '').trim().slice(0,4);
+              }
             }
 
-            // compute age
-            let age = today.getFullYear() - dob.getFullYear();
-            const monthDiff = today.getMonth() - dob.getMonth();
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) age--;
+            if (removeBtn) removeBtn.disabled = false;
+          } else {
+            // server returned success but no URL -> reload to let server render
+            location.reload();
+          }
 
-            if (age < 15) {
-                e.preventDefault();
-                showInlineMessage("You must be at least 15 years old to use this service.");
-                return;
-            }
+        } else {
+          showAlert(data?.message || 'Upload failed. Please try again.');
+        }
 
-            // OK — allow submit and show a tiny saving notice
-            showInlineMessage("Saving profile...", false);
-            // form will submit normally
+      } catch (err) {
+        console.error('[profile_settings] upload error', err);
+        // final fallback to full form submit
+        try { photoForm.submit(); } catch (e) { showAlert('Upload failed.'); }
+      } finally {
+        // reset input so change event will trigger again for same file
+        photoInput.value = '';
+      }
+    });
+  } else {
+    // If one of the pieces missing just log; doesn't break other behavior
+    log('upload UI not fully present (changeBtn/photoInput/photoForm)');
+  }
+
+  // Remove handler (AJAX) — clears server-side and updates UI locally, then reloads
+  if (removeBtn) {
+    removeBtn.addEventListener('click', async () => {
+      if (!confirm('Remove profile photo?')) return;
+
+      const removeUrl = container?.dataset?.removePhotoUrl;
+      const initials = profilePhotoWrapper?.dataset?.initials || '';
+
+      if (!removeUrl) {
+        // fallback: client-only
+        if (profilePhotoWrapper) profilePhotoWrapper.innerHTML = `<span id="profilePhotoPlaceholder">${initials}</span>`;
+        removeBtn.disabled = true;
+        return;
+      }
+
+      try {
+        const resp = await fetch(removeUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify({ remove: true })
         });
+
+        if (!resp.ok) {
+          // not ok -> show message
+          const text = await resp.text().catch(() => '');
+          console.warn('[profile_settings] remove returned non-ok', resp.status, text);
+          showAlert('Failed to remove photo. Try again.');
+          return;
+        }
+
+        // try parse JSON
+        const data = await resp.json().catch(() => null);
+        if (data && data.success) {
+          if (profilePhotoWrapper) profilePhotoWrapper.innerHTML = `<span id="profilePhotoPlaceholder">${initials}</span>`;
+          removeBtn.disabled = true;
+          // reload so server-rendered pages show consistent state
+          setTimeout(() => location.reload(), 300);
+        } else {
+          showAlert(data?.message || 'Failed to remove photo.');
+        }
+      } catch (err) {
+        console.error('[profile_settings] remove error', err);
+        showAlert('Error removing photo. Try again.');
+      }
+    });
+  }
+
+  // If no image exists at load, disable remove button
+  const profileImgEl = document.getElementById('profilePhoto');
+  if (!profileImgEl && removeBtn) removeBtn.disabled = true;
+
+  // hide updateMessage if no content
+  const updateMessageEl = document.getElementById('updateMessage');
+  if (updateMessageEl) {
+    if (!updateMessageEl.textContent || !updateMessageEl.textContent.trim()) {
+      updateMessageEl.style.display = 'none';
+    } else {
+      updateMessageEl.classList.add('success-message');
     }
+  }
+
+  // done
+  log('profile_settings script loaded');
 });
