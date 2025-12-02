@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+import random
+import string
 
 class UserProfile(models.Model):
     """
@@ -57,7 +59,7 @@ class Booking(models.Model):
     children = models.IntegerField(default=0)
     
     # Booking information
-    booking_reference = models.CharField(max_length=20, unique=True)
+    booking_reference = models.CharField(max_length=20, unique=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     
@@ -70,6 +72,26 @@ class Booking(models.Model):
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    def generate_booking_reference(self):
+        """
+        Generate a random booking reference: HH-XXXXXXXX
+        Example: HH-A3K9M2L5
+        """
+        while True:
+            # Generate 8 random characters (uppercase letters and digits)
+            code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+            booking_ref = f"HH-{code}"
+            
+            # Check if this reference already exists
+            if not Booking.objects.filter(booking_reference=booking_ref).exists():
+                return booking_ref
+    
+    def save(self, *args, **kwargs):
+        # Generate booking reference if it doesn't exist
+        if not self.booking_reference:
+            self.booking_reference = self.generate_booking_reference()
+        super().save(*args, **kwargs)
     
     def __str__(self):
         return f"{self.booking_reference} - {self.user.username} ({self.origin} to {self.destination})"
