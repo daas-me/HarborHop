@@ -1,133 +1,560 @@
-body.payment-page {
-    background: #f7f8fa;
+/* ================================================
+   IMPROVED PAYMENT PAGE STYLES
+   ================================================ */
+
+body {
+    font-family: 'Alan Sans', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: url('https://images.unsplash.com/photo-1554254464-7046778097bf?fm=jpg&q=95&w=3000&auto=format&fit=crop') no-repeat center center fixed;
+    background-size: cover;
+    min-height: 100vh;
+    padding-bottom: 60px;
 }
 
-.payment-container {
-    max-width: 900px;
+.payment-wrapper {
+    max-width: 1200px;
     margin: 40px auto;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
-    padding: 32px 40px;
+    padding: 0 20px;
 }
 
-.section-title {
-    font-size: 1.2em;
-    font-weight: 600;
-    color: #ff9900;
-    margin-bottom: 18px;
+/* Page Title */
+.page-title {
+    text-align: center;
+    color: white;
+    margin-bottom: 40px;
+    animation: fadeInDown 0.6s ease-out;
 }
 
-.summary-section {
-    margin-bottom: 36px;
-}
-
-.summary-section .row {
-    display: flex;
-    gap: 32px;
-}
-
-.summary-section .col {
-    flex: 1;
-}
-
-.summary-section .label {
-    font-size: 0.92em;
-    color: #888;
-}
-
-.summary-section .value {
-    font-size: 1.05em;
-    font-weight: 500;
-    color: #222;
-    margin-bottom: 7px;
-}
-
-.summary-section .route {
-    font-size: 1.1em;
-    font-weight: 600;
-    color: #333;
+.page-title h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
     margin-bottom: 8px;
+    text-shadow: 0 2px 10px #2c3e50;
 }
 
-.summary-section .aircon {
-    font-size: 0.93em;
-    color: #666;
+.page-title h1 i {
+    margin-right: 12px;
 }
 
-.summary-section .company-logo {
+.page-title p {
+    font-size: 1.1rem;
+    opacity: 1;
+    color: #fff;
+    text-shadow: 0 2px 10px #2c3e50 ;
+}
+
+/* Main Container */
+.payment-container {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 30px;
+    align-items: start;
+}
+
+/* Booking Summary Card */
+.booking-summary-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    overflow: hidden;
+    animation: slideInLeft 0.6s ease-out;
+}
+
+.summary-header {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    padding: 24px 30px;
     display: flex;
     align-items: center;
-    gap: 6px;
-    margin-bottom: 8px;
+    gap: 16px;
+    color: white;
 }
 
-.summary-section .company-logo img {
-    height: 22px;
+.summary-header i {
+    font-size: 2rem;
 }
 
-.summary-section .divider {
-    border-top: 1px solid #eee;
-    margin: 28px 0 20px 0;
+.summary-header h2 {
+    font-size: 1.5rem;
+    margin: 0;
+    font-weight: 700;
 }
 
-.info-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 24px;
+.summary-header p {
+    margin: 4px 0 0 0;
+    opacity: 0.9;
+    color: #fff;
+    font-size: 0.9rem;
 }
 
-.info-table th, .info-table td {
-    padding: 7px 10px;
-    text-align: left;
-    font-size: 0.97em;
+/* Trip Route */
+.trip-route {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 30px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 2px solid #dee2e6;
 }
 
-.info-table th {
-    color: #888;
+.route-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.route-item i {
+    color: #ff9800;
+    font-size: 1.4rem;
+}
+
+.route-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.route-arrow i {
+    font-size: 1.5rem;
+    color: #ff9800;
+}
+
+.route-arrow .distance {
+    font-size: 0.85rem;
+    color: #6c757d;
     font-weight: 500;
 }
 
-.info-table td {
-    color: #222;
+/* Journey Cards */
+.journey-card {
+    margin: 24px 30px;
+    border: 2px solid #e9ecef;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
-.action-row {
+.journey-card:hover {
+    border-color: #ff9800;
+    box-shadow: 0 8px 24px rgba(255, 152, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+.journey-header {
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+    padding: 14px 20px;
     display: flex;
-    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.journey-header i {
+    font-size: 1.2rem;
+}
+
+.journey-details {
+    padding: 20px;
+    background: white;
+}
+
+.detail-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 16px;
+}
+
+.detail-row:last-of-type {
+    margin-bottom: 20px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: flex-start;
     gap: 12px;
-    margin-top: 30px;
 }
 
-.btn-main {
-    background: #ff9900;
-    color: #fff;
+.detail-item i {
+    color: #ff9800;
+    font-size: 1.1rem;
+    margin-top: 2px;
+}
+
+.detail-item .label {
+    display: block;
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.detail-item .value {
+    display: block;
+    font-size: 0.95rem;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: linear-gradient(135deg, #fff5e6 0%, #ffe8cc 100%);
+    border-radius: 10px;
+    border: 2px solid #ff9800;
+}
+
+.price-row span:first-child {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: 600;
+}
+
+.price-row .price {
+    font-size: 1.5rem;
+    color: #ff9800;
+    font-weight: 700;
+}
+
+/* Passengers Info */
+.passengers-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 30px;
+    background: #f8f9fa;
+    margin: 24px 30px 30px;
+    border-radius: 12px;
+    border: 2px solid #e9ecef;
+}
+
+.passengers-info i {
+    font-size: 1.8rem;
+    color: #ff9800;
+}
+
+.passengers-info .label {
+    display: block;
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.passengers-info .value {
+    display: block;
+    font-size: 1rem;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+/* Payment Form Card */
+.payment-form-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    overflow: hidden;
+    position: sticky;
+    top: 20px;
+    animation: slideInRight 0.6s ease-out;
+}
+
+.payment-header {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+    padding: 24px 30px;
+    color: white;
+}
+
+.payment-header h3 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.payment-header h3 i {
+    margin-right: 10px;
+}
+
+/* Total Amount Display */
+.total-amount-display {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    padding: 24px 30px;
+    text-align: center;
+    color: white;
+}
+
+.total-amount-display .amount-label {
+    display: block;
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-bottom: 8px;
+}
+
+.total-amount-display .amount-value {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+/* Payment Form */
+.payment-form {
+    padding: 30px;
+}
+
+.form-group {
+    margin-bottom: 28px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 16px;
+}
+
+.form-group label i {
+    margin-right: 8px;
+    color: #ff9800;
+}
+
+/* Payment Methods */
+.payment-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.payment-method-option {
+    cursor: pointer;
+}
+
+.payment-method-option input[type="radio"] {
+    display: none;
+}
+
+.method-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.method-card i {
+    font-size: 1.8rem;
+    color: #6c757d;
+}
+
+.method-card span {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.payment-method-option input[type="radio"]:checked + .method-card {
+    border-color: #ff9800;
+    background: linear-gradient(135deg, #fff5e6 0%, #ffe8cc 100%);
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.2);
+}
+
+.payment-method-option input[type="radio"]:checked + .method-card i {
+    color: #ff9800;
+}
+
+.method-card:hover {
+    border-color: #ff9800;
+    transform: translateX(4px);
+}
+
+/* Payment Info Box */
+.payment-info-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+    background: #e7f3ff;
+    border: 2px solid #90caf9;
+    border-radius: 10px;
+    margin-bottom: 28px;
+}
+
+.payment-info-box i {
+    font-size: 1.5rem;
+    color: #1976d2;
+    margin-top: 2px;
+}
+
+.payment-info-box strong {
+    display: block;
+    font-size: 0.95rem;
+    color: #1565c0;
+    margin-bottom: 4px;
+}
+
+.payment-info-box p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #424242;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-back,
+.btn-pay {
+    flex: 1;
+    padding: 16px 24px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
     border: none;
-    padding: 12px 32px;
-    border-radius: 6px;
-    font-weight: 600;
-    font-size: 1.07em;
-    cursor: pointer;
-    transition: background 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
-.btn-main:hover {
-    background: #e68a00;
+.btn-back {
+    background: white;
+    color: #2c3e50;
+    border: 2px solid #e9ecef;
+    text-decoration: none;
 }
 
-.btn-outline {
-    background: #fff;
-    color: #ff9900;
-    border: 2px solid #ff9900;
-    padding: 11px 28px;
-    border-radius: 6px;
-    font-weight: 600;
-    font-size: 1.07em;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+.btn-back:hover {
+    border-color: #2c3e50;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(44, 62, 80, 0.2);
 }
 
-.btn-outline:hover {
-    background: #ff9900;
-    color: #fff;
+.btn-pay {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+}
+
+.btn-pay:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 152, 0, 0.5);
+}
+
+/* Animations */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .payment-container {
+        grid-template-columns: 1fr;
+    }
+
+    .payment-form-card {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-title h1 {
+        font-size: 1.8rem;
+    }
+
+    .page-title p {
+        font-size: 0.95rem;
+    }
+
+    .payment-wrapper {
+        margin: 20px auto;
+        padding: 0 15px;
+    }
+
+    .summary-header {
+        padding: 20px;
+    }
+
+    .trip-route {
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px;
+    }
+
+    .route-arrow {
+        transform: rotate(90deg);
+    }
+
+    .journey-card {
+        margin: 20px 15px;
+    }
+
+    .detail-row {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .passengers-info {
+        margin: 20px 15px 25px;
+        padding: 16px;
+    }
+
+    .payment-form {
+        padding: 20px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn-back,
+    .btn-pay {
+        width: 100%;
+    }
 }

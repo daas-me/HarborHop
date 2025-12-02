@@ -4,10 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Reservations - HarborHop</title>
+    <title>Manage Booking - HarborHop</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
-    <link rel="stylesheet" href="{% static 'css/reservations.css' %}">
+    <link rel="stylesheet" href="{% static 'css/reservations.css' %}?v=1">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon_io/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
@@ -16,13 +16,20 @@
 </head>
 <body class="reservations-page">
     <header>
-        <div class="logo-container">
-            <a href="{% url 'home' %}" class="logo">HARBOR<span>hop</span></a>
-            <p class="tagline">Hop aboard. Sail beyond</p>
-        </div>
-        <nav>
-            <a href="{% url 'reservations' %}" class="active">Manage Booking</a>
-            <a href="#">Latest Offaers</a>
+    <div class="logo-container">
+        <a href="{% url 'home' %}" class="logo">HARBOR<span>hop</span></a>
+        <p class="tagline">Hop aboard. Sail beyond</p>
+    </div>
+    <nav>
+        {% if user.is_authenticated %}
+            <!-- Admin Dashboard Button - Only visible to admin users -->
+            {% if user.profile.is_admin_user %}
+                <a href="{% url 'admin_dashboard' %}" class="admin-dashboard-link">
+                    <i class="fa-solid fa-chart-line dashboard-icon"></i> Admin Access
+                </a>
+            {% endif %}
+            <a href="{% url 'reservations' %}">Manage Booking</a>
+            <a href="#">Latest Offers</a>
             <a href="#">Contact Us</a>
             <div class="nav-divider"></div>
             <a href="#" class="language-link">PH</a>
@@ -30,12 +37,21 @@
             <a href="#" class="language-link">EN</a>
             <a href="{% url 'profile_settings' %}" class="user-name-btn">{{ user.username }}</a>
             <a href="{% url 'logout' %}" class="login-btn">Log out</a>
-        </nav>
-    </header>
+        {% else %}
+            <a href="#">Latest Offers</a>
+            <a href="#">Contact Us</a>
+            <div class="nav-divider"></div>
+            <a href="#" class="language-link">PH</a>
+            <span class="language-separator">|</span>
+            <a href="#" class="language-link">EN</a>
+            <a href="{% url 'login' %}" class="login-btn">Log In</a>
+        {% endif %}
+    </nav>
+</header>
 
     <main class="reservations-container">
         <section class="page-header">
-            <h1>My Reservations</h1>
+            <h1>Manage Booking</h1>
             <p>Track your active and upcoming ferry reservations.</p>
         </section>
 
