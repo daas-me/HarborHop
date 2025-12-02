@@ -23,7 +23,8 @@
         <p class="tagline">Hop aboard. Sail beyond</p>
     </div>
     <nav>
-    {% if user.is_authenticated %}
+        <a href="{% url 'home' %}">Home</a>
+        {% if user.is_authenticated %}
         <!-- Admin Dashboard Button - Only visible to admin users -->
         {% if user.profile.is_admin_user %}
             <a href="{% url 'admin_dashboard' %}" class="admin-dashboard-link">
