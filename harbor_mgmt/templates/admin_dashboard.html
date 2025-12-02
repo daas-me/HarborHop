@@ -7,12 +7,13 @@
     <meta http-equiv="Cache-Control" content="no-store" />
     <title>HarborHop - Admin Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/admin.css' %}?v=4">
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}?v=6">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon_io/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
     <link rel="manifest" href="{% static 'images/favicon_io/site.webmanifest' %}">
     <script src="https://kit.fontawesome.com/1256e3cde2.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 
 <script>
@@ -91,7 +92,7 @@ window.addEventListener('pageshow', function(event) {
                         <div class="stat-icon"><i class="fa-solid fa-ticket"></i></div>
                         <div class="stat-info">
                             <h3>Total Bookings</h3>
-                            <p class="stat-number">0</p>
+                            <p class="stat-number">{{ total_bookings }}</p>
                         </div>
                     </div>
                     
@@ -128,6 +129,34 @@ window.addEventListener('pageshow', function(event) {
                     </div>
                 </div>
 
+                <!-- User Growth Chart Section -->
+                <div class="chart-section">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3><i class="fa-solid fa-chart-line"></i> Monthly User Growth</h3>
+                            <div class="chart-controls">
+                                <button class="action-btn chart-toggle active" type="button" onclick="toggleChart('monthly')">
+                                    <i class="fa-solid fa-calendar-plus"></i>
+                                    <span>Monthly New Users</span>
+                                </button>
+
+                                <button class="action-btn chart-toggle" type="button" onclick="toggleChart('cumulative')">
+                                    <i class="fa-solid fa-chart-area"></i>
+                                    <span>Total Users Growth</span>
+                                </button>
+                            </div>
+
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="userGrowthChart" 
+                                    data-labels='{{ chart_labels|safe }}'
+                                    data-monthly='{{ chart_data|safe }}'
+                                    data-cumulative='{{ cumulative_data|safe }}'>
+                            </canvas>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Quick Actions -->
                 <div class="quick-actions">
                     <h3>Quick Actions</h3>
@@ -140,7 +169,7 @@ window.addEventListener('pageshow', function(event) {
                             <span class="icon"><i class="fa-solid fa-ship"></i></span>
                             <span>Add Ferry Route</span>
                         </button>
-                        <button class="action-btn" onclick='window.location.href="{% url "admin_users" %}"'>
+                        <button class="action-btn" onclick="window.location.href='{% url 'admin_users' %}'">
                             <span class="icon"><i class="fa-solid fa-user-plus"></i></span>
                             <span>Add User</span>
                         </button>
@@ -153,5 +182,8 @@ window.addEventListener('pageshow', function(event) {
             </div>
         </main>
     </div>
+
+    <!-- Load chart script -->
+    <script src="{% static 'js/admin_chart.js' %}?v=1"></script>
 </body>
 </html>

@@ -498,21 +498,68 @@ def admin_dashboard(request):
 
     # Compute statistics
     from django.contrib.auth.models import User
+    from django.db.models import Count
+    from django.db.models.functions import TruncMonth
+    from datetime import timedelta
+    
+    total_bookings = Booking.objects.count()  # Get actual booking count
     total_users = User.objects.count()
     admin_users = UserProfile.objects.filter(is_admin_user=True).count()
     active_users = User.objects.filter(is_active=True).count()
 
-    from django.utils import timezone
-    from datetime import timedelta
-    start_of_month = timezone.now().replace(day=1)
+    # Calculate new users this month
+    now = timezone.now()
+    start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     new_this_month = User.objects.filter(date_joined__gte=start_of_month).count()
+    
+    # Get user growth data for the last 12 months
+    twelve_months_ago = now - timedelta(days=365)
+    
+    # Query to get monthly user registrations
+    monthly_users = User.objects.filter(
+        date_joined__gte=twelve_months_ago
+    ).annotate(
+        month=TruncMonth('date_joined')
+    ).values('month').annotate(
+        count=Count('id')
+    ).order_by('month')
+    
+    # Prepare chart data
+    chart_labels = []
+    chart_data = []
+    
+    # Fill in the data
+    for entry in monthly_users:
+        # Format: "Jan 2024", "Feb 2024", etc.
+        month_str = entry['month'].strftime('%b %Y')
+        chart_labels.append(month_str)
+        chart_data.append(entry['count'])
+    
+    # Calculate cumulative user growth
+    cumulative_data = []
+    cumulative_sum = 0
+    for count in chart_data:
+        cumulative_sum += count
+        cumulative_data.append(cumulative_sum)
+    
+    # Handle case when there's no data
+    if not chart_labels:
+        # Provide default empty data
+        current_month = now.strftime('%b %Y')
+        chart_labels = [current_month]
+        chart_data = [0]
+        cumulative_data = [0]
 
     context = {
         'user': request.user,
+        'total_bookings': total_bookings,
         'total_users': total_users,
         'admin_users': admin_users,
         'active_users': active_users,
         'new_this_month': new_this_month,
+        'chart_labels': json.dumps(chart_labels),
+        'chart_data': json.dumps(chart_data),
+        'cumulative_data': json.dumps(cumulative_data),
     }
     return render(request, 'admin_dashboard.html', context)
 
