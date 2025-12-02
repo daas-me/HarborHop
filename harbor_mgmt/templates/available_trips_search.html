@@ -39,7 +39,7 @@
                     </a>
                 {% endif %}
                 <a href="{% url 'reservations' %}">Manage Booking</a>
-                    <a href="#">Latest Offers</a>
+                    <a href="{% url 'latest_offer' %}">Latest Offers</a>
                     <a href="{% url 'contact_us' %}">Contact Us</a>
                     <div class="nav-divider"></div>
                     <a href="#" class="language-link">PH</a>
@@ -48,7 +48,7 @@
                     <a href="{% url 'profile_settings' %}" class="user-name-btn">{{ user.username }}</a>
                     <a href="{% url 'logout' %}" class="login-btn">Log out</a>
                 {% else %}
-                    <a href="#">Latest Offers</a>
+                    <a href="{% url 'latest_offer' %}">Latest Offers</a>
                     <a href="{% url 'contact_us' %}" class="contact-btn">Contact Us</a>
                     <div class="nav-divider"></div>
                     <a href="#" class="language-link">PH</a>
