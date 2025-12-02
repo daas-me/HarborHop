@@ -7,7 +7,7 @@
     <title>Reservation Confirmation - HarborHop</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
-    <link rel="stylesheet" href="{% static 'css/reservation_confirmation.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/reservation_confirmation.css' %}?v=2">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon_io/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
@@ -51,7 +51,7 @@
     <!-- Success Header -->
     <div class="success-header">
         <div class="success-icon">
-            {% if booking.status == 'confirmed' %}
+            {% if booking.status == 'confirmed' or booking.status == 'completed' %}
                 <i class="fa-solid fa-circle-check"></i>
             {% elif booking.status == 'expired' or booking.status == 'cancelled' %}
                 <i class="fa-solid fa-circle-xmark"></i>
@@ -60,7 +60,7 @@
             {% endif %}
         </div>
         <h1>
-            {% if booking.status == 'confirmed' %}
+            {% if booking.status == 'confirmed' or booking.status == 'completed' %}
                 Booking Confirmed!
             {% elif booking.status == 'expired' %}
                 Reservation Expired
@@ -73,7 +73,7 @@
         <p>
             {% if booking.status == 'reserved' or booking.status == 'pending' %}
                 Complete your payment to confirm your booking
-            {% elif booking.status == 'confirmed' %}
+            {% elif booking.status == 'confirmed' or booking.status == 'completed' %}
                 Your booking has been successfully confirmed
             {% endif %}
         </p>
@@ -85,14 +85,14 @@
                 <span><i class="fa-solid fa-hourglass-half"></i> Your seats are temporarily reserved! Complete payment within 48 hours.</span>
             {% elif booking.status == 'pending' %}
                 <span><i class="fa-solid fa-clock"></i> Payment Pending</span>
-            {% elif booking.status == 'confirmed' %}
+            {% elif booking.status == 'confirmed' or booking.status == 'completed' %}
                 <span style="color: #4caf50"><i class="fa-solid fa-circle-check"></i> Booking Confirmed</span>
             {% elif booking.status == 'expired' %}
                 <span style="color: #e53935"><i class="fa-solid fa-circle-xmark"></i> Reservation Expired</span>
             {% elif booking.status == 'cancelled' %}
                 <span style="color: #ff9800"><i class="fa-solid fa-ban"></i> Booking Cancelled</span>
             {% endif %}
-            {% if booking.status == 'pending' %}
+            {% if booking.status == 'reserved' and booking.reserved_until %}
                 <div class="countdown-timer" id="countdown-timer"></div>
             {% endif %}
         </div>
@@ -119,38 +119,42 @@
 
         <!-- Outbound Trip Details -->
         {% if booking.details.outbound %}
-        <div class="reservation-section" style="border: 1px solid #eee; border-radius: 8px; margin-bottom: 16px; padding: 18px;">
-            <div><i class="fa-solid fa-ship"></i>  DEPARTURE</div>
-            <div><b>Company:</b> {{ booking.details.outbound.company }}</div>
-            <div><b>Vessel:</b> {{ booking.details.outbound.vessel }}</div>
-            <div><b>Route:</b> {{ booking.details.outbound.originName }} → {{ booking.details.outbound.destinationName }}</div>
-            <div><b>Departure Date:</b> {{ booking.details.outbound.departureDate }}</div>
-            <div><b>Departure Time:</b> {{ booking.details.outbound.departureTime }}</div>
-            <div><b>Accommodation:</b> {{ booking.details.outbound.accommodationName }}</div>
-            <div><b>Seat Type:</b> {{ booking.details.outbound.seatType }}</div>
-            <div><b>Aircon:</b> {{ booking.details.outbound.aircon|yesno:"YES,NO" }}</div>
-            <div><b>Price:</b> <span style="color: #ff9800; font-size: 1.2rem;">₱{{ booking.details.outbound.price|floatformat:2 }}</span></div>
+        <div class="reservation-section journey-card">
+            <div class="journey-header"><i class="fa-solid fa-ship"></i>  DEPARTURE</div>
+            <div class="journey-body">
+                <div><b>Company:</b> {{ booking.details.outbound.company }}</div>
+                <div><b>Vessel:</b> {{ booking.details.outbound.vessel }}</div>
+                <div><b>Route:</b> {{ booking.details.outbound.originName }} → {{ booking.details.outbound.destinationName }}</div>
+                <div><b>Departure Date:</b> {{ booking.details.outbound.departureDate }}</div>
+                <div><b>Departure Time:</b> {{ booking.details.outbound.departureTime }}</div>
+                <div><b>Accommodation:</b> {{ booking.details.outbound.accommodationName }}</div>
+                <div><b>Seat Type:</b> {{ booking.details.outbound.seatType }}</div>
+                <div><b>Aircon:</b> {{ booking.details.outbound.aircon|yesno:"YES,NO" }}</div>
+                <div><b>Price:</b> <span style="color: #ff9800; font-size: 1.2rem;">₱{{ booking.details.outbound.price|floatformat:2 }}</span></div>
+            </div>
         </div>
         {% endif %}
 
         <!-- Return Trip Details -->
         {% if booking.details.return %}
-        <div class="reservation-section" style="border: 1px solid #eee; border-radius: 8px; margin-bottom: 16px; padding: 18px;">
-            <div><i class="fa-solid fa-ship"></i> RETURN</div>
-            <div><b>Company:</b> {{ booking.details.return.company }}</div>
-            <div><b>Vessel:</b> {{ booking.details.return.vessel }}</div>
-            <div><b>Route:</b> {{ booking.details.return.originName }} → {{ booking.details.return.destinationName }}</div>
-            <div><b>Departure Date:</b> {{ booking.details.return.departureDate }}</div>
-            <div><b>Departure Time:</b> {{ booking.details.return.departureTime }}</div>
-            <div><b>Accommodation:</b> {{ booking.details.return.accommodationName }}</div>
-            <div><b>Seat Type:</b> {{ booking.details.return.seatType }}</div>
-            <div><b>Aircon:</b> {{ booking.details.return.aircon|yesno:"YES,NO" }}</div>
-            <div><b>Price:</b> <span style="color: #ff9800; font-size: 1.2rem;">₱{{ booking.details.return.price|floatformat:2 }}</span></div>
+        <div class="reservation-section journey-card">
+            <div class="journey-header"><i class="fa-solid fa-ship"></i> RETURN</div>
+            <div class="journey-body">
+                <div><b>Company:</b> {{ booking.details.return.company }}</div>
+                <div><b>Vessel:</b> {{ booking.details.return.vessel }}</div>
+                <div><b>Route:</b> {{ booking.details.return.originName }} → {{ booking.details.return.destinationName }}</div>
+                <div><b>Departure Date:</b> {{ booking.details.return.departureDate }}</div>
+                <div><b>Departure Time:</b> {{ booking.details.return.departureTime }}</div>
+                <div><b>Accommodation:</b> {{ booking.details.return.accommodationName }}</div>
+                <div><b>Seat Type:</b> {{ booking.details.return.seatType }}</div>
+                <div><b>Aircon:</b> {{ booking.details.return.aircon|yesno:"YES,NO" }}</div>
+                <div><b>Price:</b> <span style="color: #ff9800; font-size: 1.2rem;">₱{{ booking.details.return.price|floatformat:2 }}</span></div>
+            </div>
         </div>
         {% endif %}
 
         <!-- Passengers -->
-        <div class="reservation-section">
+        <div class="reservation-section passengers-section">
             <div>
                 <div class="reservation-label">Adults</div>
                 <div class="reservation-value">{{ booking.adults }}</div>
@@ -168,14 +172,15 @@
         </div>
 
         <!-- Total Price -->
-        <div class="reservation-section">
+        <div class="reservation-section total-section">
             <div class="reservation-label">Total Amount</div>
             <div class="reservation-value">₱{{ booking.total_price|floatformat:2 }}</div>
         </div>
 
-        <!-- Action Buttons -->
+        <!-- Action Buttons - Only show for unpaid bookings -->
+        {% if booking.status == 'reserved' or booking.status == 'pending' %}
         <div class="reservation-actions">
-            <a href="{% url 'passenger_info' %}" class="btn"><i class="fa-solid fa-arrow-left"></i> Back</a>
+            <a href="{% url 'reservations' %}" class="btn"><i class="fa-solid fa-arrow-left"></i> Back to Bookings</a>
             <a href="{% url 'payment' booking.id %}" class="btn btn-primary"><i class="fa-solid fa-credit-card"></i> Proceed to Payment</a>
             <form action="{% url 'cancel_reservation' booking.id %}" method="post" style="display:inline-block; flex: 1; min-width: 150px;">
                 {% csrf_token %}
@@ -185,6 +190,14 @@
                 </button>
             </form>
         </div>
+        {% else %}
+        <!-- For paid/confirmed bookings - Only show back button -->
+        <div class="reservation-actions">
+            <a href="{% url 'reservations' %}" class="btn btn-primary" style="width: 100%;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Manage Booking
+            </a>
+        </div>
+        {% endif %}
     </div>
 
     <footer>
@@ -242,7 +255,7 @@
     </footer>
 
     <script>
-    {% if booking.status == 'pending' %}
+    {% if booking.status == 'reserved' and booking.reserved_until %}
     function startCountdown(until) {
         const timerEl = document.getElementById('countdown-timer');
         function update() {

@@ -7,7 +7,7 @@
     <title>Manage Booking - HarborHop</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
-    <link rel="stylesheet" href="{% static 'css/reservations.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/reservations.css' %}?v=2">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon_io/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
@@ -22,7 +22,6 @@
     </div>
     <nav>
         {% if user.is_authenticated %}
-            <!-- Admin Dashboard Button - Only visible to admin users -->
             {% if user.profile.is_admin_user %}
                 <a href="{% url 'admin_dashboard' %}" class="admin-dashboard-link">
                     <i class="fa-solid fa-chart-line dashboard-icon"></i> Admin Access
@@ -55,49 +54,141 @@
             <p>Track your active and upcoming ferry reservations.</p>
         </section>
 
-        {% if reservations %}
-            <div class="reservations-grid">
-                {% for booking in reservations %}
-                    <article class="reservation-card">
-                        <header class="reservation-card__header">
-                            <div>
-                                <div class="route">{{ booking.origin }} → {{ booking.destination }}</div>
-                                <div class="trip-type">{{ booking.get_trip_type_display }}</div>
-                            </div>
-                            <span class="status-badge status-{{ booking.status }}">{{ booking.get_status_display }}</span>
-                        </header>
-
-                        <div class="reservation-card__body">
-                            <div class="reservation-detail">
-                                <span class="label">Booking Reference</span>
-                                <span class="value">{{ booking.booking_reference }}</span>
-                            </div>
-                            <div class="reservation-detail">
-                                <span class="label">Departure Date</span>
-                                <span class="value">{{ booking.departure_date|date:"M d, Y" }}</span>
-                            </div>
-                            {% if booking.return_date %}
-                            <div class="reservation-detail">
-                                <span class="label">Return Date</span>
-                                <span class="value">{{ booking.return_date|date:"M d, Y" }}</span>
-                            </div>
-                            {% endif %}
-                            <div class="reservation-detail">
-                                <span class="label">Passengers</span>
-                                <span class="value">Adults: {{ booking.adults }}{% if booking.children %}, Children: {{ booking.children }}{% endif %}</span>
-                            </div>
-                            <div class="reservation-detail">
-                                <span class="label">Total Price</span>
-                                <span class="value">₱{{ booking.total_price|floatformat:2 }}</span>
-                            </div>
+        {% if has_reservations %}
+            <!-- Reserved/Unpaid Section -->
+            {% if unpaid_bookings %}
+                <section class="bookings-section">
+                    <div class="section-header reserved-header">
+                        <div class="section-title">
+                            <i class="fa-solid fa-clock"></i>
+                            <h2>Reserved / Unpaid</h2>
                         </div>
+                        <span class="section-count">{{ unpaid_bookings|length }} booking(s)</span>
+                    </div>
+                    
+                    <div class="reservations-grid">
+                        {% for booking in unpaid_bookings %}
+                                <article class="reservation-card reserved-card">
+                                    <div class="urgent-banner">
+                                        <i class="fa-solid fa-exclamation-triangle"></i>
+                                        <span>Payment Required</span>
+                                    </div>
+                                    
+                                    <header class="reservation-card__header">
+                                        <div>
+                                            <div class="route">{{ booking.origin }} → {{ booking.destination }}</div>
+                                            <div class="trip-type">{{ booking.get_trip_type_display }}</div>
+                                        </div>
+                                        <span class="status-badge status-{{ booking.status }}">{{ booking.get_status_display }}</span>
+                                    </header>
 
-                        <footer class="reservation-card__footer">
-                            <a href="{% url 'reservation_confirmation' booking.id %}" class="btn btn-primary">View Details</a>
-                        </footer>
-                    </article>
-                {% endfor %}
-            </div>
+                                    <div class="reservation-card__body">
+                                        <div class="reservation-detail">
+                                            <span class="label">Booking Reference</span>
+                                            <span class="value">{{ booking.booking_reference }}</span>
+                                        </div>
+                                        <div class="reservation-detail">
+                                            <span class="label">Departure Date</span>
+                                            <span class="value">{{ booking.departure_date|date:"M d, Y" }}</span>
+                                        </div>
+                                        {% if booking.return_date %}
+                                        <div class="reservation-detail">
+                                            <span class="label">Return Date</span>
+                                            <span class="value">{{ booking.return_date|date:"M d, Y" }}</span>
+                                        </div>
+                                        {% endif %}
+                                        <div class="reservation-detail">
+                                            <span class="label">Passengers</span>
+                                            <span class="value">Adults: {{ booking.adults }}{% if booking.children %}, Children: {{ booking.children }}{% endif %}</span>
+                                        </div>
+                                        <div class="reservation-detail">
+                                            <span class="label">Total Price</span>
+                                            <span class="value">₱{{ booking.total_price|floatformat:2 }}</span>
+                                        </div>
+                                        {% if booking.reserved_until %}
+                                        <div class="reservation-detail expires-soon">
+                                            <span class="label">
+                                                <i class="fa-solid fa-hourglass-half"></i> Expires
+                                            </span>
+                                            <span class="value">{{ booking.reserved_until|date:"M d, Y g:i A" }}</span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <footer class="reservation-card__footer">
+                                        <a href="{% url 'reservation_confirmation' booking.id %}" class="btn btn-primary btn-pay-now">
+                                            <i class="fa-solid fa-credit-card"></i> Pay Now
+                                        </a>
+                                    </footer>
+                                </article>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+
+            <!-- Upcoming/Paid Section -->
+            {% if paid_bookings %}
+                <section class="bookings-section">
+                    <div class="section-header paid-header">
+                        <div class="section-title">
+                            <i class="fa-solid fa-check-circle"></i>
+                            <h2>Upcoming / Booked</h2>
+                        </div>
+                        <span class="section-count">{{ paid_bookings|length }} booking(s)</span>
+                    </div>
+                    
+                    <div class="reservations-grid">
+                        {% for booking in paid_bookings %}
+                                <article class="reservation-card paid-card">
+                                    <div class="paid-banner">
+                                        <i class="fa-solid fa-check"></i>
+                                        <span>Paid & Confirmed</span>
+                                    </div>
+                                    
+                                    <header class="reservation-card__header">
+                                        <div>
+                                            <div class="route">{{ booking.origin }} → {{ booking.destination }}</div>
+                                            <div class="trip-type">{{ booking.get_trip_type_display }}</div>
+                                        </div>
+                                        <span class="status-badge status-{{ booking.status }}">{{ booking.get_status_display }}</span>
+                                    </header>
+
+                                    <div class="reservation-card__body">
+                                        <div class="reservation-detail">
+                                            <span class="label">Booking Reference</span>
+                                            <span class="value">{{ booking.booking_reference }}</span>
+                                        </div>
+                                        <div class="reservation-detail">
+                                            <span class="label">Departure Date</span>
+                                            <span class="value">{{ booking.departure_date|date:"M d, Y" }}</span>
+                                        </div>
+                                        {% if booking.return_date %}
+                                        <div class="reservation-detail">
+                                            <span class="label">Return Date</span>
+                                            <span class="value">{{ booking.return_date|date:"M d, Y" }}</span>
+                                        </div>
+                                        {% endif %}
+                                        <div class="reservation-detail">
+                                            <span class="label">Passengers</span>
+                                            <span class="value">Adults: {{ booking.adults }}{% if booking.children %}, Children: {{ booking.children }}{% endif %}</span>
+                                        </div>
+                                        <div class="reservation-detail">
+                                            <span class="label">Total Price</span>
+                                            <span class="value">₱{{ booking.total_price|floatformat:2 }}</span>
+                                        </div>
+                                    </div>
+
+                                    <footer class="reservation-card__footer">
+                                        <a href="{% url 'reservation_confirmation' booking.id %}" class="btn btn-primary">
+                                            View Details
+                                        </a>
+                                    </footer>
+                                </article>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+
         {% else %}
             <div class="empty-state">
                 <i class="fa-solid fa-calendar-xmark"></i>
@@ -123,7 +214,6 @@
                 <ul class="footer-links">
                     <li><a href="{% url 'home' %}">Home</a></li>
                     <li><a href="{% url 'reservations' %}">Reservations</a></li>
-                    <li></li>
                 </ul>
             </div>
 
