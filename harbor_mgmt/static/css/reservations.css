@@ -1,3 +1,7 @@
+/* ================================================
+   RESERVATIONS PAGE STYLES - COMPLETE FIXED VERSION
+   ================================================ */
+
 .reservations-page {
     background: url('https://images.unsplash.com/photo-1554254464-7046778097bf?fm=jpg&q=95&w=3000&auto=format&fit=crop') no-repeat center center fixed;
     background-size: cover;
@@ -12,7 +16,9 @@
     padding-bottom: 60px;
 }
 
-/* Page Header */
+/* ================================================
+   PAGE HEADER
+   ================================================ */
 .page-header {
     text-align: center;
     margin-bottom: 40px;
@@ -40,7 +46,82 @@
     margin: 0;
 }
 
-/* Reservations Grid */
+/* ================================================
+   BOOKINGS SECTION
+   ================================================ */
+.bookings-section {
+    margin-bottom: 50px;
+}
+
+.section-header {
+    background: white;
+    padding: 20px 30px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.section-title i {
+    font-size: 1.8rem;
+}
+
+.section-title h2 {
+    font-size: 1.6rem;
+    margin: 0;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.section-count {
+    background: #f0f0f0;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #666;
+}
+
+/* Reserved Header Styling */
+.reserved-header {
+    border-left: 5px solid #ff9800;
+}
+
+.reserved-header .section-title i {
+    color: #ff9800;
+}
+
+.reserved-header .section-count {
+    background: linear-gradient(135deg, #fff5e6 0%, #ffe8cc 100%);
+    color: #ff9800;
+}
+
+/* Paid Header Styling */
+.paid-header {
+    border-left: 5px solid #4caf50;
+}
+
+.paid-header .section-title i {
+    color: #4caf50;
+}
+
+.paid-header .section-count {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    color: #4caf50;
+}
+
+/* ================================================
+   RESERVATIONS GRID
+   ================================================ */
 .reservations-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -48,7 +129,9 @@
     align-items: start;
 }
 
-/* Reservation Card */
+/* ================================================
+   RESERVATION CARD BASE
+   ================================================ */
 .reservation-card {
     background: white;
     border-radius: 16px;
@@ -59,6 +142,7 @@
     flex-direction: column;
     transition: all 0.3s ease;
     animation: fadeInUp 0.6s ease-out;
+    position: relative;
 }
 
 .reservation-card:hover {
@@ -66,7 +150,61 @@
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
 }
 
-/* Card Header */
+/* Reserved Card Specific Styling */
+.reserved-card {
+    border: 2px solid #ff9800;
+}
+
+.reserved-card:hover {
+    box-shadow: 0 15px 40px rgba(255, 152, 0, 0.3);
+}
+
+/* Paid Card Specific Styling */
+.paid-card {
+    border: 2px solid #4caf50;
+}
+
+.paid-card:hover {
+    box-shadow: 0 15px 40px rgba(76, 175, 80, 0.3);
+}
+
+/* ================================================
+   BANNERS
+   ================================================ */
+.urgent-banner {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+    color: white;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.urgent-banner i {
+    font-size: 1rem;
+    animation: pulse 1.5s infinite;
+}
+
+.paid-banner {
+    background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+    color: white;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ================================================
+   CARD HEADER
+   ================================================ */
 .reservation-card__header {
     background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
     padding: 20px 24px;
@@ -89,7 +227,9 @@
     margin: 0;
 }
 
-/* Status Badges */
+/* ================================================
+   STATUS BADGES
+   ================================================ */
 .status-badge {
     font-size: 0.75rem;
     padding: 8px 14px;
@@ -131,7 +271,9 @@
     color: white;
 }
 
-/* Card Body */
+/* ================================================
+   CARD BODY
+   ================================================ */
 .reservation-card__body {
     padding: 24px;
     flex: 1;
@@ -166,6 +308,28 @@
     text-align: right;
 }
 
+/* Expires Soon Styling */
+.reservation-detail.expires-soon {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    border: 2px solid #ff9800;
+    padding: 12px;
+    margin: 16px -8px 0;
+    border-radius: 8px;
+}
+
+.reservation-detail.expires-soon .label {
+    color: #ff9800;
+    font-weight: 700;
+}
+
+.reservation-detail.expires-soon .label i {
+    margin-right: 4px;
+}
+
+.reservation-detail.expires-soon .value {
+    color: #f57c00;
+}
+
 /* Special styling for booking reference */
 .reservation-detail:first-child .value {
     color: #ff9800;
@@ -173,12 +337,14 @@
 }
 
 /* Special styling for price */
-.reservation-detail:last-child .value {
+.reservation-card__body .reservation-detail:nth-last-child(2) .value {
     color: #ff9800;
     font-size: 1.2rem;
 }
 
-/* Card Footer */
+/* ================================================
+   CARD FOOTER
+   ================================================ */
 .reservation-card__footer {
     padding: 0 24px 24px;
     display: flex;
@@ -211,7 +377,17 @@
     font-size: 1.1rem;
 }
 
-/* Empty State */
+.btn-pay-now::after {
+    content: '';
+}
+
+.btn-pay-now i {
+    font-size: 1rem;
+}
+
+/* ================================================
+   EMPTY STATE
+   ================================================ */
 .empty-state {
     background: white;
     border-radius: 20px;
@@ -264,7 +440,9 @@
     box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
 }
 
-/* Animations */
+/* ================================================
+   ANIMATIONS
+   ================================================ */
 @keyframes fadeInDown {
     from {
         opacity: 0;
@@ -287,7 +465,20 @@
     }
 }
 
-/* Responsive Design */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+/* ================================================
+   RESPONSIVE DESIGN
+   ================================================ */
 @media (max-width: 768px) {
     .reservations-container {
         width: 95%;
@@ -300,6 +491,17 @@
 
     .page-header h1 {
         font-size: 2rem;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 20px;
+    }
+
+    .section-title h2 {
+        font-size: 1.3rem;
     }
 
     .reservations-grid {

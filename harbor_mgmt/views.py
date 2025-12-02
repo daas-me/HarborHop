@@ -363,16 +363,25 @@ def cancel_reservation(request, booking_id):
 
 @login_required
 def reservations_view(request):
-    active_statuses = ['pending', 'reserved', 'confirmed']
-    reservations = (
+    """Display reservations separated by payment status"""
+    
+    # Get all active bookings (exclude cancelled and expired)
+    all_reservations = (
         Booking.objects
-        .filter(user=request.user, status__in=active_statuses)
+        .filter(user=request.user)
+        .exclude(status='cancelled')
+        .exclude(status='expired')
         .order_by('departure_date', '-created_at')
     )
-
+    
+    # Separate into unpaid (reserved/pending) and paid (confirmed/completed)
+    unpaid_bookings = all_reservations.filter(status__in=['reserved', 'pending'])
+    paid_bookings = all_reservations.filter(status__in=['confirmed', 'completed'])
+    
     return render(request, 'reservations.html', {
-        'reservations': reservations,
-        'active_statuses': active_statuses,
+        'unpaid_bookings': unpaid_bookings,
+        'paid_bookings': paid_bookings,
+        'has_reservations': all_reservations.exists(),
     })
 
 
