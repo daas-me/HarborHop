@@ -7,7 +7,7 @@
     <title>Reservation Confirmation - HarborHop</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
-    <link rel="stylesheet" href="{% static 'css/reservation_confirmation.css' %}?v=2">
+    <link rel="stylesheet" href="{% static 'css/reservation_confirmation.css' %}?v=3">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon_io/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
@@ -28,23 +28,23 @@
                     </a>
                 {% endif %}
                  <a href="{% url 'reservations' %}">Manage Booking</a>
-                <a href="#">Latest Offers</a>
-                <a href="#">Contact Us</a>
-                <div class="nav-divider"></div>
-                <a href="#" class="language-link">PH</a>
-                <span class="language-separator">|</span>
-                <a href="#" class="language-link">EN</a>
-                <a href="{% url 'profile_settings' %}" class="user-name-btn">{{ user.username }}</a>
-                <a href="{% url 'logout' %}" class="login-btn">Log out</a>
-            {% else %}
-                <a href="#">Latest Offers</a>
-                <a href="#">Contact Us</a>
-                <div class="nav-divider"></div>
-                <a href="#" class="language-link">PH</a>
-                <span class="language-separator">|</span>
-                <a href="#" class="language-link">EN</a>
-                <a href="{% url 'login' %}" class="login-btn">Log In</a>
-            {% endif %}
+                    <a href="#">Latest Offers</a>
+                    <a href="{% url 'contact_us' %}">Contact Us</a>
+                    <div class="nav-divider"></div>
+                    <a href="#" class="language-link">PH</a>
+                    <span class="language-separator">|</span>
+                    <a href="#" class="language-link">EN</a>
+                    <a href="{% url 'profile_settings' %}" class="user-name-btn">{{ user.username }}</a>
+                    <a href="{% url 'logout' %}" class="login-btn">Log out</a>
+                {% else %}
+                    <a href="#">Latest Offers</a>
+                    <a href="{% url 'contact_us' %}" class="contact-btn">Contact Us</a>
+                    <div class="nav-divider"></div>
+                    <a href="#" class="language-link">PH</a>
+                    <span class="language-separator">|</span>
+                    <a href="#" class="language-link">EN</a>
+                    <a href="{% url 'login' %}" class="login-btn">Log In</a>
+                {% endif %}
         </nav>
     </header>
 
@@ -182,13 +182,9 @@
         <div class="reservation-actions">
             <a href="{% url 'reservations' %}" class="btn"><i class="fa-solid fa-arrow-left"></i> Back to Bookings</a>
             <a href="{% url 'payment' booking.id %}" class="btn btn-primary"><i class="fa-solid fa-credit-card"></i> Proceed to Payment</a>
-            <form action="{% url 'cancel_reservation' booking.id %}" method="post" style="display:inline-block; flex: 1; min-width: 150px;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger" style="width: 100%;"
-                    onclick="return confirm('Are you sure you want to cancel this reservation?');">
-                    <i class="fa-solid fa-times"></i> Cancel Reservation
-                </button>
-            </form>
+            <button type="button" class="btn btn-danger" style="flex: 1; min-width: 150px;" onclick="openCancelModal()">
+                <i class="fa-solid fa-times"></i> Cancel Reservation
+            </button>
         </div>
         {% else %}
         <!-- For paid/confirmed bookings - Only show back button -->
@@ -278,6 +274,47 @@
     }
     startCountdown("{{ booking.reserved_until|date:'Y-m-d\TH:i:s' }}");
     {% endif %}
+
+    function openCancelModal() {
+    document.getElementById('cancelModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeCancelModal() {
+    document.getElementById('cancelModal').classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
+function confirmCancel() {
+    document.getElementById('cancelForm').submit();
+}
+
+// Close on outside click
+document.getElementById('cancelModal').addEventListener('click', function(e) {
+    if (e.target === this) closeCancelModal();
+});
+
     </script>
+    <div class="cancel-modal-overlay" id="cancelModal">
+    <div class="cancel-modal">
+        <div class="cancel-modal-header">
+            <i class="fa-solid fa-exclamation-circle"></i>
+            <h3>Cancel Reservation?</h3>
+            <p>Booking Reference: <strong>{{ booking.booking_reference }}</strong></p>
+        </div>
+        <div class="cancel-modal-body">
+            <p>Are you sure you want to cancel this reservation? This action cannot be undone.</p>
+        </div>
+        <div class="cancel-modal-footer">
+            <button class="modal-btn modal-btn-cancel" onclick="closeCancelModal()">No, Keep It</button>
+            <button class="modal-btn modal-btn-confirm" onclick="confirmCancel()">Yes, Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden form for cancellation -->
+<form id="cancelForm" action="{% url 'cancel_reservation' booking.id %}" method="post" style="display: none;">
+    {% csrf_token %}
+</form>
 </body>
 </html>

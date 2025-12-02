@@ -419,8 +419,6 @@
             <p>&copy; 2025 HarborHop. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
         </div>
     </footer>
-
-    <script src="{% static 'js/home_form_guard.js' %}"></script>
    <script>
     // Preloaded routes data from Django (no API call needed!)
     let routesData = {{ routes_data|safe }};
@@ -593,6 +591,68 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Populate origins immediately (no API call needed!)
         populateOrigins();
+
+       // Add form validation before submission
+    document.querySelector('.booking-form').addEventListener('submit', function(e) {
+    const tripType = document.querySelector('input[name="trip_type"]:checked').value;
+    const departureDate = document.querySelector('input[name="departure_date"]').value;
+    const returnDate = document.getElementById('return-date-input').value;
+    const adults = parseInt(document.querySelector('input[name="adults"]').value);
+    const children = parseInt(document.querySelector('input[name="children"]').value);
+    const totalPassengers = adults + children;
+    
+    // Check if departure date is selected
+    if (!departureDate) {
+        e.preventDefault();
+        showNotification('Please select a departure date.', 'warning');
+        document.querySelector('input[name="departure_date"]').focus();
+        document.querySelector('input[name="departure_date"]').style.borderColor = '#e53935';
+        setTimeout(() => {
+            document.querySelector('input[name="departure_date"]').style.borderColor = '';
+        }, 2000);
+        return false;
+    }
+    
+    // Check if round trip but no return date
+    if (tripType === 'round_trip' && !returnDate) {
+        e.preventDefault();
+        showNotification('Please select a return date for your round trip.', 'warning');
+        document.getElementById('return-date-input').focus();
+        document.getElementById('return-date-input').style.borderColor = '#e53935';
+        setTimeout(() => {
+            document.getElementById('return-date-input').style.borderColor = '';
+        }, 2000);
+        return false;
+    }
+    
+    // Check if at least one passenger is selected
+    if (totalPassengers === 0) {
+        e.preventDefault();
+        showNotification('Please select at least one passenger (Adult or Child).', 'warning');
+        
+        // Highlight the passenger section
+        const passengerSection = document.querySelector('.passengers');
+        passengerSection.style.border = '2px solid #e53935';
+        passengerSection.style.borderRadius = '8px';
+        setTimeout(() => {
+            passengerSection.style.border = '';
+        }, 2000);
+        return false;
+    }
+    
+    // All validations passed
+    return true;
+});
+
+// Clear error styling when departure date is selected
+document.querySelector('input[name="departure_date"]').addEventListener('change', function() {
+    this.style.borderColor = '';
+});
+
+// Clear error styling when return date is selected
+document.getElementById('return-date-input').addEventListener('change', function() {
+    this.style.borderColor = '';
+});
         
         const tripTypeRadios = document.querySelectorAll('input[name="trip_type"]');
         const returnDateGroup = document.getElementById('return-date-group');
@@ -604,6 +664,7 @@
                     returnDateGroup.style.opacity = '0.5';
                     returnDateInput.disabled = true;
                     returnDateInput.required = false;
+                    returnDateInput.value = '';
                 } else {
                     returnDateGroup.style.opacity = '1';
                     returnDateInput.disabled = false;

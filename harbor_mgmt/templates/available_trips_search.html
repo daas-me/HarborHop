@@ -7,7 +7,7 @@
     <title>Available Trips - HarborHop</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
-    <link rel="stylesheet" href="{% static 'css/available_trips.css' %}?=v2">
+    <link rel="stylesheet" href="{% static 'css/available_trips.css' %}?=v4">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon_io/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
@@ -31,16 +31,16 @@
             <p class="tagline">Hop aboard. Sail beyond</p>
         </div>
         <nav>
-            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'home' %}">Home</a><a href="{% url 'home' %}">Home</a>
             {% if user.is_authenticated %}
                 {% if user.profile.is_admin_user %}
                     <a href="{% url 'admin_dashboard' %}" class="admin-dashboard-link">
                         <i class="fa-solid fa-chart-line dashboard-icon"></i> Admin Access
                     </a>
                 {% endif %}
-                 <a href="{% url 'reservations' %}">Manage Booking</a>
+                <a href="{% url 'reservations' %}">Manage Booking</a>
                     <a href="#">Latest Offers</a>
-                    <a href="#">Contact Us</a>
+                    <a href="{% url 'contact_us' %}">Contact Us</a>
                     <div class="nav-divider"></div>
                     <a href="#" class="language-link">PH</a>
                     <span class="language-separator">|</span>
@@ -49,13 +49,13 @@
                     <a href="{% url 'logout' %}" class="login-btn">Log out</a>
                 {% else %}
                     <a href="#">Latest Offers</a>
-                    <a href="#">Contact Us</a>
+                    <a href="{% url 'contact_us' %}" class="contact-btn">Contact Us</a>
                     <div class="nav-divider"></div>
                     <a href="#" class="language-link">PH</a>
                     <span class="language-separator">|</span>
                     <a href="#" class="language-link">EN</a>
                     <a href="{% url 'login' %}" class="login-btn">Log In</a>
-                {% endif %} 
+                {% endif %}
     </header>
 
     <div class="page-wrapper">

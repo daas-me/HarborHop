@@ -21,6 +21,26 @@ import requests
 
 logger = logging.getLogger(__name__)
 
+def normalize_voyage_data(voyage_data):
+    """Normalize voyage data to ensure all required fields exist"""
+    if not voyage_data:
+        return None
+    
+    # The data comes directly from JavaScript with flat structure
+    return {
+        'company': voyage_data.get('company', 'N/A'),
+        'vessel': voyage_data.get('vessel', 'N/A'),
+        'departureDate': voyage_data.get('departureDate', 'N/A'),
+        'departureTime': voyage_data.get('departureTime', 'N/A'),
+        'departureDateTime': voyage_data.get('departureDateTime', 'N/A'),
+        'accommodationName': voyage_data.get('accommodationName', 'N/A'),
+        'seatType': voyage_data.get('seatType', 'N/A'),
+        'price': float(voyage_data.get('price', 0)),
+        'distance': voyage_data.get('distance', 0),
+        'originName': voyage_data.get('originName', ''),
+        'destinationName': voyage_data.get('destinationName', ''),
+    }
+
 def home(request):
     # Ensure user has a profile if authenticated
     if request.user.is_authenticated:
@@ -171,7 +191,7 @@ def passenger_info(request):
     if not summary:
         messages.error(request, 'Please select your trips before entering passenger information.')
         return redirect('home')
-
+    
     if request.method == 'POST':
         action = request.POST.get('action')
         
@@ -188,12 +208,16 @@ def passenger_info(request):
         outbound = selections.get('outbound', {})
         return_trip = selections.get('return', {})
         
+        # Normalize the voyage data
+        normalized_outbound = normalize_voyage_data(outbound) if outbound else None
+        normalized_return = normalize_voyage_data(return_trip) if return_trip else None
+        
         # Calculate total price
         total_price = 0
-        if outbound and isinstance(outbound.get('price'), (int, float)):
-            total_price += outbound['price']
-        if return_trip and isinstance(return_trip.get('price'), (int, float)):
-            total_price += return_trip['price']
+        if normalized_outbound and isinstance(normalized_outbound.get('price'), (int, float)):
+            total_price += normalized_outbound['price']
+        if normalized_return and isinstance(normalized_return.get('price'), (int, float)):
+            total_price += normalized_return['price']
         
         # Parse dates
         from datetime import datetime
@@ -218,7 +242,7 @@ def passenger_info(request):
             from datetime import timedelta
             
             # Check 2-hour rule
-            dep_time_str = outbound.get('departureDateTime') or outbound.get('departureTime')
+            dep_time_str = normalized_outbound.get('departureDateTime') or normalized_outbound.get('departureTime')
             dep_dt = None
             
             try:
@@ -244,10 +268,11 @@ def passenger_info(request):
             booking_reference = get_random_string(12).upper()
             
             details = {
-                'outbound': outbound,
-                'return': return_trip,
+                'outbound': normalized_outbound,
+                'return': normalized_return,
                 'total_price': total_price,
                 'passengers': passenger_data,
+                'infants': summary.get('infants', 0),  # Add infants to details
             }
             
             booking = Booking.objects.create(
@@ -276,10 +301,11 @@ def passenger_info(request):
             booking_reference = get_random_string(12).upper()
             
             details = {
-                'outbound': outbound,
-                'return': return_trip,
+                'outbound': normalized_outbound,
+                'return': normalized_return,
                 'total_price': total_price,
                 'passengers': passenger_data,
+                'infants': summary.get('infants', 0),  # Add infants to details
             }
             
             booking = Booking.objects.create(
