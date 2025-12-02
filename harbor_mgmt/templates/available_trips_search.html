@@ -38,27 +38,24 @@
                         <i class="fa-solid fa-chart-line dashboard-icon"></i> Admin Access
                     </a>
                 {% endif %}
-                <a href="{% url 'home' %}">Transaction</a>
-            <a href="{% url 'reservations' %}">Reservations</a>
-            <a href="#">Latest Offers</a>
-            <a href="#">Contact Us</a>
-                <div class="nav-divider"></div>
-                <a href="#" class="language-link">PH</a>
-                <span class="language-separator">|</span>
-                <a href="#" class="language-link">EN</a>
-                <a href="{% url 'profile_settings' %}" class="user-name-btn">{{ user.username }}</a>
-                <a href="{% url 'logout' %}" class="login-btn">Log out</a>
-            {% else %}
-                <a href="#">Transaction</a>
-                <a href="#">Latest Offers</a>
-                <a href="#">Contact Us</a>
-                <div class="nav-divider"></div>
-                <a href="#" class="language-link">PH</a>
-                <span class="language-separator">|</span>
-                <a href="#" class="language-link">EN</a>
-                <a href="{% url 'login' %}" class="login-btn">Log In</a>
-            {% endif %}
-        </nav>
+                 <a href="{% url 'reservations' %}">Manage Booking</a>
+                    <a href="#">Latest Offers</a>
+                    <a href="#">Contact Us</a>
+                    <div class="nav-divider"></div>
+                    <a href="#" class="language-link">PH</a>
+                    <span class="language-separator">|</span>
+                    <a href="#" class="language-link">EN</a>
+                    <a href="{% url 'profile_settings' %}" class="user-name-btn">{{ user.username }}</a>
+                    <a href="{% url 'logout' %}" class="login-btn">Log out</a>
+                {% else %}
+                    <a href="#">Latest Offers</a>
+                    <a href="#">Contact Us</a>
+                    <div class="nav-divider"></div>
+                    <a href="#" class="language-link">PH</a>
+                    <span class="language-separator">|</span>
+                    <a href="#" class="language-link">EN</a>
+                    <a href="{% url 'login' %}" class="login-btn">Log In</a>
+                {% endif %} 
     </header>
 
     <div class="page-wrapper">

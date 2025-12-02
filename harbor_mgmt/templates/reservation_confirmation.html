@@ -29,8 +29,7 @@
                         <i class="fa-solid fa-chart-line dashboard-icon"></i> Admin Access
                     </a>
                 {% endif %}
-                <a href="{% url 'home' %}">Transaction</a>
-                <a href="{% url 'reservations' %}">Reservations</a>
+                 <a href="{% url 'reservations' %}">Manage Booking</a>
                 <a href="#">Latest Offers</a>
                 <a href="#">Contact Us</a>
                 <div class="nav-divider"></div>
@@ -40,7 +39,6 @@
                 <a href="{% url 'profile_settings' %}" class="user-name-btn">{{ user.username }}</a>
                 <a href="{% url 'logout' %}" class="login-btn">Log out</a>
             {% else %}
-                <a href="{% url 'home' %}">Home</a>
                 <a href="#">Latest Offers</a>
                 <a href="#">Contact Us</a>
                 <div class="nav-divider"></div>
@@ -54,12 +52,16 @@
 
     <div class="reservation-summary">
         <div class="reservation-status">
-            {% if booking.status == 'pending' %}
-                <i class="fa-solid fa-hourglass-half"></i> Your seats are temporarily reserved! Complete payment within 1 day.
+            {% if booking.status == 'reserved' %}
+                <i class="fa-solid fa-hourglass-half"></i> Your seats are temporarily reserved! Complete payment within 48 hours.
+            {% elif booking.status == 'pending' %}
+                <i class="fa-solid fa-clock"></i> Payment Pending
             {% elif booking.status == 'confirmed' %}
                 <span style="color: #4caf50"><i class="fa-solid fa-circle-check"></i> Booking Confirmed</span>
             {% elif booking.status == 'expired' %}
                 <span style="color: #e53935"><i class="fa-solid fa-circle-xmark"></i> Reservation Expired</span>
+            {% elif booking.status == 'cancelled' %}
+                <span style="color: #ff9800"><i class="fa-solid fa-ban"></i> Booking Cancelled</span>
             {% endif %}
         </div>
         {% if booking.status == 'pending' %}

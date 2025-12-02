@@ -30,9 +30,7 @@
                     <i class="fa-solid fa-chart-line dashboard-icon"></i> Admin Access
                 </a>
             {% endif %}
-            
-            <a href="{% url 'home' %}">Transaction</a>
-            <a href="{% url 'reservations' %}">Reservations</a>
+            <a href="{% url 'reservations' %}">Manage Booking</a>
             <a href="#">Latest Offers</a>
             <a href="#">Contact Us</a>
             <div class="nav-divider"></div>
@@ -42,7 +40,6 @@
             <a href="{% url 'profile_settings' %}" class="user-name-btn">{{ user.username }}</a>
             <a href="{% url 'logout' %}" class="login-btn">Log out</a>
         {% else %}
-            <a href="#">Transaction</a>
             <a href="#">Latest Offers</a>
             <a href="#">Contact Us</a>
             <div class="nav-divider"></div>
@@ -85,7 +82,7 @@
                         <div class="input-wrapper">
                             <i class="fa-solid fa-location-dot input-icon"></i>
                             <select name="origin" id="origin-select" class="form-input" required>
-                                <option value="">Loading locations...</option>
+                                <option value="">Select Origin Port</option>
                             </select>
                         </div>
                     </div>
@@ -422,148 +419,213 @@
     </footer>
 
     <script src="{% static 'js/home_form_guard.js' %}"></script>
-    <script>
-        // Store routes data globally
-        let routesData = [];
-        
-        function incrementCounter(btn) {
-            const counterValue = btn.previousElementSibling.previousElementSibling;
-            const hiddenInput = btn.previousElementSibling;
-            let count = parseInt(counterValue.textContent);
-            count++;
+   <script>
+    // Preloaded routes data from Django (no API call needed!)
+    let routesData = {{ routes_data|safe }};
+    
+    function incrementCounter(btn) {
+        const counterValue = btn.previousElementSibling.previousElementSibling;
+        const hiddenInput = btn.previousElementSibling;
+        let count = parseInt(counterValue.textContent);
+        count++;
+        counterValue.textContent = count;
+        hiddenInput.value = count;
+    }
+
+    function decrementCounter(btn) {
+        const counterValue = btn.nextElementSibling;
+        const hiddenInput = btn.nextElementSibling.nextElementSibling;
+        let count = parseInt(counterValue.textContent);
+        if (count > 0) {
+            count--;
             counterValue.textContent = count;
             hiddenInput.value = count;
         }
-
-        function decrementCounter(btn) {
-            const counterValue = btn.nextElementSibling;
-            const hiddenInput = btn.nextElementSibling.nextElementSibling;
-            let count = parseInt(counterValue.textContent);
-            if (count > 0) {
-                count--;
-                counterValue.textContent = count;
-                hiddenInput.value = count;
-            }
-        }
+    }
+    
+    function swapLocations() {
+        const origin = document.querySelector('select[name="origin"]');
+        const destination = document.querySelector('select[name="destination"]');
+        const temp = origin.value;
+        origin.value = destination.value;
+        destination.value = temp;
         
-        function swapLocations() {
-            const origin = document.querySelector('select[name="origin"]');
-            const destination = document.querySelector('select[name="destination"]');
-            const temp = origin.value;
-            origin.value = destination.value;
-            destination.value = temp;
+        // Update destinations for the new origin
+        if (origin.value) {
+            updateDestinations(parseInt(origin.value));
+        }
+    }
+    
+    function populateOrigins() {
+        const originSelect = document.getElementById('origin-select');
+        
+        // Check if we have data
+        if (!routesData || routesData.length === 0) {
+            // Show a user-friendly message but keep the select functional
+            console.warn('No route data available from server');
+            originSelect.innerHTML = '<option value="">Unable to load routes - Please try again later</option>';
             
-            // Update destinations for the new origin
-            if (origin.value) {
-                updateDestinations(parseInt(origin.value));
-            }
+            // Show a non-intrusive notification
+            showNotification('Unable to load available routes. Please refresh the page or try again later.', 'warning');
+            return;
         }
         
-        // Load locations from Barkota API
-        async function loadLocations() {
-            try {
-                const response = await fetch('/api/locations/');
-                const data = await response.json();
-                
-                if (data.success) {
-                    routesData = data.data;
-                    populateOrigins();
-                } else {
-                    console.error('Failed to load locations:', data.message);
-                    showLocationError();
-                }
-            } catch (error) {
-                console.error('Error loading locations:', error);
-                showLocationError();
-            }
-        }
+        originSelect.innerHTML = '<option value="">Select Origin Port</option>';
         
-        function populateOrigins() {
-            const originSelect = document.getElementById('origin-select');
-            originSelect.innerHTML = '<option value="">Select Origin Port</option>';
-            
-            // Sort routes by origin name
-            const sortedRoutes = [...routesData].sort((a, b) => 
-                a.origin.name.localeCompare(b.origin.name)
+        // Sort routes by origin name
+        const sortedRoutes = [...routesData].sort((a, b) => 
+            a.origin.name.localeCompare(b.origin.name)
+        );
+        
+        sortedRoutes.forEach(route => {
+            const origin = route.origin;
+            const option = document.createElement('option');
+            option.value = origin.id;
+            option.textContent = `${origin.name}${origin.province ? ' (' + origin.province + ')' : ''}`;
+            originSelect.appendChild(option);
+        });
+    }
+    
+    function updateDestinations(originId) {
+        const destSelect = document.getElementById('destination-select');
+        destSelect.innerHTML = '<option value="">Select Destination Port</option>';
+        
+        // Find the route for this origin
+        const route = routesData.find(r => r.origin.id === originId);
+        
+        if (route && route.destinations && route.destinations.length > 0) {
+            // Sort destinations by name
+            const sortedDests = [...route.destinations].sort((a, b) => 
+                a.name.localeCompare(b.name)
             );
             
-            sortedRoutes.forEach(route => {
-                const origin = route.origin;
+            sortedDests.forEach(dest => {
                 const option = document.createElement('option');
-                option.value = origin.id;
-                option.textContent = `${origin.name}${origin.province ? ' (' + origin.province + ')' : ''}`;
-                originSelect.appendChild(option);
+                option.value = dest.id;
+                option.textContent = `${dest.name}${dest.province ? ' (' + dest.province + ')' : ''}`;
+                destSelect.appendChild(option);
             });
+        } else {
+            destSelect.innerHTML = '<option value="">No destinations available</option>';
         }
+    }
+    
+    function showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <i class="fa-solid fa-exclamation-triangle"></i>
+            <span>${message}</span>
+            <button onclick="this.parentElement.remove()" class="close-notification">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        `;
         
-        function updateDestinations(originId) {
-            const destSelect = document.getElementById('destination-select');
-            destSelect.innerHTML = '<option value="">Select Destination Port</option>';
-            
-            // Find the route for this origin
-            const route = routesData.find(r => r.origin.id === originId);
-            
-            if (route && route.destinations && route.destinations.length > 0) {
-                // Sort destinations by name
-                const sortedDests = [...route.destinations].sort((a, b) => 
-                    a.name.localeCompare(b.name)
-                );
-                
-                sortedDests.forEach(dest => {
-                    const option = document.createElement('option');
-                    option.value = dest.id;
-                    option.textContent = `${dest.name}${dest.province ? ' (' + dest.province + ')' : ''}`;
-                    destSelect.appendChild(option);
-                });
-            } else {
-                destSelect.innerHTML = '<option value="">No destinations available</option>';
+        // Add styles
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'warning' ? '#fff3cd' : '#d1ecf1'};
+            color: ${type === 'warning' ? '#856404' : '#0c5460'};
+            border: 1px solid ${type === 'warning' ? '#ffeaa7' : '#bee5eb'};
+            border-radius: 8px;
+            padding: 15px 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: 400px;
+            animation: slideIn 0.3s ease-out;
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => notification.remove(), 300);
+        }, 5000);
+    }
+    
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
             }
         }
-        
-        function showLocationError() {
-            const originSelect = document.getElementById('origin-select');
-            originSelect.innerHTML = '<option value="">Error loading locations. Please refresh.</option>';
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
         }
+        .close-notification {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 10px;
+            opacity: 0.7;
+        }
+        .close-notification:hover {
+            opacity: 1;
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Handle trip type change
+    document.addEventListener('DOMContentLoaded', function() {
+        // Populate origins immediately (no API call needed!)
+        populateOrigins();
         
-        // Handle trip type change
-        document.addEventListener('DOMContentLoaded', function() {
-            // Load locations from API
-                loadLocations();
-            
-            const tripTypeRadios = document.querySelectorAll('input[name="trip_type"]');
-            const returnDateGroup = document.getElementById('return-date-group');
-            const returnDateInput = document.getElementById('return-date-input');
-            
-            tripTypeRadios.forEach(radio => {
-                radio.addEventListener('change', function() {
-                    if (this.value === 'one_way') {
-                        returnDateGroup.style.opacity = '0.5';
-                        returnDateInput.disabled = true;
-                        returnDateInput.required = false;
-                    } else {
-                        returnDateGroup.style.opacity = '1';
-                        returnDateInput.disabled = false;
-                        returnDateInput.required = true;
-                    }
-                });
-            });
-            
-            // Set minimum date to today
-            const today = new Date().toISOString().split('T')[0];
-            document.querySelector('input[name="departure_date"]').setAttribute('min', today);
-            returnDateInput.setAttribute('min', today);
-            
-            // Handle origin change
-            document.getElementById('origin-select').addEventListener('change', function(e) {
-                const originId = parseInt(e.target.value);
-                if (originId) {
-                    updateDestinations(originId);
+        const tripTypeRadios = document.querySelectorAll('input[name="trip_type"]');
+        const returnDateGroup = document.getElementById('return-date-group');
+        const returnDateInput = document.getElementById('return-date-input');
+        
+        tripTypeRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'one_way') {
+                    returnDateGroup.style.opacity = '0.5';
+                    returnDateInput.disabled = true;
+                    returnDateInput.required = false;
                 } else {
-                    document.getElementById('destination-select').innerHTML = '<option value="">Select origin first</option>';
+                    returnDateGroup.style.opacity = '1';
+                    returnDateInput.disabled = false;
+                    returnDateInput.required = true;
                 }
             });
         });
-    </script>
+        
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.querySelector('input[name="departure_date"]').setAttribute('min', today);
+        returnDateInput.setAttribute('min', today);
+        
+        // Handle origin change
+        document.getElementById('origin-select').addEventListener('change', function(e) {
+            const originId = parseInt(e.target.value);
+            if (originId) {
+                updateDestinations(originId);
+            } else {
+                document.getElementById('destination-select').innerHTML = '<option value="">Select origin first</option>';
+            }
+        });
+    });
+</script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var today = new Date();

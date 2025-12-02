@@ -17,6 +17,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // Store a flag that we're coming from available_trips
+        sessionStorage.setItem('from_available_trips', 'true');
+        
         window.location.href = nextUrl;
     });
 });

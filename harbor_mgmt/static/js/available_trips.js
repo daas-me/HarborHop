@@ -93,6 +93,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateTotalAndButton();
 
+    // Check if we're returning from passenger info page
+    const fromPassengerInfo = sessionStorage.getItem('from_available_trips');
+    if (fromPassengerInfo) {
+        sessionStorage.removeItem('from_available_trips');
+        restoreSelectionsFromServer();
+    }
+
     function handleCardSelection(card) {
         const direction = card.dataset.direction;
 
@@ -329,6 +336,86 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         } catch (err) {
             console.warn('Unable to persist booking selection', err);
+        }
+    }
+
+    async function restoreSelectionsFromServer() {
+        try {
+            const response = await fetch('/api/get-booking-selection/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin',
+            });
+
+            if (!response.ok) {
+                console.warn('Failed to fetch booking selection');
+                return;
+            }
+
+            const data = await response.json();
+            if (!data || !data.selections) {
+                console.warn('No booking selection data found');
+                return;
+            }
+
+            // Restore outbound selection
+            if (data.selections.outbound) {
+                restoreSelection('outbound', data.selections.outbound);
+            }
+
+            // Restore return selection
+            if (data.selections.return) {
+                restoreSelection('return', data.selections.return);
+            }
+
+            // Update UI after restoration
+            updateTotalAndButton();
+        } catch (err) {
+            console.warn('Unable to restore booking selection', err);
+        }
+    }
+
+    function restoreSelection(direction, selectionData) {
+        // Find the matching schedule card
+        const card = scheduleCards.find(c => {
+            return c.dataset.direction === direction &&
+                   c.dataset.departureDatetime === selectionData.departureDateTime &&
+                   c.dataset.vessel === selectionData.vessel;
+        });
+
+        if (!card) {
+            console.warn(`Could not find card for ${direction} direction`);
+            return;
+        }
+
+        const seatSelect = card.querySelector('.seat-type-select');
+        if (!seatSelect) {
+            console.warn(`No seat select found for ${direction} card`);
+            return;
+        }
+
+        // Find and select the matching accommodation option
+        const options = Array.from(seatSelect.options);
+        const matchingOption = options.find(opt => {
+            return opt.dataset.name === selectionData.accommodationName ||
+                   opt.dataset.seatType === selectionData.seatType;
+        });
+
+        if (matchingOption) {
+            // Set the dropdown value
+            seatSelect.value = matchingOption.value;
+            
+            // Update the card pricing display
+            updateCardPricing(card, seatSelect);
+            
+            // Trigger the card selection (this will update summary and selections object)
+            handleCardSelection(card);
+            
+            console.log(`Restored ${direction} selection:`, selectionData.accommodationName);
+        } else {
+            console.warn(`Could not find matching accommodation option for ${direction}`);
         }
     }
 

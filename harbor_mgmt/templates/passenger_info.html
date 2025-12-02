@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/available_trips.css' %}">
-    <link rel="stylesheet" href="{% static 'css/passenger_info.css' %}">
+    <link rel="stylesheet" href="{% static 'css/passenger_info.css' %}?v=1">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon_io/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
@@ -20,39 +20,38 @@
 </head>
 <body data-is-authenticated="{{ user.is_authenticated|yesno:'true,false' }}">
     <header>
-        <div class="logo-container">
-            <a href="{% url 'home' %}" class="logo">HARBOR<span>hop</span></a>
-            <p class="tagline">Hop aboard. Sail beyond</p>
-        </div>
-        <nav>
-            {% if user.is_authenticated %}
-                {% if user.profile.is_admin_user %}
-                    <a href="{% url 'admin_dashboard' %}" class="admin-dashboard-link">
-                        <i class="fa-solid fa-chart-line dashboard-icon"></i> Admin Access
-                    </a>
-                {% endif %}
-                <a href="{% url 'home' %}">Transaction</a>
-            <a href="{% url 'reservations' %}">Reservations</a>
+    <div class="logo-container">
+        <a href="{% url 'home' %}" class="logo">HARBOR<span>hop</span></a>
+        <p class="tagline">Hop aboard. Sail beyond</p>
+    </div>
+    <nav>
+        {% if user.is_authenticated %}
+            <!-- Admin Dashboard Button - Only visible to admin users -->
+            {% if user.profile.is_admin_user %}
+                <a href="{% url 'admin_dashboard' %}" class="admin-dashboard-link">
+                    <i class="fa-solid fa-chart-line dashboard-icon"></i> Admin Access
+                </a>
+            {% endif %}
+            <a href="{% url 'reservations' %}">Manage Booking</a>
             <a href="#">Latest Offers</a>
             <a href="#">Contact Us</a>
-                <div class="nav-divider"></div>
-                <a href="#" class="language-link">PH</a>
-                <span class="language-separator">|</span>
-                <a href="#" class="language-link">EN</a>
-                <a href="{% url 'profile_settings' %}" class="user-name-btn">{{ user.username }}</a>
-                <a href="{% url 'logout' %}" class="login-btn">Log out</a>
-            {% else %}
-                <a href="{% url 'home' %}">Home</a>
-                <a href="#">Latest Offers</a>
-                <a href="#">Contact Us</a>
-                <div class="nav-divider"></div>
-                <a href="#" class="language-link">PH</a>
-                <span class="language-separator">|</span>
-                <a href="#" class="language-link">EN</a>
-                <a href="{% url 'login' %}" class="login-btn">Log In</a>
-            {% endif %}
-        </nav>
-    </header>
+            <div class="nav-divider"></div>
+            <a href="#" class="language-link">PH</a>
+            <span class="language-separator">|</span>
+            <a href="#" class="language-link">EN</a>
+            <a href="{% url 'profile_settings' %}" class="user-name-btn">{{ user.username }}</a>
+            <a href="{% url 'logout' %}" class="login-btn">Log out</a>
+        {% else %}
+            <a href="#">Latest Offers</a>
+            <a href="#">Contact Us</a>
+            <div class="nav-divider"></div>
+            <a href="#" class="language-link">PH</a>
+            <span class="language-separator">|</span>
+            <a href="#" class="language-link">EN</a>
+            <a href="{% url 'login' %}" class="login-btn">Log In</a>
+        {% endif %}
+    </nav>
+</header>
 
     <div class="page-wrapper passenger-info-page">
         <div class="top-info">
@@ -67,9 +66,11 @@
                     <div class="info-value">{{ destination_name }}</div>
                 </div>
             </div>
-            <div class="info-item">
+           <div class="info-item">
                 <div class="info-label">Passengers</div>
-                <div class="info-value">{{ adults }}{% if children and children|add:0 > 0 %} + {{ children }}{% endif %}</div>
+                <div class="info-value">
+                    {{ adults }} Adult{{ adults|pluralize }}{% if children and children|add:0 > 0 %} + {{ children }} Child{{ children|pluralize:"ren" }}{% endif %}
+                </div>
             </div>
             <div class="info-item">
                 <div class="info-date-label">Departure</div>
@@ -79,11 +80,6 @@
                 <div class="info-date-label">Return</div>
                 <div class="info-date-value">{% if return_date_formatted %}{{ return_date_formatted }}{% else %}--{% endif %}</div>
             </div>
-            {% comment %} <div class="info-item">
-                <a href="{% url 'home' %}" class="modify-link">
-                    <i class="fa-solid fa-pen"></i> MODIFY
-                </a>
-            </div> {% endcomment %}
         </div>
 
         <div class="progress-steps passenger-progress">
@@ -114,10 +110,256 @@
             <form class="card passenger-info-card" method="post" action="{% url 'passenger_info' %}">
                 {% csrf_token %}
 
+                <!-- PASSENGER DETAILS SECTION (NOW FIRST) -->
+                <div class="section-title">
+                    <i class="fa-solid fa-users"></i>
+                    <div>
+                        <div>Passenger Details</div>
+                        <div class="section-subtitle">Please provide accurate passenger information as it appears on a government-issued or valid ID.</div>
+                    </div>
+                </div>
+
+                <!-- Passenger Count Info -->
+                <div class="passenger-count-info">
+                    <i class="fa-solid fa-info-circle"></i>
+                    <span>You need to add <strong id="total-passengers-needed">{{ adults|add:children }}</strong> passenger(s). Currently added: <strong id="current-passengers-count">1</strong></span>
+                </div>
+
+                <!-- Passengers Container -->
+                <div class="passengers-container" id="passengers-container">
+                    <div class="passenger-card" data-passenger-number="1">
+                        <h2>Passenger 1</h2>
+                        <div class="form-grid">
+                            <div class="field">
+                                <label>First Name *</label>
+                                <input type="text" name="passenger_1_first_name" required>
+                            </div>
+                            <div class="field">
+                                <label>Middle Name</label>
+                                <input type="text" name="passenger_1_middle_name">
+                            </div>
+                            <div class="field">
+                                <label>Last Name *</label>
+                                <input type="text" name="passenger_1_last_name" required>
+                            </div>
+                            <div class="field">
+                                <label>Suffix</label>
+                                <input type="text" name="passenger_1_suffix" placeholder="Jr., Sr., III, etc.">
+                            </div>
+                            <div class="field">
+                                <label>Gender *</label>
+                                <select name="passenger_1_gender" required>
+                                    <option value="">Select</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label>Date of Birth *</label>
+                                <input type="date" name="passenger_1_dob" required>
+                            </div>
+                            <div class="field">
+                                <label>Passenger Type *</label>
+                                <select name="passenger_1_type" required>
+                                    <option value="Adult">Adult</option>
+                                    <option value="Child">Child</option>
+                                    <option value="Infant">Infant</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label>Nationality *</label>
+                                <select name="passenger_1_nationality" required>
+                                    <option value="">Select Nationality</option>
+                                     <option value="Filipino">Filipino</option>
+                                     <option value="" disabled>──────────</option>
+                                    <option value="Afghan">Afghan</option>
+                                    <option value="Albanian">Albanian</option>
+                                    <option value="Algerian">Algerian</option>
+                                    <option value="American">American</option>
+                                    <option value="Andorran">Andorran</option>
+                                    <option value="Angolan">Angolan</option>
+                                    <option value="Argentinian">Argentinian</option>
+                                    <option value="Armenian">Armenian</option>
+                                    <option value="Australian">Australian</option>
+                                    <option value="Austrian">Austrian</option>
+                                    <option value="Azerbaijani">Azerbaijani</option>
+                                    <option value="Bahamian">Bahamian</option>
+                                    <option value="Bahraini">Bahraini</option>
+                                    <option value="Bangladeshi">Bangladeshi</option>
+                                    <option value="Barbadian">Barbadian</option>
+                                    <option value="Belarusian">Belarusian</option>
+                                    <option value="Belgian">Belgian</option>
+                                    <option value="Belizean">Belizean</option>
+                                    <option value="Beninese">Beninese</option>
+                                    <option value="Bhutanese">Bhutanese</option>
+                                    <option value="Bolivian">Bolivian</option>
+                                    <option value="Bosnian">Bosnian</option>
+                                    <option value="Brazilian">Brazilian</option>
+                                    <option value="British">British</option>
+                                    <option value="Bruneian">Bruneian</option>
+                                    <option value="Bulgarian">Bulgarian</option>
+                                    <option value="Burkinabe">Burkinabe</option>
+                                    <option value="Burmese">Burmese</option>
+                                    <option value="Burundian">Burundian</option>
+                                    <option value="Cambodian">Cambodian</option>
+                                    <option value="Cameroonian">Cameroonian</option>
+                                    <option value="Canadian">Canadian</option>
+                                    <option value="Cape Verdean">Cape Verdean</option>
+                                    <option value="Central African">Central African</option>
+                                    <option value="Chadian">Chadian</option>
+                                    <option value="Chilean">Chilean</option>
+                                    <option value="Chinese">Chinese</option>
+                                    <option value="Colombian">Colombian</option>
+                                    <option value="Comoran">Comoran</option>
+                                    <option value="Congolese">Congolese</option>
+                                    <option value="Costa Rican">Costa Rican</option>
+                                    <option value="Croatian">Croatian</option>
+                                    <option value="Cuban">Cuban</option>
+                                    <option value="Cypriot">Cypriot</option>
+                                    <option value="Czech">Czech</option>
+                                    <option value="Danish">Danish</option>
+                                    <option value="Djiboutian">Djiboutian</option>
+                                    <option value="Dominican">Dominican</option>
+                                    <option value="Dutch">Dutch</option>
+                                    <option value="Ecuadorian">Ecuadorian</option>
+                                    <option value="Egyptian">Egyptian</option>
+                                    <option value="Emirati">Emirati</option>
+                                    <option value="English">English</option>
+                                    <option value="Equatorial Guinean">Equatorial Guinean</option>
+                                    <option value="Eritrean">Eritrean</option>
+                                    <option value="Estonian">Estonian</option>
+                                    <option value="Ethiopian">Ethiopian</option>
+                                    <option value="Fijian">Fijian</option>
+                                    <option value="Finnish">Finnish</option>
+                                    <option value="French">French</option>
+                                    <option value="Gabonese">Gabonese</option>
+                                    <option value="Gambian">Gambian</option>
+                                    <option value="Georgian">Georgian</option>
+                                    <option value="German">German</option>
+                                    <option value="Ghanaian">Ghanaian</option>
+                                    <option value="Greek">Greek</option>
+                                    <option value="Grenadian">Grenadian</option>
+                                    <option value="Guatemalan">Guatemalan</option>
+                                    <option value="Guinean">Guinean</option>
+                                    <option value="Guyanese">Guyanese</option>
+                                    <option value="Haitian">Haitian</option>
+                                    <option value="Honduran">Honduran</option>
+                                    <option value="Hungarian">Hungarian</option>
+                                    <option value="Icelandic">Icelandic</option>
+                                    <option value="Indian">Indian</option>
+                                    <option value="Indonesian">Indonesian</option>
+                                    <option value="Iranian">Iranian</option>
+                                    <option value="Iraqi">Iraqi</option>
+                                    <option value="Irish">Irish</option>
+                                    <option value="Israeli">Israeli</option>
+                                    <option value="Italian">Italian</option>
+                                    <option value="Ivorian">Ivorian</option>
+                                    <option value="Jamaican">Jamaican</option>
+                                    <option value="Japanese">Japanese</option>
+                                    <option value="Jordanian">Jordanian</option>
+                                    <option value="Kazakh">Kazakh</option>
+                                    <option value="Kenyan">Kenyan</option>
+                                    <option value="Kuwaiti">Kuwaiti</option>
+                                    <option value="Kyrgyz">Kyrgyz</option>
+                                    <option value="Laotian">Laotian</option>
+                                    <option value="Latvian">Latvian</option>
+                                    <option value="Lebanese">Lebanese</option>
+                                    <option value="Liberian">Liberian</option>
+                                    <option value="Libyan">Libyan</option>
+                                    <option value="Lithuanian">Lithuanian</option>
+                                    <option value="Luxembourgish">Luxembourgish</option>
+                                    <option value="Macedonian">Macedonian</option>
+                                    <option value="Malagasy">Malagasy</option>
+                                    <option value="Malawian">Malawian</option>
+                                    <option value="Malaysian">Malaysian</option>
+                                    <option value="Maldivian">Maldivian</option>
+                                    <option value="Malian">Malian</option>
+                                    <option value="Maltese">Maltese</option>
+                                    <option value="Mauritanian">Mauritanian</option>
+                                    <option value="Mauritian">Mauritian</option>
+                                    <option value="Mexican">Mexican</option>
+                                    <option value="Moldovan">Moldovan</option>
+                                    <option value="Monegasque">Monegasque</option>
+                                    <option value="Mongolian">Mongolian</option>
+                                    <option value="Montenegrin">Montenegrin</option>
+                                    <option value="Moroccan">Moroccan</option>
+                                    <option value="Mozambican">Mozambican</option>
+                                    <option value="Namibian">Namibian</option>
+                                    <option value="Nepalese">Nepalese</option>
+                                    <option value="New Zealander">New Zealander</option>
+                                    <option value="Nicaraguan">Nicaraguan</option>
+                                    <option value="Nigerian">Nigerian</option>
+                                    <option value="Nigerien">Nigerien</option>
+                                    <option value="North Korean">North Korean</option>
+                                    <option value="Norwegian">Norwegian</option>
+                                    <option value="Omani">Omani</option>
+                                    <option value="Pakistani">Pakistani</option>
+                                    <option value="Panamanian">Panamanian</option>
+                                    <option value="Paraguayan">Paraguayan</option>
+                                    <option value="Peruvian">Peruvian</option>
+                                    <option value="Polish">Polish</option>
+                                    <option value="Portuguese">Portuguese</option>
+                                    <option value="Qatari">Qatari</option>
+                                    <option value="Romanian">Romanian</option>
+                                    <option value="Russian">Russian</option>
+                                    <option value="Rwandan">Rwandan</option>
+                                    <option value="Saudi">Saudi</option>
+                                    <option value="Scottish">Scottish</option>
+                                    <option value="Senegalese">Senegalese</option>
+                                    <option value="Serbian">Serbian</option>
+                                    <option value="Singaporean">Singaporean</option>
+                                    <option value="Slovak">Slovak</option>
+                                    <option value="Slovenian">Slovenian</option>
+                                    <option value="Somali">Somali</option>
+                                    <option value="South African">South African</option>
+                                    <option value="South Korean">South Korean</option>
+                                    <option value="Spanish">Spanish</option>
+                                    <option value="Sri Lankan">Sri Lankan</option>
+                                    <option value="Sudanese">Sudanese</option>
+                                    <option value="Surinamese">Surinamese</option>
+                                    <option value="Swedish">Swedish</option>
+                                    <option value="Swiss">Swiss</option>
+                                    <option value="Syrian">Syrian</option>
+                                    <option value="Taiwanese">Taiwanese</option>
+                                    <option value="Tajik">Tajik</option>
+                                    <option value="Tanzanian">Tanzanian</option>
+                                    <option value="Thai">Thai</option>
+                                    <option value="Togolese">Togolese</option>
+                                    <option value="Trinidadian">Trinidadian</option>
+                                    <option value="Tunisian">Tunisian</option>
+                                    <option value="Turkish">Turkish</option>
+                                    <option value="Turkmen">Turkmen</option>
+                                    <option value="Ugandan">Ugandan</option>
+                                    <option value="Ukrainian">Ukrainian</option>
+                                    <option value="Uruguayan">Uruguayan</option>
+                                    <option value="Uzbek">Uzbek</option>
+                                    <option value="Venezuelan">Venezuelan</option>
+                                    <option value="Vietnamese">Vietnamese</option>
+                                    <option value="Welsh">Welsh</option>
+                                    <option value="Yemeni">Yemeni</option>
+                                    <option value="Zambian">Zambian</option>
+                                    <option value="Zimbabwean">Zimbabwean</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Passenger Button -->
+                <button type="button" class="add-passenger-btn" id="add-passenger-btn" onclick="addPassenger()">
+                    <i class="fa-solid fa-user-plus"></i>
+                    Add Another Passenger
+                </button>
+
+                <div class="section-divider"></div>
+
+                <!-- CONTACT INFORMATION SECTION (NOW SECOND) -->
                 <div class="section-title">
                     <i class="fa-solid fa-circle-info"></i>
                     <div>
                         <div>Contact Information</div>
+                        <div class="section-subtitle">We'll use these details to send your booking confirmation and travel updates.</div>
                     </div>
                 </div>
 
@@ -138,77 +380,14 @@
                         <label>Confirm Email Address *</label>
                         <input type="email" name="contact_email_confirm" required>
                     </div>
-                    <div class="field form-grid full-width">
+                    <div class="field">
                         <label>Address *</label>
                         <input type="text" name="contact_address" required>
                     </div>
                 </div>
 
-                <div class="section-divider"></div>
-
-                <div class="section-title">
-                    <i class="fa-solid fa-users"></i>
-                    <div>
-                        <div>Passenger Details</div>
-                        <div class="section-subtitle">Please provide accurate passenger information as it appears on valid ID.</div>
-                    </div>
-                </div>
-
-                <div class="passenger-card">
-                    <h2>Passenger 1</h2>
-                    <div class="form-grid">
-                        <div class="field">
-                            <label>First Name *</label>
-                            <input type="text" name="passenger_1_first_name" required>
-                        </div>
-                        <div class="field">
-                            <label>Middle Name</label>
-                            <input type="text" name="passenger_1_middle_name">
-                        </div>
-                        <div class="field">
-                            <label>Last Name *</label>
-                            <input type="text" name="passenger_1_last_name" required>
-                        </div>
-                        <div class="field">
-                            <label>Suffix</label>
-                            <input type="text" name="passenger_1_suffix" placeholder="Jr., Sr., III, etc.">
-                        </div>
-                        <div class="field">
-                            <label>Gender *</label>
-                            <select name="passenger_1_gender" required>
-                                <option value="">Select</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                        <div class="field">
-                            <label>Date of Birth *</label>
-                            <input type="date" name="passenger_1_dob" required>
-                        </div>
-                        <div class="field">
-                            <label>Passenger Type *</label>
-                            <select name="passenger_1_type" required>
-                                <option value="Adult">Adult</option>
-                                <option value="Child">Child</option>
-                                <option value="Infant">Infant</option>
-                            </select>
-                        </div>
-                        <div class="field">
-                            <label>Nationality *</label>
-                            <select name="passenger_1_nationality" required>
-                                <option value="">Select</option>
-                                <option value="Filipino">Filipino</option>
-                                <option value="American">American</option>
-                                <option value="Canadian">Canadian</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="button-row">
-                    <a href="{% url 'home' %}" class="btn back">Back</a>
+                    <button type="button" onclick="goBack()" class="btn back">Back</button>
                     <button type="submit" name="action" value="reserve" class="btn reserve-btn">Reserve Booking</button>
                     <button type="submit" name="action" value="payment" class="btn payment-btn">Proceed To Payment</button>
                 </div>
@@ -269,5 +448,164 @@
             <p>&copy; 2025 HarborHop. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
         </div>
     </footer>
+
+    <script>
+
+        function goBack() {
+        // Set flag for restoration
+            sessionStorage.setItem('from_available_trips', 'true');
+            window.history.back();
+        }
+        // ================================================
+        // ADD/REMOVE PASSENGER FUNCTIONALITY
+        // ================================================
+        
+        let passengerCount = 1;
+        const totalPassengers = {{ adults|add:children }};
+        
+        function addPassenger() {
+            // Check if we've reached the maximum
+            if (passengerCount >= totalPassengers) {
+                alert(`You can only add ${totalPassengers} passenger(s) based on your booking.`);
+                return;
+            }
+            
+            passengerCount++;
+            const container = document.getElementById('passengers-container');
+            
+            // Create new passenger card
+            const passengerCard = document.createElement('div');
+            passengerCard.className = 'passenger-card';
+            passengerCard.setAttribute('data-passenger-number', passengerCount);
+            
+            passengerCard.innerHTML = `
+                <button type="button" class="remove-passenger-btn" onclick="removePassenger(this)">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+                <h2>Passenger ${passengerCount}</h2>
+                <div class="form-grid">
+                    <div class="field">
+                        <label>First Name *</label>
+                        <input type="text" name="passenger_${passengerCount}_first_name" required>
+                    </div>
+                    <div class="field">
+                        <label>Middle Name</label>
+                        <input type="text" name="passenger_${passengerCount}_middle_name">
+                    </div>
+                    <div class="field">
+                        <label>Last Name *</label>
+                        <input type="text" name="passenger_${passengerCount}_last_name" required>
+                    </div>
+                    <div class="field">
+                        <label>Suffix</label>
+                        <input type="text" name="passenger_${passengerCount}_suffix" placeholder="Jr., Sr., III, etc.">
+                    </div>
+                    <div class="field">
+                        <label>Gender *</label>
+                        <select name="passenger_${passengerCount}_gender" required>
+                            <option value="">Select</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Date of Birth *</label>
+                        <input type="date" name="passenger_${passengerCount}_dob" required>
+                    </div>
+                    <div class="field">
+                        <label>Passenger Type *</label>
+                        <select name="passenger_${passengerCount}_type" required>
+                            <option value="Adult">Adult</option>
+                            <option value="Child">Child</option>
+                            <option value="Infant">Infant</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Nationality *</label>
+                        <select name="passenger_${passengerCount}_nationality" required>
+                            <option value="">Select</option>
+                            <option value="Filipino">Filipino</option>
+                            <option value="American">American</option>
+                            <option value="Canadian">Canadian</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(passengerCard);
+            updatePassengerCount();
+            updateAddButtonState();
+            
+            // Scroll to new passenger card
+            passengerCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        function removePassenger(button) {
+            const card = button.closest('.passenger-card');
+            const passengerNumber = parseInt(card.getAttribute('data-passenger-number'));
+            
+            // Don't allow removing the first passenger
+            if (passengerNumber === 1) {
+                alert('You must have at least one passenger.');
+                return;
+            }
+            
+            card.remove();
+            passengerCount--;
+            
+            // Renumber remaining passengers
+            renumberPassengers();
+            updatePassengerCount();
+            updateAddButtonState();
+        }
+        
+        function renumberPassengers() {
+            const cards = document.querySelectorAll('.passenger-card');
+            cards.forEach((card, index) => {
+                const newNumber = index + 1;
+                card.setAttribute('data-passenger-number', newNumber);
+                card.querySelector('h2').textContent = `Passenger ${newNumber}`;
+                
+                // Update all input names
+                const inputs = card.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    const name = input.getAttribute('name');
+                    if (name) {
+                        const newName = name.replace(/passenger_\d+_/, `passenger_${newNumber}_`);
+                        input.setAttribute('name', newName);
+                    }
+                });
+            });
+            
+            passengerCount = cards.length;
+        }
+        
+        function updatePassengerCount() {
+            document.getElementById('current-passengers-count').textContent = passengerCount;
+        }
+        
+        function updateAddButtonState() {
+            const addButton = document.getElementById('add-passenger-btn');
+            if (passengerCount >= totalPassengers) {
+                addButton.disabled = true;
+                addButton.style.opacity = '0.5';
+                addButton.style.cursor = 'not-allowed';
+                addButton.innerHTML = '<i class="fa-solid fa-check"></i> All Passengers Added';
+            } else {
+                addButton.disabled = false;
+                addButton.style.opacity = '1';
+                addButton.style.cursor = 'pointer';
+                addButton.innerHTML = '<i class="fa-solid fa-user-plus"></i> Add Another Passenger';
+            }
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updatePassengerCount();
+            updateAddButtonState();
+        });
+    </script>
 </body>
 </html>
