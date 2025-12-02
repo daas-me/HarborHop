@@ -1663,3 +1663,50 @@ def get_booking_selection(request):
         booking_data = request.session.get('booking_selection', {})
         return JsonResponse(booking_data)
 
+
+
+@login_required
+@require_POST
+def delete_account(request):
+    """
+    Permanently delete the logged-in user's account.
+    Accepts AJAX (application/json) and normal form POST.
+    """
+    # Basic confirmation check for safety (optional)
+    
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
+    # Optional: you may verify `request.user` password before deleting.
+    
+
+    try:
+        user = request.user
+
+        # Option A (hard delete)
+        user.delete()
+
+        # Option B (soft delete) example:
+        # user.is_active = False
+        # user.save()
+
+        # Logout the session (important)
+        logout(request)
+
+        if is_ajax:
+            # return JSON instructing client where to redirect
+            return JsonResponse({
+                "success": True,
+                "message": "Account deleted successfully.",
+                "redirect": "/"
+            })
+        else:
+            # non-AJAX: redirect to homepage (logged out)
+            return redirect('home')
+
+    except Exception as e:
+        # Log the exception in your real app
+        if is_ajax:
+            return JsonResponse({"success": False, "message": "Failed to delete account."}, status=500)
+        else:
+            return redirect('profile')  # or render an error page
+

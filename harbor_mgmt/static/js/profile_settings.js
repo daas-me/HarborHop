@@ -1,16 +1,15 @@
 document.addEventListener('DOMContentLoaded', function () {
-  // ---------- helpers ----------
-  function log(...args) { /* console.log('[profile_settings]', ...args); */ }
+  //  helpers 
   function getCookie(name) {
     const cookie = document.cookie.split('; ').find(r => r.trim().startsWith(name + '='));
     return cookie ? decodeURIComponent(cookie.split('=')[1]) : null;
   }
   function showAlert(msg) {
-    // simple alert (keeps behavior consistent). Replace with custom UI if needed.
+    // using alert for now to match existing behavior
     alert(msg);
   }
 
-  // ---------- tabs wiring ----------
+  //  tabs wiring (existing) 
   const container = document.querySelector('.container');
   const defaultTab = container?.dataset?.activeTab || 'personal';
   const tabsContainer = document.querySelector('.tabs');
@@ -29,9 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (active) s.removeAttribute('hidden'); else s.setAttribute('hidden', 'true');
     });
   }
-
   setActiveTab(defaultTab);
-
   if (tabsContainer) {
     tabsContainer.addEventListener('click', (e) => {
       const btn = e.target.closest('.tab');
@@ -40,7 +37,6 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!name) return;
       setActiveTab(name);
     });
-
     tabsContainer.addEventListener('keydown', (e) => {
       const btn = e.target.closest('.tab');
       if (!btn) return;
@@ -52,19 +48,13 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // ---------- photo upload / remove wiring ----------
+  //  profile photo upload / remove 
   const changeBtn = document.getElementById('changePhotoBtn');
   const removeBtn = document.getElementById('removePhotoBtn');
   const photoInput = document.getElementById('photoInput');
   const photoForm = document.getElementById('photoForm');
   const profilePhotoWrapper = document.getElementById('profilePhotoWrapper');
 
-  // If wrapper not present, create a safe stub to avoid crashes
-  if (!profilePhotoWrapper) {
-    console.warn('[profile_settings] profilePhotoWrapper not found in DOM');
-  }
-
-  // Upload handler (AJAX with fallback)
   if (changeBtn && photoInput && photoForm) {
     changeBtn.addEventListener('click', () => photoInput.click());
 
@@ -72,7 +62,6 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!photoInput.files || photoInput.files.length === 0) return;
       const file = photoInput.files[0];
 
-      // optional client-side size limit
       const maxMB = 8;
       if (file.size > maxMB * 1024 * 1024) {
         showAlert(`File is too large. Max ${maxMB} MB allowed.`);
@@ -82,7 +71,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const action = photoForm.getAttribute('action');
       if (!action) {
-        console.error('[profile_settings] photoForm action attribute missing; falling back to full submit.');
         photoForm.submit();
         return;
       }
@@ -100,78 +88,52 @@ document.addEventListener('DOMContentLoaded', function () {
           body: formData
         });
 
-        // If response isn't OK, fallback to form submit (handles redirects/login pages)
         if (!resp.ok) {
-          console.warn('[profile_settings] upload response not ok (status ' + resp.status + '), falling back to full submit.');
           photoForm.submit();
           return;
         }
 
         const contentType = resp.headers.get('content-type') || '';
         if (!contentType.includes('application/json')) {
-          // server returned HTML or redirect — fallback to full submit
           photoForm.submit();
           return;
         }
 
         const data = await resp.json();
-
         if (data && data.success) {
-          // tolerate multiple key names returned by different backends
-          const imageUrlRaw = data.image_url || data.photo_url || data.photoUrl || data.url || data.path || null;
-
+          const imageUrlRaw = data.image_url || data.photo_url || data.url || null;
           if (imageUrlRaw) {
-            // convert relative path ("/media/...") to absolute
             let src = imageUrlRaw;
-            if (src.startsWith('/')) {
-              src = window.location.origin + src;
-            }
-
-            // cache-bust query param to force browser to fetch new image
+            if (src.startsWith('/')) src = window.location.origin + src;
             const busted = src + (src.includes('?') ? '&' : '?') + 'v=' + Date.now();
-
             if (profilePhotoWrapper) {
               profilePhotoWrapper.innerHTML = `<img src="${busted}" alt="Profile Photo" id="profilePhoto">`;
-              // store initials if dataset not present (used by remove fallback)
-              if (!profilePhotoWrapper.dataset.initials) {
-                profilePhotoWrapper.dataset.initials = (profilePhotoWrapper.textContent || '').trim().slice(0,4);
-              }
             }
-
             if (removeBtn) removeBtn.disabled = false;
           } else {
-            // server returned success but no URL -> reload to let server render
+            // ensure UI consistent if server doesn't return a URL
             location.reload();
           }
-
         } else {
           showAlert(data?.message || 'Upload failed. Please try again.');
         }
 
       } catch (err) {
-        console.error('[profile_settings] upload error', err);
-        // final fallback to full form submit
+        console.error('upload error', err);
         try { photoForm.submit(); } catch (e) { showAlert('Upload failed.'); }
       } finally {
-        // reset input so change event will trigger again for same file
         photoInput.value = '';
       }
     });
-  } else {
-    // If one of the pieces missing just log; doesn't break other behavior
-    log('upload UI not fully present (changeBtn/photoInput/photoForm)');
   }
 
-  // Remove handler (AJAX) — clears server-side and updates UI locally, then reloads
   if (removeBtn) {
     removeBtn.addEventListener('click', async () => {
       if (!confirm('Remove profile photo?')) return;
-
       const removeUrl = container?.dataset?.removePhotoUrl;
       const initials = profilePhotoWrapper?.dataset?.initials || '';
 
       if (!removeUrl) {
-        // fallback: client-only
         if (profilePhotoWrapper) profilePhotoWrapper.innerHTML = `<span id="profilePhotoPlaceholder">${initials}</span>`;
         removeBtn.disabled = true;
         return;
@@ -189,35 +151,89 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         if (!resp.ok) {
-          // not ok -> show message
           const text = await resp.text().catch(() => '');
-          console.warn('[profile_settings] remove returned non-ok', resp.status, text);
+          console.warn('remove non-ok', resp.status, text);
           showAlert('Failed to remove photo. Try again.');
           return;
         }
 
-        // try parse JSON
         const data = await resp.json().catch(() => null);
         if (data && data.success) {
           if (profilePhotoWrapper) profilePhotoWrapper.innerHTML = `<span id="profilePhotoPlaceholder">${initials}</span>`;
           removeBtn.disabled = true;
-          // reload so server-rendered pages show consistent state
           setTimeout(() => location.reload(), 300);
         } else {
           showAlert(data?.message || 'Failed to remove photo.');
         }
       } catch (err) {
-        console.error('[profile_settings] remove error', err);
+        console.error('remove error', err);
         showAlert('Error removing photo. Try again.');
       }
     });
   }
 
-  // If no image exists at load, disable remove button
-  const profileImgEl = document.getElementById('profilePhoto');
-  if (!profileImgEl && removeBtn) removeBtn.disabled = true;
+  if (!document.getElementById('profilePhoto') && removeBtn) removeBtn.disabled = true;
 
-  // hide updateMessage if no content
+  //  Delete account wiring 
+  const deleteBtn = document.getElementById('deleteAccountBtn');
+  const deleteForm = document.getElementById('deleteAccountForm'); // fallback form
+
+  if (deleteBtn) {
+    deleteBtn.addEventListener('click', async () => {
+      // Strong confirm message
+      const confirmText = "Are you sure you want to permanently delete your account? This action cannot be undone. Type 'DELETE' to confirm.";
+      // prompt ensures user explicitly types DELETE
+      const typed = prompt(confirmText, "");
+      if (!typed || typed.trim().toUpperCase() !== 'DELETE') {
+        alert('Account deletion cancelled.');
+        return;
+      }
+
+      // AJAX POST to delete endpoint
+      const deleteUrl = "{% url 'delete_account' %}"; // Django will render this in the template
+      try {
+        const resp = await fetch(deleteUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify({ confirm: true })
+        });
+
+        // If not JSON (redirect), fall back to form submit
+        if (!resp.ok) {
+          // fallback: submit the hidden form (non-AJAX) so server can handle redirect
+          if (deleteForm) {
+            deleteForm.submit();
+            return;
+          }
+          showAlert('Failed to delete account. Please try again.');
+          return;
+        }
+
+        const data = await resp.json().catch(() => null);
+        if (data && data.success) {
+          // On success, server logs out user and returns success.
+          // Redirect to logout or homepage — server may have already logged out.
+          const redirectTo = data.redirect || '{% url "home" %}';
+          alert(data.message || 'Your account has been deleted.');
+          window.location.href = redirectTo;
+        } else {
+          showAlert(data?.message || 'Failed to delete account. Please try again.');
+        }
+
+      } catch (err) {
+        console.error('delete account error', err);
+        // fallback to full form submit to let server handle it
+        if (deleteForm) deleteForm.submit();
+        else showAlert('Failed to delete account. Please try again later.');
+      }
+    });
+  }
+
+  //  hide updateMessage if empty 
   const updateMessageEl = document.getElementById('updateMessage');
   if (updateMessageEl) {
     if (!updateMessageEl.textContent || !updateMessageEl.textContent.trim()) {
@@ -226,7 +242,4 @@ document.addEventListener('DOMContentLoaded', function () {
       updateMessageEl.classList.add('success-message');
     }
   }
-
-  // done
-  log('profile_settings script loaded');
 });
