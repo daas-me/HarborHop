@@ -7,7 +7,7 @@
     <title>Available Trips - HarborHop</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
-    <link rel="stylesheet" href="{% static 'css/available_trips.css' %}">
+    <link rel="stylesheet" href="{% static 'css/available_trips.css' %}?=v2">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon_io/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
@@ -64,13 +64,19 @@
         </a>
 
         <!-- Top Info Bar -->
+       <!-- Top Info Bar with Edit Capability -->
         <div class="top-info">
+        <div class="top-info-header">
+            <i class="fa-solid fa-route"></i>
+            <span>Trip Details</span>
+        </div>
+        <div class="top-info-content">
             <div class="info-item route">
                 <div>
                     <div class="info-label">FROM</div>
                     <div class="info-value">{{ origin_name }}</div>
                 </div>
-                <span class="route-arrow"><i class="fa-solid fa-arrows-left-right"></i></span>
+                <span class="route-arrow"><i class="fa-solid fa-arrow-right"></i></span>
                 <div>
                     <div class="info-label">TO</div>
                     <div class="info-value">{{ destination_name }}</div>
@@ -78,7 +84,7 @@
             </div>
             <div class="info-item">
                 <div class="info-label">Passengers</div>
-                <div class="info-value">{{ adults }}{% if children > 0 %} + {{ children }}{% endif %}</div>
+                <div class="info-value">{{ adults }} Adult{% if adults > 1 %}s{% endif %}{% if children > 0 %} + {{ children }} Child{% if children > 1 %}ren{% endif %}{% endif %}</div>
             </div>
             <div class="info-item">
                 <div class="info-date-label">Departure</div>
@@ -89,29 +95,105 @@
                 <div class="info-date-value">{% if return_date_formatted %}{{ return_date_formatted }}{% else %}--{% endif %}</div>
             </div>
             <div class="info-item">
-                {% comment %} <a href="{% url 'home' %}" class="modify-link">
+                <a href="#" class="modify-link" onclick="openModifyModal(event)">
                     <i class="fa-solid fa-pen"></i> MODIFY
-                </a> {% endcomment %}
+                </a>
             </div>
         </div>
+    </div>
 
+<!-- Modify Booking Modal -->
+<div id="modifyModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModifyModal()">&times;</span>
+        <h2><i class="fa-solid fa-pen-to-square"></i> Modify Your Search</h2>
+        
+        <form method="POST" action="{% url 'search_trips' %}" id="modifyForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label>Trip Type</label>
+                <div class="trip-type-selector">
+                    <label class="radio-option">
+                        <input type="radio" name="trip_type" value="round_trip" {% if trip_type == 'round_trip' %}checked{% endif %}>
+                        <span>Round Trip</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="trip_type" value="one_way" {% if trip_type == 'one_way' %}checked{% endif %}>
+                        <span>One Way</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-row-modal">
+                <div class="form-group">
+                    <label>From</label>
+                    <select name="origin" id="modal-origin" required>
+                        <option value="{{ origin }}">{{ origin_name }}</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>To</label>
+                    <select name="destination" id="modal-destination" required>
+                        <option value="{{ destination }}">{{ destination_name }}</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row-modal">
+                <div class="form-group">
+                    <label>Departure Date</label>
+                    <input type="date" name="departure_date" value="{{ departure_date }}" required min="{{ today }}">
+                </div>
+                
+                <div class="form-group" id="modal-return-date-group">
+                    <label>Return Date</label>
+                    <input type="date" name="return_date" value="{{ return_date }}" id="modal-return-date" {% if trip_type == 'round_trip' %}required{% endif %}>
+                </div>
+            </div>
+            
+            <div class="form-row-modal">
+                <div class="form-group">
+                    <label>Adults (12+ years)</label>
+                    <div class="passenger-counter">
+                        <button type="button" onclick="changeCount('adults', -1)"><i class="fa-solid fa-minus"></i></button>
+                        <input type="number" name="adults" id="modal-adults" value="{{ adults }}" min="1" max="20" readonly>
+                        <button type="button" onclick="changeCount('adults', 1)"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Children (2-11 years)</label>
+                    <div class="passenger-counter">
+                        <button type="button" onclick="changeCount('children', -1)"><i class="fa-solid fa-minus"></i></button>
+                        <input type="number" name="children" id="modal-children" value="{{ children }}" min="0" max="20" readonly>
+                        <button type="button" onclick="changeCount('children', 1)"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" onclick="closeModifyModal()" class="btn-secondary">Cancel</button>
+                <button type="submit" class="btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Search Again</button>
+            </div>
+        </form>
+    </div>
+</div>
         <!-- Progress Steps -->
         <div class="progress-steps">
-            <div class="steps">
+            <div class="steps step-1">
                 <div class="step active">
                     <div class="step-number">1</div>
                     <div class="step-label">Schedules</div>
-                    <div class="step-line"></div>
                 </div>
                 <div class="step">
                     <div class="step-number">2</div>
                     <div class="step-label">Passenger Info</div>
-                    <div class="step-line"></div>
                 </div>
                 <div class="step">
                     <div class="step-number">3</div>
                     <div class="step-label">Payment</div>
-                    <div class="step-line"></div>
                 </div>
                 <div class="step">
                     <div class="step-number">4</div>
@@ -119,7 +201,6 @@
                 </div>
             </div>
         </div>
-
         <div class="container">
             <!-- Main Content -->
             <div class="main-content">
@@ -370,5 +451,122 @@
 
     <script src="{% static 'js/available_trips.js' %}"></script>
     <script src="{% static 'js/available_trips_continue.js' %}"></script>
+    <script>
+// Load routes data for modal
+let modalRoutesData = {{ routes_data|safe }};
+
+function openModifyModal(e) {
+    e.preventDefault();
+    document.getElementById('modifyModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    
+    // Populate locations in modal
+    populateModalLocations();
+    
+    // Handle trip type change
+    setupTripTypeToggle();
+}
+
+function closeModifyModal() {
+    document.getElementById('modifyModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+function populateModalLocations() {
+    if (!modalRoutesData || modalRoutesData.length === 0) return;
+    
+    const originSelect = document.getElementById('modal-origin');
+    const destSelect = document.getElementById('modal-destination');
+    
+    // Clear and populate origins
+    originSelect.innerHTML = '<option value="">Select Origin</option>';
+    const sortedRoutes = [...modalRoutesData].sort((a, b) => 
+        a.origin.name.localeCompare(b.origin.name)
+    );
+    
+    sortedRoutes.forEach(route => {
+        const option = document.createElement('option');
+        option.value = route.origin.id;
+        option.textContent = `${route.origin.name}${route.origin.province ? ' (' + route.origin.province + ')' : ''}`;
+        if (route.origin.id == {{ origin }}) {
+            option.selected = true;
+        }
+        originSelect.appendChild(option);
+    });
+    
+    // Update destinations when origin changes
+    originSelect.addEventListener('change', function() {
+        updateModalDestinations(parseInt(this.value));
+    });
+    
+    // Initial destination population
+    updateModalDestinations({{ origin }});
+}
+
+function updateModalDestinations(originId) {
+    const destSelect = document.getElementById('modal-destination');
+    destSelect.innerHTML = '<option value="">Select Destination</option>';
+    
+    const route = modalRoutesData.find(r => r.origin.id === originId);
+    
+    if (route && route.destinations) {
+        const sortedDests = [...route.destinations].sort((a, b) => 
+            a.name.localeCompare(b.name)
+        );
+        
+        sortedDests.forEach(dest => {
+            const option = document.createElement('option');
+            option.value = dest.id;
+            option.textContent = `${dest.name}${dest.province ? ' (' + dest.province + ')' : ''}`;
+            if (dest.id == {{ destination }}) {
+                option.selected = true;
+            }
+            destSelect.appendChild(option);
+        });
+    }
+}
+
+function setupTripTypeToggle() {
+    const tripTypeRadios = document.querySelectorAll('#modifyForm input[name="trip_type"]');
+    const returnDateGroup = document.getElementById('modal-return-date-group');
+    const returnDateInput = document.getElementById('modal-return-date');
+    
+    tripTypeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'one_way') {
+                returnDateGroup.style.opacity = '0.5';
+                returnDateInput.disabled = true;
+                returnDateInput.required = false;
+            } else {
+                returnDateGroup.style.opacity = '1';
+                returnDateInput.disabled = false;
+                returnDateInput.required = true;
+            }
+        });
+    });
+}
+
+function changeCount(type, delta) {
+    const input = document.getElementById(`modal-${type}`);
+    let value = parseInt(input.value) || 0;
+    value += delta;
+    
+    if (type === 'adults') {
+        value = Math.max(1, Math.min(20, value));
+    } else {
+        value = Math.max(0, Math.min(20, value));
+    }
+    
+    input.value = value;
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('modifyModal');
+    if (event.target === modal) {
+        closeModifyModal();
+    }
+}
+</script>
 </body>
 </html>

@@ -1,195 +1,450 @@
-:root {
-    --primary-color: #ff9900;
-    --accent-color: #0b7dda;
-    --text-dark: #2c3e50;
-    --text-muted: #67747d;
-    --border-color: #dfe6ed;
-    --background-light: #f8fbff;
-    --danger-color: #c0392b;
+/* Passenger Info Page Styles - Matching Available Trips */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 body {
-    margin: 0;
     font-family: 'Alan Sans', sans-serif;
     margin: 0;
     padding: 0;
     background: url('https://images.unsplash.com/photo-1554254464-7046778097bf?fm=jpg&q=95&w=3000&auto=format&fit=crop') no-repeat center center fixed;
     background-size: cover;
-    min-height: 10vh;
-    color: var(--text-dark);
+    color: #2c3e50;
 }
 
-header {
-   background-color: #ffffff;
-    padding: 15px 50px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+.page-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 30px 20px;
 }
 
-.logo-container {
-   display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-}
-
-.logo {
-    font-size: 35px;
-    font-weight: bold;
-    color: #333;
-    text-decoration: none;
-    letter-spacing: -0.5px;
-}
-
-.logo span {
-    color: var(--primary-color);
-}
-
-.tagline {
-    margin: 0;
-    font-size: 12px;
-    color: #ff9800;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    line-height: 1;
-}
-
-nav a {
-    margin-left: 24px;
-    text-decoration: none;
-    color: var(--text-muted);
-    font-weight: 600;
-    font-size: 14px;
-}
-
-nav a.login-btn {
-    border: 1px solid var(--primary-color);
-    padding: 8px 18px;
-    border-radius: 25px;
-    color: var(--primary-color);
-}
-
-.page-container {
-    max-width: 1100px;
-    margin: 30px auto;
-    padding: 0 25px 40px;
-}
-
-.steps-bar {
-    background: white;
-    border-radius: 12px;
-    padding: 20px 30px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 10px 30px rgba(43, 123, 190, 0.1);
-}
-
-.itinerary-details {
-    display: flex;
-    gap: 40px;
-    align-items: center;
-    font-size: 14px;
-}
-
-.itinerary-details span.title {
-    display: block;
-    font-weight: 700;
-    color: var(--text-dark);
-}
-
-.itinerary-details span.value {
-    color: var(--text-muted);
-    font-size: 13px;
-}
-
-.steps-indicator {
-    display: flex;
-    align-items: center;
+.container {
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 25px;
+    align-items: start;
 }
 
-.step-item {
+/* TOP INFO BAR - Matching Available Trips */
+.top-info {
+    background: white;
+    padding: 0;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    animation: fadeInDown 0.6s ease-out;
+}
+
+.top-info-header {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    padding: 15px 30px;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    font-size: 12px;
-    color: var(--text-muted);
-    position: relative;
+    gap: 10px;
 }
 
-.step-item::after {
+.top-info-header i {
+    font-size: 1.2rem;
+}
+
+.top-info-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 25px;
+    align-items: center;
+    padding: 25px 30px;
+}
+
+.info-item {
+    text-align: center;
+    padding: 0;
+}
+
+.info-item.route {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    text-align: left;
+}
+
+.info-item.route > div {
+    flex: 1;
+}
+
+.info-label {
+    font-size: 0.75rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.info-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.info-date-label {
+    font-size: 0.75rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.info-date-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.route-arrow {
+    font-size: 2rem;
+    color: #ff9900;
+}
+
+.route-arrow i {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+/* PROGRESS STEPS - Matching Available Trips */
+.progress-steps {
+    background: white;
+    padding: 30px 40px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    animation: fadeInDown 0.6s ease-out 0.2s backwards;
+}
+
+.steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    padding: 0 20px;
+}
+
+.steps::before {
     content: '';
     position: absolute;
-    top: 18px;
-    left: 40px;
-    width: 50px;
-    height: 2px;
-    background: #dfe6ed;
+    top: 22px;
+    left: 10%;
+    right: 10%;
+    height: 4px;
+    background: #e9ecef;
+    z-index: 0;
+    border-radius: 2px;
 }
 
-.step-item:last-child::after {
-    display: none;
+.steps::after {
+    content: '';
+    position: absolute;
+    top: 22px;
+    left: 10%;
+    width: 0%;
+    height: 4px;
+    background: linear-gradient(135deg, #ff9900 0%, #f57c00 100%);
+    z-index: 0;
+    border-radius: 2px;
+    transition: width 0.5s ease;
 }
 
-.step-item.active {
-    color: var(--primary-color);
-    font-weight: 700;
+.steps.step-1::after { width: 0%; }
+.steps.step-2::after { width: 26.66%; }
+.steps.step-3::after { width: 53.33%; }
+.steps.step-4::after { width: 80%; }
+
+.step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    z-index: 1;
 }
 
 .step-number {
-    width: 32px;
-    height: 32px;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
-    background: #dfe6ed;
+    background: white;
+    border: 4px solid #e9ecef;
+    color: #999;
     display: flex;
     align-items: center;
     justify-content: center;
+    margin: 0 auto 12px;
     font-weight: 700;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.step-item.active .step-number {
-    background: var(--primary-color);
+.step.active .step-number {
+    background: linear-gradient(135deg, #ff9900 0%, #f57c00 100%);
+    border-color: #ff9900;
+    color: white;
+    transform: scale(1.15);
+    box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+}
+
+.step.completed .step-number {
+    background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+    border-color: #4caf50;
     color: white;
 }
 
-.card {
+.step.completed .step-number::after {
+    content: '✓';
+    font-size: 1.2rem;
+}
+
+.step-label {
+    font-size: 0.9rem;
+    color: #999;
+    font-weight: 500;
+}
+
+.step.active .step-label {
+    color: #ff9900;
+    font-weight: 700;
+}
+
+.step.completed .step-label {
+    color: #4caf50;
+    font-weight: 600;
+}
+
+/* BACK BUTTON */
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
     background: white;
+    color: #2c3e50;
+    text-decoration: none;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    transition: all 0.3s;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 2px solid #e9ecef;
+}
+
+.back-btn:hover {
+    transform: translateY(-2px);
+    border-color: #2c3e50;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* MAIN CONTENT */
+.main-content {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    animation: fadeInUp 0.6s ease-out 0.3s backwards;
+}
+
+/* SECTION CARDS */
+.section-card {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 25px;
+    border: 2px solid #e9ecef;
+}
+
+.section-header {
+    display: flex;
+    justify-content: flex-start;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.section-header i {
+    font-size: 2rem;
+    color: #ff9900;
+    margin-top: 5px;
+}
+
+.section-header h3 {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    margin: 0 0 5px 0;
+    font-weight: 700;
+}
+
+.section-subtitle {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* PASSENGER COUNT INFO */
+.passenger-count-info {
+    background: linear-gradient(135deg, #e3f4fc 0%, #d1ecf9 100%);
+    border: 2px solid #0d9cdb;
     border-radius: 12px;
-    padding: 25px 30px;
-    margin-top: 25px;
-    box-shadow: 0 15px 40px rgba(15, 88, 158, 0.12);
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.95rem;
+    color: #2c3e50;
 }
 
-.card h2 {
-    margin-top: 0;
-    font-size: 20px;
-    color: var(--text-dark);
+.passenger-count-info i {
+    color: #0d9cdb;
+    font-size: 1.3rem;
 }
 
-.note-banner {
-    background: #fff9e6;
-    border-left: 4px solid var(--primary-color);
-    padding: 12px 18px;
-    margin-bottom: 24px;
-    border-radius: 6px;
-    font-size: 13px;
+.passenger-count-info strong {
+    color: #ff9900;
+    font-weight: 700;
 }
 
+/* IMPORTANT NOTICE */
+.important-notice {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+    border: 2px solid #ff9900;
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 0.9rem;
+    color: #2c3e50;
+    line-height: 1.6;
+}
+
+.important-notice i {
+    color: #ff9900;
+    font-size: 1.3rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.important-notice strong {
+    color: #e67e00;
+    font-weight: 700;
+}
+
+/* PASSENGER CARDS */
+.passengers-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.passenger-card {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 15px;
+    padding: 25px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.passenger-card:hover {
+    border-color: #ff9900;
+    box-shadow: 0 8px 25px rgba(255, 153, 0, 0.15);
+}
+
+.passenger-card h4 {
+    font-size: 1.2rem;
+    color: #2c3e50;
+    margin: 0 0 20px 0;
+    font-weight: 700;
+}
+
+.remove-passenger-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.remove-passenger-btn:hover {
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 6px 16px rgba(231, 76, 60, 0.5);
+}
+
+/* ADD PASSENGER BUTTON */
+.add-passenger-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 30px;
+    background: linear-gradient(135deg, #ff9900 0%, #f57c00 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 10px;
+    box-shadow: 0 4px 15px rgba(255, 153, 0, 0.3);
+}
+
+.add-passenger-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 153, 0, 0.4);
+}
+
+.add-passenger-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    box-shadow: none;
+    opacity: 0.6;
+}
+
+.add-passenger-btn i {
+    font-size: 1.1rem;
+}
+
+/* FORM STYLES */
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
-    margin-top: 18px;
-}
-
-.form-grid.full-width {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
 }
 
 .field {
@@ -197,214 +452,133 @@ nav a.login-btn {
     flex-direction: column;
 }
 
+.field.full-width {
+    grid-column: 1 / -1;
+}
+
 .field label {
-    font-size: 13px;
+    font-size: 0.85rem;
     font-weight: 600;
-    color: var(--text-muted);
-    margin-bottom: 10px;
+    color: #555;
+    margin-bottom: 8px;
 }
 
 .field input,
 .field select {
-    padding: 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
     font-size: 14px;
-    font-family: inherit;
+    font-family: 'Alan Sans', sans-serif;
+    transition: all 0.3s;
 }
 
 .field input:focus,
 .field select:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.15);
+    border-color: #ff9900;
+    box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.1);
 }
 
-.section-subtitle {
-    font-size: 14px;
-    color: var(--text-muted);
-    margin-top: 6px;
-    margin-bottom: 20px;
-}
-
-.section-divider {
-    height: 1px;
-    background: var(--border-color);
-    margin: 25px 0;
-}
-
-.checkbox-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    color: var(--text-muted);
-}
-
-.fa-circle-info{
-    font-size: 2rem;
-}
-
-.section-title {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 18px;
-    margin-bottom: 10px;
-}
-
-.section-title i {
-    color: var(--primary-color);
-}
-
-.passenger-card {
-    background: #f9fcff;
-    border: 1px solid #e3edf6;
-    border-radius: 12px;
-    padding: 20px;
-    margin-top: 18px;
-}
-
+/* BUTTON ROW */
 .button-row {
     display: flex;
-    justify-content: space-between;
+    gap: 15px;
     margin-top: 30px;
+    justify-content: space-between;
 }
 
-.button-row .btn {
-    padding: 12px 28px;
-    border-radius: 30px;
+.btn {
+    padding: 15px 30px;
+    border-radius: 12px;
     border: none;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 1rem;
     cursor: pointer;
-    font-family: inherit;
-    background: transparent;
-    border: 1px solid var(--primary-color);
-    color: var(--primary-color);
+    font-family: 'Alan Sans', sans-serif;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.btn.back {
-    background: transparent;
-    text-decoration: none;
-    border: 1px solid var(--primary-color);
-    color: var(--primary-color);
+.btn i {
+    font-size: 1.1rem;
 }
 
-.btn.back:hover, .btn.reserve-btn:hover, .btn.payment-btn:hover{
-    background-color: #2c3e50;
-    border: none;
+.back-button {
+    background: white;
+    color: #2c3e50;
+    border: 2px solid #e0e0e0;
+}
+
+.back-button:hover {
+    border-color: #2c3e50;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.reserve-btn {
+    background: linear-gradient(135deg, #0d9cdb 0%, #0a7ea8 100%);
     color: white;
-    transition: all ease-in-out 300ms;
 }
 
-
-.btn.continue {
-    background: #ff9900;
-    color: #fff;
-    border: 1px solid #ff9900;
+.reserve-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(13, 156, 219, 0.4);
 }
 
-@media (max-width: 900px) {
+.payment-btn {
+    background: linear-gradient(135deg, #ff9900 0%, #f57c00 100%);
+    color: white;
+}
+
+.payment-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 153, 0, 0.4);
+}
+
+/* ANIMATIONS */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+    .top-info-content {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
     .form-grid {
         grid-template-columns: 1fr;
     }
-
-    .steps-bar {
+    
+    .button-row {
         flex-direction: column;
-        gap: 20px;
-        align-items: flex-start;
     }
-
-    .step-item::after {
-        display: none;
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
     }
 }
-
- /* Add Passenger Button Styles */
-        .add-passenger-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 24px;
-            background: #ff9900;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin: 20px 0;
-        }
-        
-        .add-passenger-btn:hover {
-            background: #e68a00;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 153, 0, 0.4);
-        }
-        
-        .add-passenger-btn i {
-            font-size: 16px;
-        }
-        
-        .passenger-card {
-            position: relative;
-        }
-        
-        .remove-passenger-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #ff4444;
-            color: white;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            font-size: 18px;
-        }
-        
-        .remove-passenger-btn:hover {
-            background: #cc0000;
-            transform: scale(1.1);
-        }
-        
-        .passenger-card h2 {
-            margin-bottom: 20px;
-            color: #333;
-            font-size: 20px;
-        }
-        
-        .passengers-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        .passenger-count-info {
-            background: #f0f8ff;
-            border: 2px solid #3498db;
-            border-radius: 8px;
-            padding: 12px 16px;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 14px;
-            color: #2c3e50;
-        }
-        
-        .passenger-count-info i {
-            color: #3498db;
-            font-size: 18px;
-        }
-        
-        .passenger-count-info strong {
-            color: #ff9900;
-        }
