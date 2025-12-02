@@ -383,6 +383,22 @@ def reservations_view(request):
         'paid_bookings': paid_bookings,
         'has_reservations': all_reservations.exists(),
     })
+    
+@login_required
+def payment_confirmation(request, booking_id):
+    """Display payment confirmation page after successful payment"""
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    
+    # Only show confirmation for completed bookings
+    if booking.status != 'completed':
+        messages.warning(request, 'This booking has not been completed yet.')
+        return redirect('payment', booking_id=booking_id)
+    
+    context = {
+        'booking': booking,
+        'user': request.user,
+    }
+    return render(request, 'payment_confirmation.html', context)
 
 
 @login_required
@@ -406,7 +422,7 @@ def payment_view(request, booking_id):
 
         messages.success(request, 'Payment confirmed! Your booking was added to your history.')
         profile_url = reverse('profile_settings')
-        return redirect(f"{profile_url}?tab=booking")
+        return redirect('payment_confirmation', booking_id=booking.id)
 
     details = booking.details or {}
     distance = details.get('distance')
@@ -1417,6 +1433,8 @@ def search_trips(request):
                 'children': children,
                 'outbound_voyages': outbound_voyages,
                 'return_voyages': return_voyages,
+                'routes_data': json.dumps(routes_data) if routes_data else '[]',
+                'today': date.today().isoformat(),
             }
 
             request.session['passenger_info_summary'] = {

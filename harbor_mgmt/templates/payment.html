@@ -7,7 +7,7 @@
     <title>Payment - HarborHop</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
-    <link rel="stylesheet" href="{% static 'css/payment.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/payment.css' %}?v=2">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon_io/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
@@ -21,6 +21,7 @@
         <p class="tagline">Hop aboard. Sail beyond</p>
     </div>
     <nav>
+        <a href="{% url 'home' %}">Home</a>
         {% if user.is_authenticated %}
             <!-- Admin Dashboard Button - Only visible to admin users -->
             {% if user.profile.is_admin_user %}
@@ -53,6 +54,28 @@
         <div class="page-title">
             <h1><i class="fa-solid fa-credit-card"></i> Complete Your Payment</h1>
             <p>You're almost there! Review your booking and complete payment.</p>
+        </div>
+
+        <!-- Progress Steps -->
+        <div class="progress-steps">
+            <div class="steps step-3">
+                <div class="step completed">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Schedules</div>
+                </div>
+                <div class="step completed">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Passenger Info</div>
+                </div>
+                <div class="step active">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Payment</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-label">Complete</div>
+                </div>
+            </div>
         </div>
 
         <div class="payment-container">
@@ -275,8 +298,26 @@
                         </div>
                     </div>
 
+                    <!-- Ticket Rules Summary -->
+                    <div class="ticket-rules-box">
+                        <div class="rules-header">
+                            <i class="fa-solid fa-clipboard-list"></i>
+                            <strong>Important Ticket Rules</strong>
+                        </div>
+                        <ul class="rules-list">
+                            <li><strong>Check-in:</strong> Arrive at least 2 hours before departure</li>
+                            <li><strong>Valid ID Required:</strong> Present valid ID for boarding</li>
+                            <li><strong>Ticket Validity:</strong> Valid only for the voyage indicated</li>
+                            <li><strong>Refund/Reschedule:</strong> Within 60 days from departure, subject to surcharge</li>
+                            <li><strong>Baggage:</strong> 2 bags (0.05 cubic meter or 100kg) for 2nd class/tourist</li>
+                        </ul>
+                        <a href="#" class="view-full-rules" onclick="openRulesModal(event)">
+                            <i class="fa-solid fa-file-lines"></i> View Full Ticket Rules & Conditions
+                        </a>
+                    </div>
+
                     <div class="form-actions">
-                        <a href="{% url 'reservation_confirmation' booking.id %}" class="btn-back">
+                        <a href="javascript:history.back()" class="btn-back">
                             <i class="fa-solid fa-arrow-left"></i> Back
                         </a>
                         <button type="submit" class="btn-pay">
@@ -334,5 +375,78 @@
             <p>&copy; 2025 HarborHop. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
         </div>
     </footer>
+
+    <!-- Ticket Rules Modal -->
+    <div id="rulesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-clipboard-list"></i> Ticket Rules & Conditions</h2>
+                <button class="modal-close" onclick="closeRulesModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <ol class="full-rules-list">
+                    <li>Ticket is non-transferable and shall be used solely by Passenger named herein. Passenger is required to present a valid ID upon check-in or may be refused boarding if can not present.</li>
+                    
+                    <li>Ticket is valid only for the voyage indicated herein and shall be deemed automatically canceled if not used. In cases wherein the Passenger was unable to use the ticket, the ticket may still be refunded or rescheduled within sixty (60) days from date of departure, subject to surcharge.</li>
+                    
+                    <li>Passenger must be at the Passenger Terminal for check-in at least two (2) hours before departure time. Carrier reserves the right to cancel the ticket of any Passenger who fails to check-in thirty (30) minutes before scheduled departure and may issue the same accommodation to another person.</li>
+                    
+                    <li>Passenger undertakes to faithfully comply with the rules and regulations of the Carrier involving the maintenance of peace and order, safety, and sanitation on board the vessel.</li>
+                    
+                    <li>Passenger voluntarily agrees that Carrier shall not be liable for death, injury, or delay to the Passenger and/or loss, damage, or delay to any baggage due to any fortuitous event, war, rebellion, strike, acts of terrorism, navigational requirements, government intervention, and other causes beyond the control of the Carrier. It is agreed that the term "baggage" shall mean only such thing that is necessary for the personal use of the Passenger during the voyage, excluding all money, jewelry, merchandise, securities, and other articles of similar nature, for which the Carrier shall not be liable for unless transported under a Bill of Lading. The liability of the Carrier in case of loss, damage, or delay to the Passenger's baggage shall be limited to Five Hundred Pesos (₱500.00) for First Class passengers and a reduced proportion thereof in the case of all other passengers. Carrier shall have no liability whatsoever in connection with this voyage unless a written notice of claim is presented to the Carrier within fifteen (15) days or unless a suit is instituted within thirty (30) days from the day the Passenger disembarks or from the day the vessel arrives at the Passenger's port of destination, whichever is earlier.</li>
+                    
+                    <li>Passengers can bring two (2) 0.05 cubic meter in size or 100 kilos of baggage on board, on 2nd class and tourist accommodations. Private room and cabin passengers have double allowance in terms of quantity but not in size. Minor's allowance is half in size that of an adult. Baggage in excess of allowance will be deemed as cargo and will be treated as such and charged accordingly.</li>
+                    
+                    <li>Carrier reserves the right to refuse boarding to Passenger/s who pose a threat to the security, order, comfort, safety & health of other passengers and the vessel and Passenger/s whose payment is made through fraudulent means.</li>
+                    
+                    <li>Sick Passengers must present a medical certificate dated five (5) days within departure date, attesting to their fitness to undertake sea travel. Non-ambulatory cases, especially those with life support, should be accompanied by a licensed nurse/doctor companion with enough supply of medication for the duration of the trip. Carrier reserved the right to deny boarding of a sick passenger.</li>
+                    
+                    <li>Pregnant Passengers within 1 to 6 months (up to 28 weeks) are required to present a medical certificate issued at least the day prior the departure date attesting to their fitness to travel by boat indicated with the specific date of departure. 7 months and beyond (29 weeks and beyond) are no longer accepted for sea travel.</li>
+                    
+                    <li>Passengers below three (3) years old are considered infants. Passengers who are between three (3) to eleven (11) years of age but below one meter in height are considered minors.</li>
+                    
+                    <li>Carrier is not responsible to replace lost Passage Sales Invoice. Passage Official Receipt mutilated beyond recognition shall not be accepted for check-in. Passenger will have to purchase a new ticket.</li>
+                    
+                    <li>Ticket may be rescheduled or refunded subject to applicable surcharge at the issuing ticket outlet or at Trans-Asia Cebu-Main offices, provided that the Passenger named therein presents his complete set of ticket and a photocopy of valid ID (with picture) as proof of identity, and that the ticket has not yet expired or lapsed sixty (60) days from departure date. Ticket rescheduling can only be done once and is subject to fare rates prevailing at the time of rescheduling.</li>
+                    
+                    <li>In case the vessel cannot continue or complete the voyage for any cause whatsoever, Carrier reserves the right to cancel the trip and refund the Passenger the unused cost of said ticket or reschedule for another date/destination.</li>
+                    
+                    <li>Sailing schedule of the vessel is not guaranteed and may change between the date of purchase and the date of travel. Carrier will exert reasonable efforts to notify affected Passengers of any change of the sailing schedule, but will not be liable in any way for any loss or damage that may be incurred as a result of such change.</li>
+                    
+                    <li>Carrier may cancel, terminate, or delay any departing vessel or suspend the operation at any time after a reservation has been made.</li>
+                    
+                    <li>Carrier is not responsible for any connecting trip of the Passenger or for any misconnection arising from any delay or cancellation of the scheduled trip.</li>
+                    
+                    <li>Carrier reserves the right to deploy another vessel without prior notice. Affected accommodations will be automatically downgraded should there be no available accommodations, and the fare difference will be refunded to the Passenger. In the event all accommodations are fully booked, Passenger agrees to be refunded in full.</li>
+                    
+                    <li>Any unauthorized alteration of this ticket shall render the same null and void.</li>
+                </ol>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-close-modal" onclick="closeRulesModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openRulesModal(event) {
+            event.preventDefault();
+            document.getElementById('rulesModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeRulesModal() {
+            document.getElementById('rulesModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('rulesModal');
+            if (event.target == modal) {
+                closeRulesModal();
+            }
+        }
+    </script>
 </body>
 </html>
