@@ -28,4 +28,5 @@ urlpatterns = [
     path('payment/<int:booking_id>/', views.payment_view, name='payment'),
     path('upload-profile-photo/', views.upload_profile_photo, name='upload_profile_photo'),
     path('delete-profile-photo/', views.delete_profile_photo, name='delete_profile_photo'),
+    path('api/get-booking-selection/', views.get_booking_selection, name='get_booking_selection'),
 ]
