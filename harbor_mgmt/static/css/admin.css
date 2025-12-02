@@ -1292,3 +1292,35 @@ body {
   color: #fff !important;
   cursor: pointer;
 }
+
+/* Chart control tweaks when reusing .action-btn */
+.chart-controls {
+  display: flex;
+  gap: 10px;
+  padding: 6px;
+  background: #f5f7fa;
+  border-radius: 10px;
+  border: 1px solid #e0e6ed;
+  align-items: center;
+}
+
+.chart-controls .action-btn {
+  padding: 8px 16px;          /* a little smaller than quick actions */
+  min-width: 170px;          /* keeps them reasonably sized */
+  justify-content: center;
+}
+
+.chart-controls .action-btn .icon,
+.chart-controls .action-btn i {
+  font-size: 14px;
+}
+
+/* active override — keeps the same orange active look */
+.chart-controls .action-btn.chart-toggle.active {
+  background: #ff9800;
+  color: #fff;
+  border-color: #ff9800;
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.35);
+}
+
+
