@@ -2,15 +2,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Profile - HarborHop</title>
 
     <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
 
     <!-- External CSS -->
-    <link rel="stylesheet" href="{% static 'css/profile_settings.css' %}?v=4">
+    <link rel="stylesheet" href="{% static 'css/profile_settings.css' %}?v=5">
 
     <!-- Favicons -->
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
@@ -19,7 +19,7 @@
     <link rel="manifest" href="{% static 'images/favicon_io/site.webmanifest' %}">
 
     <!-- External JS (defer to avoid DOM timing issues) -->
-    <script src="{% static 'js/profile_settings.js' %}?v=2" defer></script>
+    <script src="{% static 'js/profile_settings.js' %}?v=3" defer></script>
 </head>
 <body>
     <nav class="navbar">
@@ -38,7 +38,13 @@
         </div>
     </nav>
 
-    <div class="container"data-active-tab="{{ active_tab|default:'personal' }}"data-remove-photo-url="{% url 'delete_profile_photo' %}">
+    <!-- container exposes server endpoints to JS via data-* attributes -->
+    <div class="container"
+         data-active-tab="{{ active_tab|default:'personal' }}"
+         data-remove-photo-url="{% url 'delete_profile_photo' %}"
+         data-delete-account-url="{% url 'delete_account' %}">
+
+        <!-- PROFILE HEADER -->
         <div class="profile-header">
             <div class="profile-photo-section">
                 <div class="profile-photo" id="profilePhotoWrapper">
@@ -60,6 +66,7 @@
                     </div>
                 </form>
             </div>
+
             <div class="profile-info">
                 <h1>{{ user.first_name }} {{ user.last_name }}</h1>
                 <p class="username-display">@{{ user.username }}</p>
@@ -69,7 +76,7 @@
             </div>
         </div>
 
-        <!-- Tabs (buttons, data-tab) -->
+        <!-- TABS -->
         <div class="tabs" role="tablist" aria-label="Profile sections">
             <button class="tab {% if active_tab == 'personal' %}active{% endif %}" type="button" data-tab="personal" aria-selected="{% if active_tab == 'personal' %}true{% else %}false{% endif %}">Personal Information</button>
             <button class="tab {% if active_tab == 'booking' %}active{% endif %}" type="button" data-tab="booking" aria-selected="{% if active_tab == 'booking' %}true{% else %}false{% endif %}">Booking History</button>
@@ -82,7 +89,7 @@
 
             <form id="profileForm" method="POST">
                 {% csrf_token %}
-                
+
                 <div class="form-row">
                     <div class="form-group">
                         <label>First Name</label>
@@ -126,7 +133,6 @@
                 <button type="submit" class="btn-save">Save Changes</button>
             </form>
 
-            {# Render success message only when present #}
             {% for message in messages %}
                 {% if 'success' in message.tags %}
                     <div id="updateMessage" class="success-message">
@@ -244,7 +250,32 @@
 
                 <button type="submit" class="btn-save">Update Password</button>
             </form>
+
+            <hr style="margin:28px 0; border:none; border-top:1px solid #f0f0f0;">
+
+            <!-- Delete account block -->
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+                <div>
+                    <h3 style="margin:0 0 6px 0;">Delete Account</h3>
+                    <p style="margin:0;color:#666;font-size:14px;">Permanently delete your account and all associated data. This action cannot be undone.</p>
+                </div>
+
+                <div>
+                    <button id="deleteAccountBtn" class="remove-photo-btn" type="button" style="background:white; border:1.5px solid #dc3545; color:#dc3545; padding:12px 20px; border-radius:8px; font-weight:700;">
+                        Delete Account
+                    </button>
+
+                    <!-- Non-AJAX fallback form (posts to delete_account view) -->
+                    <form id="deleteAccountForm" method="POST" action="{% url 'delete_account' %}" style="display:none;">
+                        {% csrf_token %}
+                        <input type="hidden" name="confirm" value="1">
+                        <button type="submit">Delete (fallback)</button>
+                    </form>
+                </div>
+            </div>
+            <!-- end delete account -->
         </div>
-    </div>
+
+    </div> <!-- /.container -->
 </body>
 </html>

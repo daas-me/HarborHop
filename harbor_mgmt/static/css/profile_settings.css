@@ -523,3 +523,22 @@ body {
 #updateMessage:empty {
     display: none;
 }
+
+.remove-photo-btn, .danger-btn {
+    background: white;
+    color: #dc3545;
+    padding: 10px 20px;
+    border: 1.5px solid #dc3545;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Alan Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    transition: all 0.15s;
+}
+
+.remove-photo-btn:hover, .danger-btn:hover {
+    background: #dc3545;
+    color: white;
+    transform: translateY(-1px);
+}
