@@ -143,6 +143,7 @@
     transition: all 0.3s ease;
     animation: fadeInUp 0.6s ease-out;
     position: relative;
+    isolation: isolate; 
 }
 
 .reservation-card:hover {
@@ -212,6 +213,8 @@
     justify-content: space-between;
     align-items: flex-start;
     gap: 15px;
+    position: relative; 
+    z-index: auto; 
 }
 
 .route {
@@ -277,6 +280,8 @@
 .reservation-card__body {
     padding: 24px;
     flex: 1;
+    position: relative; 
+    z-index: auto; 
 }
 
 .reservation-detail {
@@ -340,6 +345,7 @@
 .reservation-card__body .reservation-detail:nth-last-child(2) .value {
     color: #ff9800;
     font-size: 1.2rem;
+    z-index: 1;
 }
 
 /* ================================================
@@ -349,6 +355,8 @@
     padding: 0 24px 24px;
     display: flex;
     justify-content: flex-end;
+    position: relative;
+    z-index: auto; 
 }
 
 .btn-primary {
@@ -512,6 +520,7 @@
     .reservation-card__header {
         flex-direction: column;
         gap: 10px;
+        z-index: 1;
     }
 
     .status-badge {

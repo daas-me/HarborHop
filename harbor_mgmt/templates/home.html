@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HarborHop - Your Gateway to Maritime Adventures</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/home.css' %}?v=11">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}?v=12">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon_io/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
@@ -30,26 +30,24 @@
                 <i class="fa-solid fa-chart-line dashboard-icon"></i> Admin Access
             </a>
         {% endif %}
-        <a href="{% url 'reservations' %}">Manage Booking</a>
-        <a href="#">Latest Offers</a>
-        <!-- FIXED: use contact_us route -->
-        <a href="{% url 'contact_us' %}">Contact Us</a>
-        <div class="nav-divider"></div>
-        <a href="#" class="language-link">PH</a>
-        <span class="language-separator">|</span>
-        <a href="#" class="language-link">EN</a>
-        <a href="{% url 'profile_settings' %}" class="user-name-btn">{{ user.username }}</a>
-        <a href="{% url 'logout' %}" class="login-btn">Log out</a>
-    {% else %}
-        <a href="#">Latest Offers</a>
-        <!-- FIXED: use contact_us route and consistent class -->
-        <a href="{% url 'contact_us' %}" class="contact-btn">Contact Us</a>
-        <div class="nav-divider"></div>
-        <a href="#" class="language-link">PH</a>
-        <span class="language-separator">|</span>
-        <a href="#" class="language-link">EN</a>
-        <a href="{% url 'login' %}" class="login-btn">Log In</a>
-    {% endif %}
+            <a href="{% url 'reservations' %}">Manage Booking</a>
+            <a href="{% url 'latest_offer' %}">Latest Offers</a>
+            <a href="{% url 'contact_us' %}">Contact Us</a>
+            <div class="nav-divider"></div>
+            <a href="#" class="language-link">PH</a>
+            <span class="language-separator">|</span>
+            <a href="#" class="language-link">EN</a>
+            <a href="{% url 'profile_settings' %}" class="user-name-btn">{{ user.username }}</a>
+            <a href="{% url 'logout' %}" class="login-btn">Log out</a>
+        {% else %}
+            <a href="{% url 'latest_offer' %}">Latest Offers</a>
+            <a href="{% url 'contact_us' %}" class="contact-btn">Contact Us</a>
+            <div class="nav-divider"></div>
+            <a href="#" class="language-link">PH</a>
+            <span class="language-separator">|</span>
+            <a href="#" class="language-link">EN</a>
+            <a href="{% url 'login' %}" class="login-btn">Log In</a>
+        {% endif %}
 </nav>
 </header>
 
