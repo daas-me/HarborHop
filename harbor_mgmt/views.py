@@ -1741,3 +1741,5 @@ def contact_us(request):
     
     return render(request, 'contact.html')
 
+def latest_offer(request):
+    return render(request, 'latest_offer.html')

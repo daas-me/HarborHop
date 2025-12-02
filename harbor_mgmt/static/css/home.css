@@ -1019,6 +1019,7 @@ footer {
 
 .footer-links {
     list-style: none;
+    color: #2c3e50;
     padding: 0;
 }
 
@@ -1027,7 +1028,7 @@ footer {
 }
 
 .footer-links a {
-    color: #fff;
+    color: #2c3e50;
     text-decoration: none;
     transition: color 0.3s ease;
 }

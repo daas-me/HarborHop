@@ -32,4 +32,5 @@ urlpatterns = [
     path('api/get-booking-selection/', views.get_booking_selection, name='get_booking_selection'),
     path('profile/delete-account/', views.delete_account, name='delete_account'),
     path('contact/', views.contact_us, name='contact_us'),
+    path('latest-offer/', views.latest_offer, name='latest_offer')
 ]

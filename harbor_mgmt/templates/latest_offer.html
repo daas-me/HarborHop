@@ -1,0 +1,470 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latest Offers - HarborHop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/latest_offer.css' %}?v=1">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon_io/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
+    <link rel="manifest" href="{% static 'images/favicon_io/site.webmanifest' %}">
+    <script src="https://kit.fontawesome.com/1256e3cde2.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo-container">
+            <a href="{% url 'home' %}" class="logo">HARBOR<span>hop</span></a>
+            <p class="tagline">Hop aboard. Sail beyond</p>
+        </div>
+        <nav>
+            {% if user.is_authenticated %}
+                {% if user.profile.is_admin_user %}
+                    <a href="{% url 'admin_dashboard' %}" class="admin-dashboard-link">
+                        <i class="fa-solid fa-chart-line dashboard-icon"></i> Admin Access
+                    </a>
+                {% endif %}
+                <a href="{% url 'reservations' %}">Manage Booking</a>
+                <a href="{% url 'latest_offer' %}" class="active">Latest Offers</a>
+                <a href="{% url 'contact_us' %}">Contact Us</a>
+                <div class="nav-divider"></div>
+                <a href="#" class="language-link">PH</a>
+                <span class="language-separator">|</span>
+                <a href="#" class="language-link">EN</a>
+                <a href="{% url 'profile_settings' %}" class="user-name-btn">{{ user.username }}</a>
+                <a href="{% url 'logout' %}" class="login-btn">Log out</a>
+            {% else %}
+                <a href="{% url 'latest_offer' %}" class="active">Latest Offers</a>
+                <a href="{% url 'contact_us' %}">Contact Us</a>
+                <div class="nav-divider"></div>
+                <a href="#" class="language-link">PH</a>
+                <span class="language-separator">|</span>
+                <a href="#" class="language-link">EN</a>
+                <a href="{% url 'login' %}" class="login-btn">Log In</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <!-- Hero Banner -->
+    <section class="offers-hero">
+        <div class="hero-content">
+            <h1><i class="fa-solid fa-tags"></i> Exclusive Ferry Deals</h1>
+            <p>Save big on your next island adventure with our special offers</p>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-number">12+</div>
+                    <div class="stat-label">Active Offers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">Up to 50%</div>
+                    <div class="stat-label">Discount</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">Limited</div>
+                    <div class="stat-label">Time Only</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter Section -->
+    <section class="filter-section">
+        <div class="container">
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all">
+                    <i class="fa-solid fa-border-all"></i> All Offers
+                </button>
+                <button class="filter-tab" data-filter="discount">
+                    <i class="fa-solid fa-percent"></i> Discounts
+                </button>
+                <button class="filter-tab" data-filter="family">
+                    <i class="fa-solid fa-people-group"></i> Family Packages
+                </button>
+                <button class="filter-tab" data-filter="flash">
+                    <i class="fa-solid fa-bolt"></i> Flash Sales
+                </button>
+                <button class="filter-tab" data-filter="student">
+                    <i class="fa-solid fa-graduation-cap"></i> Student Deals
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Offers -->
+    <section class="featured-offers">
+        <div class="container">
+            <div class="section-title">
+                <h2><i class="fa-solid fa-star"></i> Featured Deals</h2>
+                <p>Our hottest offers this month</p>
+            </div>
+
+            <div class="offers-grid">
+                <!-- Offer 1: Boracay Express -->
+                <div class="offer-card-large" data-category="discount">
+                    <div class="offer-badge hot"><i class="fa-solid fa-fire"></i> HOT DEAL</div>
+                    <div class="offer-image">
+                        <img src="https://static1.detourista.com/wp/wp-content/uploads/Unorganized/Boracay-Spots-Featured.jpg" alt="Boracay Express">
+                        <div class="offer-overlay">
+                            <div class="discount-tag">30% OFF</div>
+                        </div>
+                    </div>
+                    <div class="offer-details">
+                        <div class="offer-header">
+                            <h3>Boracay Express</h3>
+                            <div class="price-section">
+                                <span class="old-price">₱1,428</span>
+                                <span class="new-price">₱999</span>
+                            </div>
+                        </div>
+                        <div class="offer-info">
+                            <div class="info-item">
+                                <i class="fa-solid fa-route"></i>
+                                <span>Manila ↔ Boracay</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fa-solid fa-calendar-days"></i>
+                                <span>Valid until June 2025</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fa-solid fa-ship"></i>
+                                <span>All Shipping Lines</span>
+                            </div>
+                        </div>
+                        <div class="offer-description">
+                            <p>Experience the beauty of Boracay's white sand beaches at an unbeatable price. Limited slots available for this exclusive summer deal!</p>
+                        </div>
+                        <div class="offer-footer">
+                            <div class="urgency-banner">
+                                <i class="fa-solid fa-clock"></i>
+                                <span>15 bookings left at this price!</span>
+                            </div>
+                            <a href="{% url 'home' %}" class="book-now-btn">
+                                <i class="fa-solid fa-ticket"></i> Book Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Offer 2: Cebu Island Hopper -->
+                <div class="offer-card-large" data-category="family">
+                    <div class="offer-badge family"><i class="fa-solid fa-people-roof"></i> FAMILY</div>
+                    <div class="offer-image">
+                        <img src="https://www.kkday.com/en-ph/blog/wp-content/uploads/FBblogCoverIslandHoppinginCebu-1170x630.jpg" alt="Cebu Island Hopper">
+                        <div class="offer-overlay">
+                            <div class="discount-tag">Kids Free</div>
+                        </div>
+                    </div>
+                    <div class="offer-details">
+                        <div class="offer-header">
+                            <h3>Cebu Island Hopper</h3>
+                            <div class="price-section">
+                                <span class="new-price">Family Package</span>
+                            </div>
+                        </div>
+                        <div class="offer-info">
+                            <div class="info-item">
+                                <i class="fa-solid fa-calendar-days"></i>
+                                <span>4 Islands in 1 Day</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fa-solid fa-utensils"></i>
+                                <span>Lunch Included</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fa-solid fa-child"></i>
+                                <span>Kids (2-11) Travel Free</span>
+                            </div>
+                        </div>
+                        <div class="offer-description">
+                            <p>Perfect family adventure exploring Cebu's most beautiful islands. Kids travel free with every adult ticket. Includes island hopping, snorkeling gear, and a delicious lunch buffet!</p>
+                        </div>
+                        <div class="offer-footer">
+                            <div class="features-list">
+                                <span class="feature-tag"><i class="fa-solid fa-check"></i> BBQ Lunch</span>
+                                <span class="feature-tag"><i class="fa-solid fa-check"></i> Snorkeling</span>
+                                <span class="feature-tag"><i class="fa-solid fa-check"></i> Guide</span>
+                            </div>
+                            <a href="{% url 'home' %}" class="book-now-btn">
+                                <i class="fa-solid fa-ticket"></i> Book Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Offer 3: El Nido Express -->
+                <div class="offer-card-large" data-category="flash">
+                    <div class="offer-badge flash"><i class="fa-solid fa-bolt"></i> FLASH SALE</div>
+                    <div class="offer-image">
+                        <img src="https://i.ytimg.com/vi/aWOdllk6u2U/mqdefault.jpg" alt="El Nido Express">
+                        <div class="offer-overlay">
+                            <div class="discount-tag">B1G1</div>
+                        </div>
+                    </div>
+                    <div class="offer-details">
+                        <div class="offer-header">
+                            <h3>El Nido Express</h3>
+                            <div class="price-section">
+                                <span class="flash-price">Buy 1 Get 1 Free!</span>
+                            </div>
+                        </div>
+                        <div class="offer-info">
+                            <div class="info-item">
+                                <i class="fa-solid fa-route"></i>
+                                <span>Manila ↔ El Nido</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fa-solid fa-clock"></i>
+                                <span>24 Hours Only!</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fa-solid fa-calendar-check"></i>
+                                <span>Travel Jan-March</span>
+                            </div>
+                        </div>
+                        <div class="offer-description">
+                            <p>Incredible flash sale to paradise! Buy one ticket and bring a friend for FREE. Explore El Nido's stunning lagoons and limestone cliffs. Limited to first 50 bookings only!</p>
+                        </div>
+                        <div class="offer-footer">
+                            <div class="countdown-timer">
+                                <i class="fa-solid fa-hourglass-half"></i>
+                                <span>Ends in: <strong id="countdown-el-nido">23:45:12</strong></span>
+                            </div>
+                            <a href="{% url 'home' %}" class="book-now-btn flash">
+                                <i class="fa-solid fa-bolt"></i> Grab Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Offer 4: Siargao Surfer -->
+                <div class="offer-card-large" data-category="student">
+                    <div class="offer-badge student"><i class="fa-solid fa-graduation-cap"></i> STUDENT</div>
+                    <div class="offer-image">
+                        <img src="https://i.ytimg.com/vi/l6K6FgR2xB8/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLCVmTDDTDEHhgshytd1yuDBy914bA" alt="Siargao Surfer">
+                        <div class="offer-overlay">
+                            <div class="discount-tag">20% OFF</div>
+                        </div>
+                    </div>
+                    <div class="offer-details">
+                        <div class="offer-header">
+                            <h3>Siargao Surfer Special</h3>
+                            <div class="price-section">
+                                <span class="old-price">₱2,500</span>
+                                <span class="new-price">₱2,000</span>
+                            </div>
+                        </div>
+                        <div class="offer-info">
+                            <div class="info-item">
+                                <i class="fa-solid fa-route"></i>
+                                <span>Manila → Siargao</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fa-solid fa-id-card"></i>
+                                <span>Valid Student ID Required</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fa-solid fa-person-swimming"></i>
+                                <span>Free Surfboard Transport</span>
+                            </div>
+                        </div>
+                        <div class="offer-description">
+                            <p>Student discount for adventure seekers! Head to Siargao's Cloud 9 with 20% off. Bring your surfboard for free and catch the best waves in the Philippines!</p>
+                        </div>
+                        <div class="offer-footer">
+                            <div class="requirements">
+                                <i class="fa-solid fa-info-circle"></i>
+                                <span>Present valid student ID at booking</span>
+                            </div>
+                            <a href="{% url 'home' %}" class="book-now-btn">
+                                <i class="fa-solid fa-ticket"></i> Book Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Offers -->
+                <div class="offer-card-large" data-category="discount">
+                    <div class="offer-badge hot"><i class="fa-solid fa-gem"></i> PREMIUM</div>
+                    <div class="offer-image">
+                        <img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800" alt="Palawan Premium">
+                        <div class="offer-overlay">
+                            <div class="discount-tag">25% OFF</div>
+                        </div>
+                    </div>
+                    <div class="offer-details">
+                        <div class="offer-header">
+                            <h3>Palawan Premium Escape</h3>
+                            <div class="price-section">
+                                <span class="old-price">₱4,000</span>
+                                <span class="new-price">₱3,000</span>
+                            </div>
+                        </div>
+                        <div class="offer-info">
+                            <div class="info-item">
+                                <i class="fa-solid fa-route"></i>
+                                <span>Manila → Puerto Princesa</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fa-solid fa-star"></i>
+                                <span>Premium Class Included</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fa-solid fa-calendar-days"></i>
+                                <span>Valid until July 2025</span>
+                            </div>
+                        </div>
+                        <div class="offer-description">
+                            <p>Travel in style to Palawan! Includes premium seating, priority boarding, complimentary meals, and lounge access. Experience luxury at sea.</p>
+                        </div>
+                        <div class="offer-footer">
+                            <div class="features-list">
+                                <span class="feature-tag"><i class="fa-solid fa-check"></i> Lounge Access</span>
+                                <span class="feature-tag"><i class="fa-solid fa-check"></i> Meals</span>
+                                <span class="feature-tag"><i class="fa-solid fa-check"></i> Wi-Fi</span>
+                            </div>
+                            <a href="{% url 'home' %}" class="book-now-btn">
+                                <i class="fa-solid fa-ticket"></i> Book Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="offer-card-large" data-category="family">
+                    <div class="offer-badge family"><i class="fa-solid fa-champagne-glasses"></i> WEEKEND</div>
+                    <div class="offer-image">
+                        <img src="https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=800" alt="Batangas Weekend">
+                        <div class="offer-overlay">
+                            <div class="discount-tag">35% OFF</div>
+                        </div>
+                    </div>
+                    <div class="offer-details">
+                        <div class="offer-header">
+                            <h3>Batangas Weekend Getaway</h3>
+                            <div class="price-section">
+                                <span class="old-price">₱1,500</span>
+                                <span class="new-price">₱975</span>
+                            </div>
+                        </div>
+                        <div class="offer-info">
+                            <div class="info-item">
+                                <i class="fa-solid fa-route"></i>
+                                <span>Manila ↔ Batangas</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fa-solid fa-calendar-week"></i>
+                                <span>Fri-Sun Only</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fa-solid fa-users"></i>
+                                <span>Min 4 Passengers</span>
+                            </div>
+                        </div>
+                        <div class="offer-description">
+                            <p>Perfect for weekend escapes! Quick ferry rides to Batangas beaches. Book as a group and save more. Ideal for family beach trips or barkada outings!</p>
+                        </div>
+                        <div class="offer-footer">
+                            <div class="urgency-banner">
+                                <i class="fa-solid fa-users"></i>
+                                <span>45 groups booked this week!</span>
+                            </div>
+                            <a href="{% url 'home' %}" class="book-now-btn">
+                                <i class="fa-solid fa-ticket"></i> Book Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-content">
+            <h2><i class="fa-solid fa-bell"></i> Never Miss a Deal!</h2>
+            <p>Subscribe to our newsletter and be the first to know about exclusive offers</p>
+            <form class="newsletter-form">
+                <input type="email" placeholder="Enter your email address" required>
+                <button type="submit">
+                    <i class="fa-solid fa-paper-plane"></i> Subscribe
+                </button>
+            </form>
+            <div class="cta-features">
+                <div class="cta-feature">
+                    <i class="fa-solid fa-percent"></i>
+                    <span>Exclusive Discounts</span>
+                </div>
+                <div class="cta-feature">
+                    <i class="fa-solid fa-clock"></i>
+                    <span>Early Access</span>
+                </div>
+                <div class="cta-feature">
+                    <i class="fa-solid fa-gift"></i>
+                    <span>Special Promos</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <div class="footer-logo">
+                    <div class="logo-text">HARBOR<span class="highlight">hop</span></div>
+                    <p class="tagline">Hop Aboard. Sail Beyond</p>
+                </div>
+                <p style="color: #2c3e50; margin-top: 20px;">Experience the best cruise booking platform with exclusive deals and premium customer service.</p>
+            </div>
+
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="{% url 'latest_offer' %}">Latest Offers</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <div class="contact-info">
+                    <p><i class="fa-solid fa-envelope"></i> Steven@harborhop.com</p>
+                    <p><i class="fa-solid fa-phone"></i> +1 (555) 123-4567</p>
+                    <p><i class="fa-solid fa-location-dot"></i> 123 Marina Blvd, Beach City, CA</p>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h4>Connect With Us</h4>
+                <div class="social-media">
+                    <a href="#" title="Facebook">
+                        <img src="https://cdn-icons-png.flaticon.com/512/124/124010.png" alt="Facebook">
+                    </a>
+                    <a href="#" title="Twitter">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3256/3256013.png" alt="Twitter">
+                    </a>
+                    <a href="#" title="Instagram">
+                        <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram">
+                    </a>
+                </div>
+                <div style="margin-top: 20px;">
+                    <h4>Newsletter</h4>
+                    <form style="display: flex; gap: 10px;">
+                        <input type="email" placeholder="Enter your email" style="padding: 8px; border-radius: 4px; border: none; flex: 1;">
+                        <button type="submit" style="background: #ff9900; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Subscribe</button>
+                    </form>
+                </div>  
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 HarborHop. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/latest_offer.js' %}"></script>
+</body>
+</html>
