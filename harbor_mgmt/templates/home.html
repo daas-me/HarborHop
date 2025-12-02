@@ -23,32 +23,34 @@
         <p class="tagline">Hop aboard. Sail beyond</p>
     </div>
     <nav>
-        {% if user.is_authenticated %}
-            <!-- Admin Dashboard Button - Only visible to admin users -->
-            {% if user.profile.is_admin_user %}
-                <a href="{% url 'admin_dashboard' %}" class="admin-dashboard-link">
-                    <i class="fa-solid fa-chart-line dashboard-icon"></i> Admin Access
-                </a>
-            {% endif %}
-            <a href="{% url 'reservations' %}">Manage Booking</a>
-            <a href="#">Latest Offers</a>
-            <a href="#">Contact Us</a>
-            <div class="nav-divider"></div>
-            <a href="#" class="language-link">PH</a>
-            <span class="language-separator">|</span>
-            <a href="#" class="language-link">EN</a>
-            <a href="{% url 'profile_settings' %}" class="user-name-btn">{{ user.username }}</a>
-            <a href="{% url 'logout' %}" class="login-btn">Log out</a>
-        {% else %}
-            <a href="#">Latest Offers</a>
-            <a href="#">Contact Us</a>
-            <div class="nav-divider"></div>
-            <a href="#" class="language-link">PH</a>
-            <span class="language-separator">|</span>
-            <a href="#" class="language-link">EN</a>
-            <a href="{% url 'login' %}" class="login-btn">Log In</a>
+    {% if user.is_authenticated %}
+        <!-- Admin Dashboard Button - Only visible to admin users -->
+        {% if user.profile.is_admin_user %}
+            <a href="{% url 'admin_dashboard' %}" class="admin-dashboard-link">
+                <i class="fa-solid fa-chart-line dashboard-icon"></i> Admin Access
+            </a>
         {% endif %}
-    </nav>
+        <a href="{% url 'reservations' %}">Manage Booking</a>
+        <a href="#">Latest Offers</a>
+        <!-- FIXED: use contact_us route -->
+        <a href="{% url 'contact_us' %}">Contact Us</a>
+        <div class="nav-divider"></div>
+        <a href="#" class="language-link">PH</a>
+        <span class="language-separator">|</span>
+        <a href="#" class="language-link">EN</a>
+        <a href="{% url 'profile_settings' %}" class="user-name-btn">{{ user.username }}</a>
+        <a href="{% url 'logout' %}" class="login-btn">Log out</a>
+    {% else %}
+        <a href="#">Latest Offers</a>
+        <!-- FIXED: use contact_us route and consistent class -->
+        <a href="{% url 'contact_us' %}" class="contact-btn">Contact Us</a>
+        <div class="nav-divider"></div>
+        <a href="#" class="language-link">PH</a>
+        <span class="language-separator">|</span>
+        <a href="#" class="language-link">EN</a>
+        <a href="{% url 'login' %}" class="login-btn">Log In</a>
+    {% endif %}
+</nav>
 </header>
 
     <!-- Hero Section with Booking Card -->

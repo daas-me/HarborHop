@@ -1,0 +1,117 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact Us - HarborHop</title>
+
+    <!-- Fonts & CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/contact.css' %}">
+
+    <!-- Icons -->
+    <script src="https://kit.fontawesome.com/1256e3cde2.js" crossorigin="anonymous"></script>
+
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon_io/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
+    <link rel="manifest" href="{% static 'images/favicon_io/site.webmanifest' %}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <a href="{% url 'home' %}" class="logo">HARBOR<span>hop</span></a>
+            <p class="tagline">Hop aboard. Sail beyond</p>
+        </div>
+        <div class="nav-links">
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'reservations' %}">My Bookings</a>
+            <a href="{% url 'contact_us' %}" class="active">Contact Us</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'profile_settings' %}">Profile</a>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero-section">
+        <h1>Get in Touch</h1>
+        <p>Have questions about your ferry booking? We're here to help! Use any of the channels below — no form required.</p>
+    </section>
+
+    <!-- Contact / Info -->
+    <div class="contact-container">
+        <div class="contact-info">
+            <div class="info-card">
+                <div class="info-card-header">
+                    <div class="info-icon"><i class="fa-solid fa-phone"></i></div>
+                    <h3>Call Us</h3>
+                </div>
+                <p>Customer service is available during business hours. For urgent matters, call us.</p>
+                <p><a href="tel:+63123456789" class = "contact-no">+63 995 570 2354</a></p>
+            </div>
+
+            <div class="info-card">
+                <div class="info-card-header">
+                    <div class="info-icon"><i class="fa-solid fa-envelope"></i></div>
+                    <h3>Email Us</h3>
+                </div>
+                <p>Prefer email? Send us a message and we'll reply within 24 hours.</p>
+                <p><a href="mailto:support@harborhop.com" class = "contact-no">support@harborhop.com</a></p>
+            </div>
+
+            <div class="info-card">
+                <div class="info-card-header">
+                    <div class="info-icon"><i class="fa-solid fa-location-dot"></i></div>
+                    <h3>Visit Us</h3>
+                </div>
+                <p>Office visits by appointment only.</p>
+                <p>Natalio B. Bacalso Ave, Cebu City<br>Philippines 6000</p>
+            </div>
+
+            <div class="info-card">
+                <div class="info-card-header">
+                    <div class="info-icon"><i class="fa-solid fa-clock"></i></div>
+                    <h3>Business Hours</h3>
+                </div>
+                <p>Monday - Friday: 8:00 AM - 6:00 PM<br>Saturday: 9:00 AM - 5:00 PM<br>Sunday: Closed</p>
+            </div>
+        </div>
+
+        
+    </div>
+
+    <!-- FAQ Section (unchanged) -->
+    <section class="faq-section">
+        <h2 class = "faq-header">Frequently Asked Questions</h2>
+        <div class="faq-grid">
+            <div class="faq-item">
+                <h3><i class="fa-solid fa-circle-question"></i> How do I book a ferry ticket?</h3>
+                <p>Simply visit our homepage, select your origin and destination, choose your travel dates, and follow the booking process.</p>
+            </div>
+            <div class="faq-item">
+                <h3><i class="fa-solid fa-circle-question"></i> Can I cancel my booking?</h3>
+                <p>Yes, you can cancel your reservation through the "My Bookings" page. Cancellation policies vary by ferry operator.</p>
+            </div>
+            <div class="faq-item">
+                <h3><i class="fa-solid fa-circle-question"></i> What payment methods do you accept?</h3>
+                <p>We accept credit cards, debit cards, GCash, PayMaya, and over-the-counter payments at authorized centers.</p>
+            </div>
+            <div class="faq-item">
+                <h3><i class="fa-solid fa-circle-question"></i> How early should I arrive at the port?</h3>
+                <p>We recommend arriving at least 1 hour before your scheduled departure time for check-in and boarding.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 HarborHop. All rights reserved. | Hop aboard. Sail beyond.</p>
+    </footer>
+</body>
+</html>

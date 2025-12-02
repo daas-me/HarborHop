@@ -1709,4 +1709,9 @@ def delete_account(request):
             return JsonResponse({"success": False, "message": "Failed to delete account."}, status=500)
         else:
             return redirect('profile')  # or render an error page
+        
+
+def contact_us(request):
+    
+    return render(request, 'contact.html')
 
