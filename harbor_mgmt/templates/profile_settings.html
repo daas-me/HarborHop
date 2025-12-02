@@ -5,15 +5,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Profile - HarborHop</title>
-
-    <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
-
-    <!-- External CSS -->
-    <link rel="stylesheet" href="{% static 'css/profile_settings.css' %}?v=5">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}?v=5">
+    <link rel="stylesheet" href="{% static 'css/profile_settings.css' %}?v=6">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-
-    <!-- Favicons -->
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon_io/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
@@ -23,21 +18,39 @@
     <script src="{% static 'js/profile_settings.js' %}?v=3" defer></script>
 </head>
 <body>
-    <nav class="navbar">
+    <header>
         <div class="logo-container">
             <a href="{% url 'home' %}" class="logo">HARBOR<span>hop</span></a>
             <p class="tagline">Hop aboard. Sail beyond</p>
         </div>
-        <div class="nav-links">
-            <a href="{% url 'reservations' %}">Manage Booking</a>
-            <a href="#">Latest Offers</a>
-            <a href="#">Contact Us</a>
-            <form action="{% url 'logout' %}" method="post" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn-logout">Log out</button>
-            </form>
-        </div>
-    </nav>
+        <nav>
+            <a href="{% url 'home' %}">Home</a>
+            {% if user.is_authenticated %}
+                {% if user.profile.is_admin_user %}
+                    <a href="{% url 'admin_dashboard' %}" class="admin-dashboard-link">
+                        <i class="fa-solid fa-chart-line dashboard-icon"></i> Admin Access
+                    </a>
+                {% endif %}
+                <a href="{% url 'reservations' %}">Manage Booking</a>
+                <a href="#">Latest Offers</a>
+                <a href="{% url 'contact_us' %}" class="active">Contact Us</a>
+                <div class="nav-divider"></div>
+                <a href="#" class="language-link">PH</a>
+                <span class="language-separator">|</span>
+                <a href="#" class="language-link">EN</a>
+                <a href="{% url 'profile_settings' %}" class="user-name-btn">{{ user.username }}</a>
+                <a href="{% url 'logout' %}" class="login-btn">Log out</a>
+            {% else %}
+                <a href="#">Latest Offers</a>
+                <a href="{% url 'contact_us' %}" class="active">Contact Us</a>
+                <div class="nav-divider"></div>
+                <a href="#" class="language-link">PH</a>
+                <span class="language-separator">|</span>
+                <a href="#" class="language-link">EN</a>
+                <a href="{% url 'login' %}" class="login-btn">Log In</a>
+            {% endif %}
+        </nav>
+    </header>
 
     <!-- container exposes server endpoints to JS via data-* attributes -->
     <div class="container"
@@ -147,7 +160,7 @@
         <div id="booking" class="content-section {% if active_tab == 'booking' %}active{% endif %}" role="tabpanel" {% if active_tab != 'booking' %}hidden{% endif %}>
             {% if bookings %}
                 {% for booking in bookings %}
-                    <div class="booking-card">
+                    <div class="booking-card-profile">
                         <div class="booking-header">
                             <div class="booking-route">{{ booking.origin }} → {{ booking.destination }}</div>
                             <div class="booking-status status-{{ booking.status }}">{{ booking.get_status_display }}</div>

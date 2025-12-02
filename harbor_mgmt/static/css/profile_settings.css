@@ -11,82 +11,6 @@ body {
     color: #1a1a1a;
 }
 
-/* NAV */
-.navbar {
-    background: white;
-    padding: 20px 50px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    position: sticky;
-    top: 0;
-    z-index: 200;
-}
-
-.logo-container {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.logo {
-    font-size: 28px;
-    font-weight: 700;
-    color: #1a1a1a;
-    text-decoration: none;
-    letter-spacing: -0.5px;
-}
-
-.logo span:last-child {
-    color: #ff9500;
-}
-
-.tagline {
-    font-size: 10px;
-    color: #ff9500;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-weight: 600;
-}
-
-.nav-links {
-    display: flex;
-    gap: 32px;
-    align-items: center;
-}
-
-.nav-links a {
-    text-decoration: none;
-    color: #555;
-    font-size: 15px;
-    font-weight: 500;
-    transition: color 0.2s;
-}
-
-.nav-links a:hover {
-    color: #ff9500;
-}
-
-.btn-logout {
-    padding: 10px 24px;
-    border: 1.5px solid #e0e0e0;
-    border-radius: 20px;
-    background: white;
-    color: #333;
-    font-family: 'Alan Sans', sans-serif;
-    font-weight: 500;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-logout:hover {
-    background: #1a1a1a;
-    color: white;
-    border-color: #1a1a1a;
-}
-
 .container {
     max-width: 1200px;
     margin: 40px auto;
@@ -349,7 +273,7 @@ body {
     transform: translateY(0);
 }
 
-.booking-card {
+.booking-card-profile {
     border: 1.5px solid #f0f0f0;
     border-radius: 12px;
     padding: 28px;
@@ -358,7 +282,7 @@ body {
     background: white;
 }
 
-.booking-card:hover {
+.booking-card-profile:hover {
     border-color: #ff9500;
     box-shadow: 0 4px 12px rgba(255, 149, 0, 0.08);
     transform: translateY(-2px);
