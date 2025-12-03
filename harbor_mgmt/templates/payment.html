@@ -309,6 +309,14 @@
                         </p>
                     </div>
 
+                    <div class="payment-info-box">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <div>
+                            <strong>Secure Payment</strong>
+                            <p>Your payment information is encrypted and secure.</p>
+                        </div>
+                    </div>
+
                     <!-- Ticket Rules Summary -->
                     <div class="ticket-rules-box">
                         <div class="rules-header">
@@ -538,61 +546,23 @@
                 ewalletDropdown.classList.remove('show');
             }
         }
-        
-        paymentMethodRadios.forEach(radio => {
-            radio.addEventListener('change', toggleEwalletDropdown);
-        });
-        
-        toggleEwalletDropdown();
+    </script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        (function() {
+            const form = document.querySelector('.payment-form');
+            if (!form) return;
 
-        // Phone Number Formatting (E-Wallet)
-        const phoneInput = document.getElementById('phone-number');
-        if (phoneInput) {
-            phoneInput.addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\D/g, '');
-                if (value.length > 11) {
-                    value = value.slice(0, 11);
+            const stripePublicKey = '{{ stripe_public_key|escapejs }}';
+
+            form.addEventListener('submit', function (e) {
+                const selected = form.querySelector('input[name="payment_method"]:checked');
+                const method = selected ? selected.value : '';
+
+                if (method !== 'credit_card') {
+                    return; // let normal POST flow handle other methods
                 }
-                e.target.value = value;
-            });
-        }
-    });
 
-    // Close modals when clicking outside
-    window.onclick = function(event) {
-        const rulesModal = document.getElementById('rulesModal');
-        const ewalletModal = document.getElementById('paymentGatewayModal');
-        const paypalModal = document.getElementById('paypalModal');
-        
-        if (event.target == rulesModal) {
-            closeRulesModal();
-        }
-        
-        if (event.target === ewalletModal) {
-            closePaymentGateway();
-        }
-        
-        if (event.target === paypalModal) {
-            closePaypalModal();
-        }
-    }
-</script>
-
-<!-- Stripe Integration Script -->
-<script src="https://js.stripe.com/v3/"></script>
-<script>
-    (function() {
-        const form = document.querySelector('.payment-form');
-        if (!form) return;
-
-        const stripePublicKey = '{{ stripe_public_key|escapejs }}';
-
-        form.addEventListener('submit', function (e) {
-            const selected = form.querySelector('input[name="payment_method"]:checked');
-            const method = selected ? selected.value : '';
-
-            // Handle Credit Card with Stripe
-            if (method === 'credit_card') {
                 e.preventDefault();
 
                 if (!stripePublicKey) {
@@ -633,204 +603,8 @@
                     console.error('Error starting Stripe checkout:', error);
                     alert('Unable to start Stripe payment. Please try again later.');
                 });
-            } 
-            // Handle E-Wallet and PayPal
-            else if (method === 'ewallet' || method === 'paypal') {
-                e.preventDefault();
-                openPaymentGateway();
-            }
-            // Let other methods proceed normally
-        });
-    })();
-</script>
-
-<!-- E-Wallet Payment Gateway Modal -->
-<div id="paymentGatewayModal" class="modal payment-gateway-modal">
-    <div class="modal-content payment-gateway-content">
-        <div class="modal-header payment-gateway-header">
-            <div class="gateway-logo">
-                <i class="fa-solid fa-shield-halved"></i>
-                <div>
-                    <h2>Secure Payment Gateway</h2>
-                    <p class="gateway-subtitle">Complete your transaction securely</p>
-                </div>
-            </div>
-            <button class="modal-close" onclick="closePaymentGateway()">&times;</button>
-        </div>
-        <div class="modal-body payment-gateway-body">
-            <div class="payment-provider-info">
-                <div class="provider-badge">
-                    <i class="fa-solid fa-wallet"></i>
-                    <span id="selected-provider">GCash</span>
-                </div>
-                <div class="amount-display-gateway">
-                    <span class="amount-label-small">Amount to Pay</span>
-                    <span class="amount-value-large">₱<span id="gateway-amount">{{ booking.total_price|floatformat:2 }}</span></span>
-                </div>
-            </div>
-
-            <form id="gatewayPaymentForm" class="gateway-payment-form">
-                <div class="gateway-form-group">
-                    <label for="phone-number">
-                        <i class="fa-solid fa-mobile-screen-button"></i>
-                        Phone Number / Account Number
-                    </label>
-                    <input 
-                        type="tel" 
-                        id="phone-number" 
-                        name="phone_number" 
-                        placeholder="09XX XXX XXXX"
-                        class="gateway-input"
-                        pattern="[0-9]{11}"
-                        maxlength="11"
-                        required>
-                    <small class="input-hint">Enter your 11-digit mobile number</small>
-                </div>
-
-                <div class="gateway-form-group">
-                    <label for="account-name">
-                        <i class="fa-solid fa-user"></i>
-                        Full Name (as registered)
-                    </label>
-                    <input 
-                        type="text" 
-                        id="account-name" 
-                        name="account_name" 
-                        placeholder="Juan Dela Cruz"
-                        class="gateway-input"
-                        required>
-                    <small class="input-hint">Enter the name registered to your account</small>
-                </div>
-
-                <div class="gateway-form-group">
-                    <label for="confirm-amount">
-                        <i class="fa-solid fa-peso-sign"></i>
-                        Confirm Amount
-                    </label>
-                    <input 
-                        type="number" 
-                        id="confirm-amount" 
-                        name="confirm_amount" 
-                        placeholder="0.00"
-                        class="gateway-input"
-                        step="0.01"
-                        required
-                        readonly
-                        value="{{ booking.total_price }}">
-                    <small class="input-hint">Verify the payment amount</small>
-                </div>
-
-                <div class="security-notice">
-                    <i class="fa-solid fa-lock"></i>
-                    <div>
-                        <strong>Your transaction is secure</strong>
-                        <p>We use bank-level encryption to protect your information</p>
-                    </div>
-                </div>
-            </form>
-        </div>
-        <div class="modal-footer payment-gateway-footer">
-            <button type="button" class="btn-gateway-cancel" onclick="closePaymentGateway()">
-                <i class="fa-solid fa-xmark"></i> Cancel
-            </button>
-            <button type="button" class="btn-gateway-pay" onclick="processPayment()">
-                <i class="fa-solid fa-check-circle"></i> Pay Now
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- PayPal Payment Gateway Modal -->
-<div id="paypalModal" class="modal payment-gateway-modal">
-    <div class="modal-content payment-gateway-content">
-        <div class="modal-header payment-gateway-header paypal-header">
-            <div class="gateway-logo">
-                <i class="fa-brands fa-paypal"></i>
-                <div>
-                    <h2>PayPal Payment</h2>
-                    <p class="gateway-subtitle">Log in to your PayPal account</p>
-                </div>
-            </div>
-            <button class="modal-close" onclick="closePaypalModal()">&times;</button>
-        </div>
-        <div class="modal-body payment-gateway-body">
-            <div class="payment-provider-info paypal-info">
-                <div class="provider-badge paypal-badge">
-                    <i class="fa-brands fa-paypal"></i>
-                    <span>PayPal</span>
-                </div>
-                <div class="amount-display-gateway">
-                    <span class="amount-label-small">Amount to Pay</span>
-                    <span class="amount-value-large">₱<span>{{ booking.total_price|floatformat:2 }}</span></span>
-                </div>
-            </div>
-
-            <form id="paypalForm" class="gateway-payment-form">
-                <div class="gateway-form-group">
-                    <label for="paypal-email">
-                        <i class="fa-solid fa-envelope"></i>
-                        PayPal Email Address
-                    </label>
-                    <input 
-                        type="email" 
-                        id="paypal-email" 
-                        name="paypal_email" 
-                        placeholder="your.email@example.com"
-                        class="gateway-input"
-                        required>
-                    <small class="input-hint">Enter your PayPal registered email</small>
-                </div>
-
-                <div class="gateway-form-group">
-                    <label for="paypal-password">
-                        <i class="fa-solid fa-lock"></i>
-                        PayPal Password
-                    </label>
-                    <input 
-                        type="password" 
-                        id="paypal-password" 
-                        name="paypal_password" 
-                        placeholder="••••••••"
-                        class="gateway-input"
-                        required>
-                    <small class="input-hint">Enter your PayPal password</small>
-                </div>
-
-                <div class="paypal-info-box">
-                    <i class="fa-solid fa-info-circle"></i>
-                    <div>
-                        <strong>Secure PayPal Login</strong>
-                        <p>You will be redirected to PayPal to complete the payment securely</p>
-                    </div>
-                </div>
-
-                <div class="security-notice paypal-security">
-                    <i class="fa-solid fa-shield-halved"></i>
-                    <div>
-                        <strong>PayPal Buyer Protection</strong>
-                        <p>All transactions are protected by PayPal's buyer protection policy</p>
-                    </div>
-                </div>
-            </form>
-        </div>
-        <div class="modal-footer payment-gateway-footer">
-            <button type="button" class="btn-gateway-cancel" onclick="closePaypalModal()">
-                <i class="fa-solid fa-xmark"></i> Cancel
-            </button>
-            <button type="button" class="btn-gateway-pay paypal-btn" onclick="processPaypalPayment()">
-                <i class="fa-brands fa-paypal"></i> Continue with PayPal
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Loading Overlay -->
-<div id="paymentLoadingOverlay" class="payment-loading-overlay">
-    <div class="loading-content">
-        <div class="loading-spinner"></div>
-        <h3>Processing Payment...</h3>
-        <p>Please wait while we process your transaction</p>
-    </div>
-</div>
+            });
+        })();
+    </script>
 </body>
 </html>

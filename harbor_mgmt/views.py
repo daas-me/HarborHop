@@ -478,7 +478,7 @@ def payment_view(request, booking_id):
         'booking': booking,
         'user': request.user,
         'route_distance': distance,
-        'stripe_public_key': settings.STRIPE_PUBLISHABLE_KEY,  
+        'stripe_public_key': settings.STRIPE_PUBLISHABLE_KEY,
     }
     return render(request, 'payment.html', context)
 
