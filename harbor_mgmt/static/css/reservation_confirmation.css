@@ -76,20 +76,80 @@ body {
 .reservation-status i {
     font-size: 1.5rem;
     margin-right: 10px;
+    color: #fff;
 }
 
-.reservation-status span[style*="color: #4caf50"] {
+/* Status-specific styling using data attributes */
+.reservation-status[data-status="reserved"] {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+}
+
+.reservation-status[data-status="reserved"] span {
+    font-size: 16px;
+}
+
+.reservation-status[data-status="pending"] {
+    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+}
+
+.reservation-status[data-status="pending"] span {
+    font-size: 22px;
+}
+
+.reservation-status[data-status="confirmed"],
+.reservation-status[data-status="completed"] {
     background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
-    padding: 20px 30px;
-    margin: -20px -30px;
-    width: calc(100% + 60px);
 }
 
-.reservation-status span[style*="color: #e53935"] {
+.reservation-status[data-status="confirmed"] span,
+.reservation-status[data-status="completed"] span {
+    font-size: 22px;
+}
+
+.reservation-status[data-status="expired"] {
     background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
-    padding: 20px 30px;
-    margin: -20px -30px;
-    width: calc(100% + 60px);
+}
+
+.reservation-status[data-status="expired"] span {
+    font-size: 22px;
+}
+
+.reservation-status[data-status="cancelled"] {
+    background: linear-gradient(135deg, #9e9e9e 0%, #757575 100%);
+}
+
+.reservation-status[data-status="cancelled"] span {
+    font-size: 22px;
+}
+
+/* Optional: Add subtle animations for different statuses */
+.reservation-status[data-status="reserved"] i {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.reservation-status[data-status="pending"] i {
+    animation: rotate 2s linear infinite;
+}
+
+.reservation-status[data-status="confirmed"] i,
+.reservation-status[data-status="completed"] i {
+    animation: checkPulse 0.5s ease-out;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes checkPulse {
+    0% { transform: scale(0.8); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
 }
 
 .countdown-timer {

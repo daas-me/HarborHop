@@ -7,7 +7,7 @@
     <title>Reservation Confirmation - HarborHop</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
-    <link rel="stylesheet" href="{% static 'css/reservation_confirmation.css' %}?v=3">
+    <link rel="stylesheet" href="{% static 'css/reservation_confirmation.css' %}?v=4">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon_io/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
@@ -21,6 +21,7 @@
             <p class="tagline">Hop aboard. Sail beyond</p>
         </div>
         <nav>
+            <a href="{% url 'home' %}">Home</a>
             {% if user.is_authenticated %}
                 {% if user.profile.is_admin_user %}
                     <a href="{% url 'admin_dashboard' %}" class="admin-dashboard-link">
@@ -79,23 +80,23 @@
         </p>
     </div>
 
-    <div class="reservation-summary">
-        <div class="reservation-status">
-            {% if booking.status == 'reserved' %}
-                <span><i class="fa-solid fa-hourglass-half"></i> Your seats are temporarily reserved! Complete payment within 48 hours.</span>
-            {% elif booking.status == 'pending' %}
-                <span><i class="fa-solid fa-clock"></i> Payment Pending</span>
-            {% elif booking.status == 'confirmed' or booking.status == 'completed' %}
-                <span style="color: #4caf50"><i class="fa-solid fa-circle-check"></i> Booking Confirmed</span>
-            {% elif booking.status == 'expired' %}
-                <span style="color: #e53935"><i class="fa-solid fa-circle-xmark"></i> Reservation Expired</span>
-            {% elif booking.status == 'cancelled' %}
-                <span style="color: #ff9800"><i class="fa-solid fa-ban"></i> Booking Cancelled</span>
-            {% endif %}
-            {% if booking.status == 'reserved' and booking.reserved_until %}
-                <div class="countdown-timer" id="countdown-timer"></div>
-            {% endif %}
-        </div>
+   <div class="reservation-summary">
+    <div class="reservation-status" data-status="{{ booking.status }}">
+        {% if booking.status == 'reserved' %}
+            <span><i class="fa-solid fa-hourglass-half"></i> Your seats are temporarily reserved! Complete payment within 48 hours.</span>
+        {% elif booking.status == 'pending' %}
+            <span><i class="fa-solid fa-clock"></i> Payment Pending</span>
+        {% elif booking.status == 'confirmed' or booking.status == 'completed' %}
+            <span><i class="fa-solid fa-circle-check"></i> Booking Confirmed</span>
+        {% elif booking.status == 'expired' %}
+            <span><i class="fa-solid fa-circle-xmark"></i> Reservation Expired</span>
+        {% elif booking.status == 'cancelled' %}
+            <span><i class="fa-solid fa-ban"></i> Booking Cancelled</span>
+        {% endif %}
+        {% if booking.status == 'reserved' and booking.reserved_until %}
+            <div class="countdown-timer" id="countdown-timer"></div>
+        {% endif %}
+    </div>
 
         <!-- Booking Reference -->
         <div class="booking-ref">
