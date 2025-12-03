@@ -4,24 +4,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-store" />
     <title>HarborHop - Manage Bookings</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/admin.css' %}?v=3">
+    <link rel="stylesheet" href="{% static 'css/admin_bookings.css' %}?v=10">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon_io/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
-    <link rel="manifest" href="{% static 'images/favicon_io/site.webmanifest' %}">
     <script src="https://kit.fontawesome.com/1256e3cde2.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="admin-container">
-        <!-- Sidebar -->
+    <div class="admin-container no-print">
+         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="logo-section">
                 <a href="{% url 'home' %}" class="logo">HARBOR<span>hop</span></a>
                 <p class="tagline">Admin Dashboard</p>
             </div>
+            
             <nav class="sidebar-nav">
                 <a href="{% url 'admin_dashboard' %}" class="nav-item">
                     <span class="icon"><i class="fa-solid fa-table-columns"></i></span>
@@ -29,7 +29,7 @@
                 </a>
                 <a href="{% url 'admin_bookings' %}" class="nav-item active">
                     <span class="icon"><i class="fa-solid fa-ticket"></i></span>
-                    <span>Bookings</span>
+                    <span>Manage Bookings</span>
                 </a>
                 <a href="{% url 'admin_users' %}" class="nav-item">
                     <span class="icon"><i class="fa-solid fa-users"></i></span>
@@ -44,6 +44,7 @@
                     <span>Settings</span>
                 </a>
             </nav>
+            
             <div class="sidebar-footer">
                 <a href="{% url 'home' %}" class="nav-item">
                     <span class="icon"><i class="fa-solid fa-house"></i></span>
@@ -55,20 +56,48 @@
                 </a>
             </div>
         </aside>
-        <!-- Main Content -->
+
         <main class="main-content">
             <header class="top-header">
                 <div>
                     <h1>Manage Bookings</h1>
-                    <p class="page-subtitle">View and manage all bookings</p>
+                    <p class="page-subtitle">Comprehensive booking management and analytics</p>
                 </div>
                 <div class="user-info">
                     <span class="user-avatar"><i class="fa-solid fa-user"></i></span>
                     <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
                 </div>
             </header>
+
             <div class="dashboard-content">
-                <!-- Stats Overview -->
+                <div class="revenue-section">
+                    <h3><i class="fa-solid fa-chart-line"></i> Revenue Overview</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card revenue-card">
+                            <div class="stat-icon"><i class="fa-solid fa-peso-sign"></i></div>
+                            <div class="stat-info">
+                                <h3>Total Revenue</h3>
+                                <p class="stat-number">₱{{ total_revenue|floatformat:2 }}</p>
+                                <span class="stat-subtitle">From all completed payments</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fa-solid fa-calculator"></i></div>
+                            <div class="stat-info">
+                                <h3>Average Booking Value</h3>
+                               <p class="stat-number">
+                                    {% if completed_bookings > 0 %}
+                                        ₱{% widthratio total_revenue completed_bookings 1 %}
+                                    {% else %}
+                                        ₱0
+                                    {% endif %}
+                                </p>
+                                <span class="stat-subtitle">Based on {{ completed_bookings }} completed bookings</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon"><i class="fa-solid fa-ticket"></i></div>
@@ -94,64 +123,458 @@
                     <div class="stat-card">
                         <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
                         <div class="stat-info">
-                            <h3>Confirmed</h3>
-                            <p class="stat-number">{{ confirmed_bookings }}</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fa-solid fa-xmark"></i></div>
-                        <div class="stat-info">
-                            <h3>Cancelled</h3>
-                            <p class="stat-number">{{ cancelled_bookings }}</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fa-solid fa-flag-checkered"></i></div>
-                        <div class="stat-info">
                             <h3>Completed</h3>
                             <p class="stat-number">{{ completed_bookings }}</p>
                         </div>
                     </div>
                 </div>
-                <!-- Bookings Table -->
+
+                <div class="users-controls">
+                    <form method="GET" class="filters-form">
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                            <input type="text" 
+                                   name="search" 
+                                   class="search-input" 
+                                   placeholder="Search by reference, user, origin..." 
+                                   value="{{ search_query }}">
+                        </div>
+                        
+                        <select name="status" class="filter-select">
+                            <option value="">All Status</option>
+                            <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="reserved" {% if status_filter == 'reserved' %}selected{% endif %}>Reserved</option>
+                            <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                            <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                            <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+
+                        <select name="company" class="filter-select">
+                            <option value="">All Companies</option>
+                            {% for company in all_companies %}
+                            <option value="{{ company }}" {% if company_filter == company %}selected{% endif %}>{{ company }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <select name="payment_method" class="filter-select">
+                            <option value="">All Payment Methods</option>
+                            {% for method_key, display_name in all_payment_methods.items %}
+                                <option value="{{ method_key }}" {% if payment_method_filter == method_key %}selected{% endif %}>
+                                    {{ display_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                        <input type="date" name="date_from" class="filter-date" value="{{ date_from }}" title="Date From">
+                        <input type="date" name="date_to" class="filter-date" value="{{ date_to }}" title="Date To">
+
+                        <button type="submit" class="filter-btn active">
+                            <i class="fa-solid fa-filter"></i> Apply
+                        </button>
+                        <a href="{% url 'admin_bookings' %}" class="filter-btn">
+                            <i class="fa-solid fa-times"></i> Clear
+                        </a>
+                    </form>
+                </div>
+
                 <div class="users-table-container">
-                    <table class="users-table">
+                    <table class="users-table bookings-table">
                         <thead>
                             <tr>
                                 <th>Reference</th>
                                 <th>User</th>
-                                <th>Origin</th>
-                                <th>Destination</th>
+                                <th>Route</th>
+                                <th>Passengers</th>
                                 <th>Departure</th>
+                                <th>Pricing</th>
+                                <th>Payment</th>
                                 <th>Status</th>
-                                <th>Total Price</th>
-                                <th>Created</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for b in bookings %}
+                            {% for item in bookings %}
                             <tr>
-                                <td>{{ b.booking_reference }}</td>
-                                <td>{{ b.user.get_full_name|default:b.user.username }}</td>
-                                <td>{{ b.origin }}</td>
-                                <td>{{ b.destination }}</td>
-                                <td>{{ b.departure_date|date:"M d, Y" }}</td>
+                                <td><strong>{{ item.booking.booking_reference }}</strong></td>
                                 <td>
-                                    <span class="status-badge {{ b.status }}">{{ b.status|title }}</span>
+                                    <div class="user-cell">
+                                        <div class="user-avatar-small">
+                                            <i class="fa-solid fa-user"></i>
+                                        </div>
+                                        <div class="user-details">
+                                            <span class="user-name-text">{{ item.booking.user.get_full_name|default:item.booking.user.username }}</span>
+                                            <span class="user-username">@{{ item.booking.user.username }}</span>
+                                        </div>
+                                    </div>
                                 </td>
-                                <td>₱{{ b.total_price }}</td>
-                                <td>{{ b.created_at|date:"M d, Y H:i" }}</td>
+                                <td>
+                                    <div class="route-info">
+                                        <div class="port"><i class="fa-solid fa-location-dot"></i> {{ item.booking.origin }}</div>
+                                        <div class="arrow"><i class="fa-solid fa-arrow-down"></i></div>
+                                        <div class="port"><i class="fa-solid fa-location-dot"></i> {{ item.booking.destination }}</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="passenger-breakdown">
+                                        <span title="Adults"><i class="fa-solid fa-user"></i> {{ item.passenger_breakdown.adults }} Adult(s)</span>
+                                        {% if item.passenger_breakdown.children > 0 %}
+                                        <span title="Children"><i class="fa-solid fa-child"></i> {{ item.passenger_breakdown.children }} Child(ren)</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="departure-info">
+                                        <strong>{{ item.booking.departure_date|date:"M d, Y" }}</strong>
+                                        <small>{{ item.outbound.departure_time }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="pricing-breakdown">
+                                        <span class="total-price">₱{{ item.booking.total_price|floatformat:2 }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="payment-info">
+                                        {% if item.payment.method_raw == 'stripe' or item.payment.method_raw == 'stripe_test' %}
+                                            <span class="payment-badge stripe">
+                                                <i class="fa-solid fa-credit-card"></i> CREDIT/DEBIT
+                                            </span>
+                                        {% elif item.payment.method_raw == 'gcash' %}
+                                            <span class="payment-badge gcash">GCASH</span>
+                                        {% elif item.payment.method_raw == 'paymaya' or item.payment.method_raw == 'maya' %}
+                                            <span class="payment-badge paymaya">MAYA</span>
+                                        {% elif item.payment.method_raw == 'cash' %}
+                                            <span class="payment-badge cash">CASH</span>
+                                        {% else %}
+                                            <span class="payment-badge">{{ item.payment.method|upper }}</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-badge {{ item.booking.status }}">{{ item.booking.status|title }}</span>
+                                </td>
+                                <td>
+                                    <button class="action-icon-btn" onclick="viewBookingDetails('{{ item.booking.id }}')">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="8" style="text-align:center;">No bookings found.</td>
+                                <td colspan="9" style="text-align:center;">No bookings found.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
-            </div>
+
+                {% if bookings.has_other_pages %}
+                <div class="pagination">
+                    {% if bookings.has_previous %}
+                        <a href="?page={{ bookings.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if company_filter %}&company={{ company_filter }}{% endif %}{% if payment_method_filter %}&payment_method={{ payment_method_filter }}{% endif %}" class="pagination-btn">
+                            <i class="fa-solid fa-chevron-left"></i> Previous
+                        </a>
+                    {% else %}
+                        <button class="pagination-btn" disabled>Previous</button>
+                    {% endif %}
+
+                    <div class="pagination-numbers">
+                        {% for num in bookings.paginator.page_range %}
+                            {% if bookings.number == num %}
+                                <button class="pagination-num active">{{ num }}</button>
+                            {% elif num > bookings.number|add:'-3' and num < bookings.number|add:'3' %}
+                                <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if company_filter %}&company={{ company_filter }}{% endif %}{% if payment_method_filter %}&payment_method={{ payment_method_filter }}{% endif %}" class="pagination-num">{{ num }}</a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    {% if bookings.has_next %}
+                        <a href="?page={{ bookings.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if company_filter %}&company={{ company_filter }}{% endif %}{% if payment_method_filter %}&payment_method={{ payment_method_filter }}{% endif %}" class="pagination-btn">
+                            Next <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+                    {% else %}
+                        <button class="pagination-btn" disabled>Next</button>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div> 
         </main>
     </div>
+
+    <div id="bookingDetailsModal" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="closeBookingModal()"></div>
+        <div class="modal-content booking-modal-content">
+            <div class="modal-header no-print">
+                <h2><i class="fa-solid fa-ticket"></i> E-Ticket Preview</h2>
+                <button class="modal-close" onclick="closeBookingModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="bookingDetailsContent">
+                </div>
+        </div>
+    </div>
+
+    <script>
+    // Revenue Chart
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    const revenueChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: 'Monthly Revenue (₱)',
+                data: {{ chart_data|safe }},
+                backgroundColor: '#ff9800',
+                borderColor: '#e68a00',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₱' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Function to fetch and display booking details
+    function viewBookingDetails(bookingId) {
+        const modal = document.getElementById('bookingDetailsModal');
+        const content = document.getElementById('bookingDetailsContent');
+        
+        // Show modal with loading state
+        modal.style.display = 'flex';
+        content.innerHTML = '<div style="text-align:center; padding: 40px; color:#666;"><i class="fa-solid fa-circle-notch fa-spin fa-2x"></i><p style="margin-top:10px;">Retrieving ticket details...</p></div>';
+
+        fetch(`/get-booking-details/${bookingId}/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    const b = data.booking;
+                    
+                    // 1. Build Passenger Rows
+                    let passengerRows = '';
+                    b.passengers.forEach(p => {
+                        passengerRows += `
+                            <tr>
+                                <td>${p.number}</td>
+                                <td><strong>${p.first_name} ${p.last_name}</strong></td>
+                                <td>${p.type}</td>
+                                <td>${p.gender || 'N/A'}</td>
+                                <td>${p.dob || 'N/A'}</td>
+                            </tr>
+                        `;
+                    });
+
+                    // 2. Build Itemized Payment Breakdown
+                    let breakdownRows = '';
+                    
+                    // --- Calculate Adult Pricing ---
+                    // Base price is usually calculated per leg, so we sum outbound + return unit prices
+                    let adultUnitCost = b.outbound.adult_price || 0;
+                    if (b.return) {
+                        adultUnitCost += (b.return.adult_price || 0);
+                    }
+                    const adultTotal = adultUnitCost * b.totals.adults;
+                    
+                    breakdownRows += `
+                        <div class="breakdown-row">
+                            <span style="color:#555;">Adult Fare (x${b.totals.adults})</span>
+                            <span>₱${adultTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                        </div>
+                    `;
+
+                    // --- Calculate Child Pricing ---
+                    if (b.totals.children > 0) {
+                        let childUnitCost = b.outbound.child_price || 0;
+                        if (b.return) {
+                            childUnitCost += (b.return.child_price || 0);
+                        }
+                        const childTotal = childUnitCost * b.totals.children;
+
+                        breakdownRows += `
+                            <div class="breakdown-row">
+                                <span style="color:#555;">Child Fare (x${b.totals.children})</span>
+                                <span>₱${childTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                            </div>
+                        `;
+                    }
+
+                    // --- Infants ---
+                    if (b.totals.infants > 0) {
+                        breakdownRows += `
+                            <div class="breakdown-row">
+                                <span style="color:#555;">Infant Fee (x${b.totals.infants})</span>
+                                <span>Free</span>
+                            </div>
+                        `;
+                    }
+
+                    // 3. Build Main E-Ticket HTML
+                    let html = `
+                        <div class="print-header">
+                            <div class="print-logo">HARBOR<span>hop</span></div>
+                            <h2 class="e-ticket-title">E-TICKET / BOARDING PASS</h2>
+                            <p>Booking Ref: <strong>${b.reference}</strong></p>
+                        </div>
+
+                        <div class="modal-section">
+                            <div class="detail-grid">
+                                <div class="detail-item-modal">
+                                    <span class="detail-label">Booking Reference</span>
+                                    <span class="detail-value" style="font-size: 1.2em; color: #ff9800;">${b.reference}</span>
+                                </div>
+                                <div class="detail-item-modal" style="text-align: right;">
+                                    <span class="detail-label">Status</span>
+                                    <span class="status-badge ${b.status}">${b.status.toUpperCase()}</span>
+                                </div>
+                                <div class="detail-item-modal">
+                                    <span class="detail-label">Booked By</span>
+                                    <span class="detail-value">${b.user.name}</span>
+                                </div>
+                                <div class="detail-item-modal" style="text-align: right;">
+                                    <span class="detail-label">Date Booked</span>
+                                    <span class="detail-value">${b.created_at}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-section">
+                            <h3 class="modal-section-title"><i class="fa-solid fa-ship"></i> Voyage Itinerary</h3>
+                            
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ff9800;">
+                                <div style="font-weight:bold; margin-bottom: 10px; color:#2c3e50;">
+                                    DEPARTURE: ${b.route.origin} <i class="fa-solid fa-arrow-right"></i> ${b.route.destination}
+                                </div>
+                                <div class="detail-grid">
+                                    <div class="detail-item-modal">
+                                        <span class="detail-label">Vessel / Carrier</span>
+                                        <span class="detail-value">${b.outbound.vessel}</span>
+                                        <small>${b.outbound.company}</small>
+                                    </div>
+                                    <div class="detail-item-modal">
+                                        <span class="detail-label">Schedule</span>
+                                        <span class="detail-value">${b.outbound.date}</span>
+                                        <small>${b.outbound.time}</small>
+                                    </div>
+                                    <div class="detail-item-modal">
+                                        <span class="detail-label">Accommodation</span>
+                                        <span class="detail-value">${b.outbound.accommodation}</span>
+                                    </div>
+                                    <div class="detail-item-modal">
+                                        <span class="detail-label">Seat Type</span>
+                                        <span class="detail-value">${b.outbound.seat_type}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            ${b.return ? `
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea;">
+                                <div style="font-weight:bold; margin-bottom: 10px; color:#2c3e50;">
+                                    RETURN: ${b.route.destination} <i class="fa-solid fa-arrow-right"></i> ${b.route.origin}
+                                </div>
+                                <div class="detail-grid">
+                                    <div class="detail-item-modal">
+                                        <span class="detail-label">Vessel / Carrier</span>
+                                        <span class="detail-value">${b.return.vessel}</span>
+                                        <small>${b.return.company}</small>
+                                    </div>
+                                    <div class="detail-item-modal">
+                                        <span class="detail-label">Schedule</span>
+                                        <span class="detail-value">${b.return.date}</span>
+                                        <small>${b.return.time}</small>
+                                    </div>
+                                    <div class="detail-item-modal">
+                                        <span class="detail-label">Accommodation</span>
+                                        <span class="detail-value">${b.return.accommodation}</span>
+                                    </div>
+                                    <div class="detail-item-modal">
+                                        <span class="detail-label">Seat Type</span>
+                                        <span class="detail-value">${b.return.seat_type}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+
+                        <div class="modal-section">
+                            <h3 class="modal-section-title"><i class="fa-solid fa-users"></i> Passenger Manifest</h3>
+                            <table class="passengers-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Passenger Name</th>
+                                        <th>Type</th>
+                                        <th>Gender</th>
+                                        <th>Birthdate</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${passengerRows}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="modal-section">
+                            <h3 class="modal-section-title"><i class="fa-solid fa-receipt"></i> Payment Information</h3>
+                            <div class="payment-breakdown">
+                                <div class="breakdown-row">
+                                    <span>Payment Method</span>
+                                    <span><strong>${b.payment.method}</strong></span>
+                                </div>
+                                <div class="breakdown-row">
+                                    <span>Date Paid</span>
+                                    <span>${b.payment.paid_at}</span>
+                                </div>
+                                
+                                <div style="margin-top: 15px; margin-bottom: 10px; border-top: 1px dashed #ccc; padding-top: 10px;">
+                                    <h4 style="font-size: 14px; margin-bottom: 10px; color:#2c3e50;">Price Breakdown</h4>
+                                    ${breakdownRows}
+                                </div>
+
+                                <div class="breakdown-row total">
+                                    <span>TOTAL AMOUNT PAID</span>
+                                    <span>₱${b.totals.total_price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer no-print">
+                            <button class="confirm-modal-btn cancel" onclick="closeBookingModal()">Close</button>
+                            <button class="confirm-modal-btn confirm" onclick="window.print()">
+                                <i class="fa-solid fa-print"></i> Print E-Ticket
+                            </button>
+                        </div>
+                    `;
+                    content.innerHTML = html;
+                } else {
+                    content.innerHTML = `<div style="text-align:center; padding:20px; color:red;"><i class="fa-solid fa-triangle-exclamation"></i> Error: ${data.message}</div>`;
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                content.innerHTML = `<div style="text-align:center; padding:20px; color:red;">
+                    <h3><i class="fa-solid fa-triangle-exclamation"></i> Failed to load details</h3>
+                    <p>Could not retrieve booking data. Please check if the URL <code>/get-booking-details/${bookingId}/</code> exists in your urls.py.</p>
+                </div>`;
+            });
+    }
+
+    function closeBookingModal() {
+        document.getElementById('bookingDetailsModal').style.display = 'none';
+    }
+    </script>
 </body>
 </html>
