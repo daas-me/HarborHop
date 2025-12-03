@@ -16,6 +16,15 @@ from django.utils import timezone
 from django.contrib.auth import update_session_auth_hash
 from datetime import datetime, date 
 from django.core.cache import cache
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
+from django.contrib import messages
+from django.shortcuts import redirect
+from django.db.models import Sum, Count, Q, F
+from django.db.models.functions import TruncMonth
+from .models import Booking
+import json
 import json
 import logging
 import requests
@@ -1303,6 +1312,388 @@ def test_csrf(request):
         'post_data': dict(request.POST) if request.method == 'POST' else None,
     })
 
+@never_cache
+@login_required
+def admin_bookings(request):
+    """Enhanced admin bookings management page with comprehensive data and pagination"""
+    # Check admin permissions
+    if not hasattr(request.user, 'profile') or not request.user.profile.is_admin_user:
+        messages.error(request, "You don't have permission to access this page.")
+        return redirect('home')
+
+    # Get filter parameters
+    search_query = request.GET.get('search', '')
+    status_filter = request.GET.get('status', '')
+    company_filter = request.GET.get('company', '')
+    payment_method_filter = request.GET.get('payment_method', '')
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+
+    # Base queryset
+    bookings = Booking.objects.select_related('user').order_by('-created_at')
+
+    # Apply basic filters
+    if search_query:
+        bookings = bookings.filter(
+            Q(booking_reference__icontains=search_query) |
+            Q(user__username__icontains=search_query) |
+            Q(user__first_name__icontains=search_query) |
+            Q(user__last_name__icontains=search_query) |
+            Q(origin__icontains=search_query) |
+            Q(destination__icontains=search_query)
+        )
+
+    if status_filter:
+        bookings = bookings.filter(status=status_filter)
+
+    if date_from:
+        bookings = bookings.filter(departure_date__gte=date_from)
+    
+    if date_to:
+        bookings = bookings.filter(departure_date__lte=date_to)
+
+    # For company and payment filters, we need to filter after getting the queryset
+    if company_filter or payment_method_filter:
+        filtered_ids = []
+        for b in bookings:
+            include = True
+            if b.details and isinstance(b.details, dict):
+                # Check company filter
+                if company_filter:
+                    outbound = b.details.get('outbound')
+                    if not (outbound and isinstance(outbound, dict) and 
+                           outbound.get('company', '') == company_filter):
+                        include = False
+                
+                # Check payment method filter - FIXED to use actual method names
+                if payment_method_filter and include:
+                    payment = b.details.get('payment')
+                    if payment and isinstance(payment, dict):
+                        actual_method = payment.get('method', '')
+                        # Normalize stripe_test to stripe for comparison
+                        if actual_method == 'stripe_test':
+                            actual_method = 'stripe'
+                        if actual_method != payment_method_filter:
+                            include = False
+                    else:
+                        include = False
+            else:
+                include = False
+            
+            if include:
+                filtered_ids.append(b.id)
+        
+        # Apply the filter
+        bookings = bookings.filter(id__in=filtered_ids)
+
+    # Calculate KPIs (use all bookings, not filtered)
+    all_bookings = Booking.objects.all()
+    
+    # Basic statistics
+    total_bookings = all_bookings.count()
+    pending_bookings = all_bookings.filter(status='pending').count()
+    reserved_bookings = all_bookings.filter(status='reserved').count()
+    confirmed_bookings = all_bookings.filter(status='confirmed').count()
+    cancelled_bookings = all_bookings.filter(status='cancelled').count()
+    completed_bookings = all_bookings.filter(status='completed').count()
+
+    # Revenue statistics (only completed bookings)
+    completed = all_bookings.filter(status='completed')
+    total_revenue = completed.aggregate(Sum('total_price'))['total_price__sum'] or 0
+
+    # Revenue by shipping company
+    company_revenue = {}
+    for booking in completed:
+        if booking.details and isinstance(booking.details, dict):
+            outbound = booking.details.get('outbound')
+            if outbound and isinstance(outbound, dict):
+                company = outbound.get('company', 'Unknown')
+                if company not in company_revenue:
+                    company_revenue[company] = {
+                        'revenue': 0,
+                        'bookings': 0,
+                        'passengers': 0
+                    }
+                company_revenue[company]['revenue'] += float(booking.total_price)
+                company_revenue[company]['bookings'] += 1
+                company_revenue[company]['passengers'] += booking.adults + booking.children
+
+    # Sort companies by revenue
+    company_revenue = dict(sorted(company_revenue.items(), 
+                                 key=lambda x: x[1]['revenue'], 
+                                 reverse=True))
+
+    # Get unique shipping companies for filter dropdown
+    all_companies = set()
+    for booking in all_bookings:
+        if booking.details and isinstance(booking.details, dict):
+            outbound = booking.details.get('outbound')
+            if outbound and isinstance(outbound, dict):
+                company = outbound.get('company')
+                if company:
+                    all_companies.add(company)
+
+    # FIXED: Get unique payment methods with proper display names
+    all_payment_methods = {}  # Changed to dict for display mapping
+    for booking in all_bookings:
+        if booking.details and isinstance(booking.details, dict):
+            payment = booking.details.get('payment')
+            if payment and isinstance(payment, dict):
+                method = payment.get('method', '')
+                if method:
+                    # Normalize stripe_test to stripe
+                    if method == 'stripe_test':
+                        method = 'stripe'
+                    
+                    # Map method to display name
+                    display_name = {
+                        'stripe': 'Credit/Debit Card',
+                        'gcash': 'GCash',
+                        'paymaya': 'PayMaya',
+                        'maya': 'Maya',
+                        'shopeepay': 'ShopeePay',
+                        'gotyme': 'GoTyme',
+                        'paypal': 'PayPal',
+                        'cash': 'Cash'
+                    }.get(method.lower(), method.title())
+                    
+                    all_payment_methods[method] = display_name
+
+    # Monthly revenue data for chart
+    monthly_revenue = (
+        completed
+        .annotate(month=TruncMonth('created_at'))
+        .values('month')
+        .annotate(revenue=Sum('total_price'))
+        .order_by('month')
+    )
+
+    chart_labels = [entry['month'].strftime('%b %Y') for entry in monthly_revenue]
+    chart_data = [float(entry['revenue']) for entry in monthly_revenue]
+
+    # Prepare enhanced booking data
+    enhanced_bookings = []
+    for booking in bookings:
+        # Safely get details with proper None handling
+        details = booking.details if booking.details and isinstance(booking.details, dict) else {}
+        
+        # Safely extract nested dictionaries
+        outbound = details.get('outbound') if isinstance(details.get('outbound'), dict) else {}
+        return_trip = details.get('return') if isinstance(details.get('return'), dict) else {}
+        payment = details.get('payment') if isinstance(details.get('payment'), dict) else {}
+
+        # Calculate fees breakdown
+        outbound_base = outbound.get('adult_price', 0) if outbound else 0
+        outbound_total = outbound.get('price', 0) if outbound else 0
+        return_base = return_trip.get('adult_price', 0) if return_trip else 0
+        return_total = return_trip.get('price', 0) if return_trip else 0
+
+        # Get payment method with proper display
+        payment_method_raw = payment.get('method', 'N/A') if payment else 'N/A'
+        if payment_method_raw == 'stripe_test':
+            payment_method_raw = 'stripe'
+        
+        payment_method_display = {
+            'stripe': 'Credit/Debit Card',
+            'gcash': 'GCash',
+            'paymaya': 'PayMaya',
+            'maya': 'Maya',
+            'shopeepay': 'ShopeePay',
+            'gotyme': 'GoTyme',
+            'paypal': 'PayPal',
+            'cash': 'Cash'
+        }.get(payment_method_raw.lower() if payment_method_raw != 'N/A' else '', payment_method_raw)
+
+        enhanced_bookings.append({
+            'booking': booking,
+            'outbound': {
+                'company': outbound.get('company', 'N/A') if outbound else 'N/A',
+                'vessel': outbound.get('vessel', 'N/A') if outbound else 'N/A',
+                'departure_date': outbound.get('departureDate', 'N/A') if outbound else 'N/A',
+                'departure_time': outbound.get('departureTime', 'N/A') if outbound else 'N/A',
+                'accommodation': outbound.get('accommodationName', 'N/A') if outbound else 'N/A',
+                'seat_type': outbound.get('seatType', 'N/A') if outbound else 'N/A',
+                'adult_price': outbound_base,
+                'child_price': outbound.get('child_price', 0) if outbound else 0,
+                'total_price': outbound_total,
+            },
+            'return': {
+                'company': return_trip.get('company', 'N/A') if return_trip else 'N/A',
+                'vessel': return_trip.get('vessel', 'N/A') if return_trip else 'N/A',
+                'departure_date': return_trip.get('departureDate', 'N/A') if return_trip else 'N/A',
+                'departure_time': return_trip.get('departureTime', 'N/A') if return_trip else 'N/A',
+                'accommodation': return_trip.get('accommodationName', 'N/A') if return_trip else 'N/A',
+                'seat_type': return_trip.get('seatType', 'N/A') if return_trip else 'N/A',
+                'adult_price': return_base,
+                'child_price': return_trip.get('child_price', 0) if return_trip else 0,
+                'total_price': return_total,
+            } if return_trip else None,
+            'payment': {
+                'method': payment_method_display,
+                'method_raw': payment_method_raw,
+                'paid_at': payment.get('paid_at_display', 'N/A') if payment else 'N/A',
+            },
+            'passenger_breakdown': {
+                'adults': booking.adults,
+                'children': booking.children,
+                'infants': details.get('infants', 0),
+                'total': booking.adults + booking.children
+            }
+        })
+
+    # Pagination - 15 bookings per page
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    
+    paginator = Paginator(enhanced_bookings, 15)
+    page = request.GET.get('page', 1)
+    
+    try:
+        paginated_bookings = paginator.page(page)
+    except PageNotAnInteger:
+        paginated_bookings = paginator.page(1)
+    except EmptyPage:
+        paginated_bookings = paginator.page(paginator.num_pages)
+
+    context = {
+        'bookings': paginated_bookings,
+        'total_bookings': total_bookings,
+        'pending_bookings': pending_bookings,
+        'reserved_bookings': reserved_bookings,
+        'confirmed_bookings': confirmed_bookings,
+        'cancelled_bookings': cancelled_bookings,
+        'completed_bookings': completed_bookings,
+        'total_revenue': total_revenue,
+        'company_revenue': company_revenue,
+        'all_companies': sorted(all_companies),
+        'all_payment_methods': all_payment_methods,  # Now a dict with method: display_name
+        'chart_labels': json.dumps(chart_labels),
+        'chart_data': json.dumps(chart_data),
+        'user': request.user,
+        # Filter values for maintaining state
+        'search_query': search_query,
+        'status_filter': status_filter,
+        'company_filter': company_filter,
+        'payment_method_filter': payment_method_filter,
+        'date_from': date_from,
+        'date_to': date_to,
+    }
+    return render(request, 'admin_bookings.html', context)
+
+@login_required
+def get_booking_details(request, booking_id):
+    """API endpoint to get detailed booking information for modal"""
+    try:
+        # Check if user is admin
+        if not hasattr(request.user, 'profile') or not request.user.profile.is_admin_user:
+            return JsonResponse({
+                'success': False,
+                'message': 'Unauthorized'
+            }, status=403)
+        
+        booking = get_object_or_404(Booking, id=booking_id)
+        details = booking.details if booking.details and isinstance(booking.details, dict) else {}
+        
+        # Extract passenger information
+        passengers_data = details.get('passengers', {})
+        passengers = []
+        
+        # Get passenger count
+        total_passengers = booking.adults + booking.children
+        
+        for i in range(1, total_passengers + 1):
+            passenger = {
+                'number': i,
+                'first_name': passengers_data.get(f'passenger_{i}_first_name', 'N/A'),
+                'last_name': passengers_data.get(f'passenger_{i}_last_name', 'N/A'),
+                'gender': passengers_data.get(f'passenger_{i}_gender', 'N/A'),
+                'dob': passengers_data.get(f'passenger_{i}_dob', 'N/A'),
+                'type': 'Adult' if i <= booking.adults else 'Child'
+            }
+            passengers.append(passenger)
+        
+        # Extract voyage information
+        outbound = details.get('outbound', {})
+        return_trip = details.get('return', {})
+        payment = details.get('payment', {})
+        
+        # Format payment method
+        payment_method = payment.get('method', 'N/A')
+        if payment_method == 'stripe_test':
+            payment_method = 'stripe'
+        
+        payment_display = {
+            'stripe': 'Credit/Debit Card',
+            'gcash': 'GCash',
+            'paymaya': 'PayMaya',
+            'maya': 'Maya',
+            'shopeepay': 'ShopeePay',
+            'gotyme': 'GoTyme',
+            'paypal': 'PayPal',
+            'cash': 'Cash'
+        }.get(payment_method.lower() if payment_method != 'N/A' else '', payment_method)
+        
+        response_data = {
+            'success': True,
+            'booking': {
+                'reference': booking.booking_reference,
+                'status': booking.status,
+                'created_at': booking.created_at.strftime('%b %d, %Y %I:%M %p'),
+                'user': {
+                    'name': booking.user.get_full_name() or booking.user.username,
+                    'email': booking.user.email,
+                    'username': booking.user.username
+                },
+                'route': {
+                    'origin': booking.origin,
+                    'destination': booking.destination,
+                    'trip_type': booking.trip_type
+                },
+                'outbound': {
+                    'company': outbound.get('company', 'N/A'),
+                    'vessel': outbound.get('vessel', 'N/A'),
+                    'date': outbound.get('departureDate', 'N/A'),
+                    'time': outbound.get('departureTime', 'N/A'),
+                    'accommodation': outbound.get('accommodationName', 'N/A'),
+                    'seat_type': outbound.get('seatType', 'N/A'),
+                    'adult_price': outbound.get('adult_price', 0),
+                    'child_price': outbound.get('child_price', 0),
+                    'total': outbound.get('price', 0)
+                },
+                'return': {
+                    'company': return_trip.get('company', 'N/A'),
+                    'vessel': return_trip.get('vessel', 'N/A'),
+                    'date': return_trip.get('departureDate', 'N/A'),
+                    'time': return_trip.get('departureTime', 'N/A'),
+                    'accommodation': return_trip.get('accommodationName', 'N/A'),
+                    'seat_type': return_trip.get('seatType', 'N/A'),
+                    'adult_price': return_trip.get('adult_price', 0),
+                    'child_price': return_trip.get('child_price', 0),
+                    'total': return_trip.get('price', 0)
+                } if return_trip else None,
+                'passengers': passengers,
+                'payment': {
+                    'method': payment_display,
+                    'paid_at': payment.get('paid_at_display', 'N/A'),
+                    'amount': float(booking.total_price)
+                },
+                'totals': {
+                    'adults': booking.adults,
+                    'children': booking.children,
+                    'infants': details.get('infants', 0),
+                    'total_price': float(booking.total_price)
+                }
+            }
+        }
+        
+        return JsonResponse(response_data)
+    
+    except Exception as e:
+        logger.error(f"Error getting booking details: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=500)
+        
 @login_required
 def profile_settings(request):
     user = request.user

@@ -33,6 +33,7 @@ urlpatterns = [
     path('upload-profile-photo/', views.upload_profile_photo, name='upload_profile_photo'),
     path('delete-profile-photo/', views.delete_profile_photo, name='delete_profile_photo'),
     path('api/get-booking-selection/', views.get_booking_selection, name='get_booking_selection'),
+    path('get-booking-details/<int:booking_id>/', views.get_booking_details, name='get_booking_details'),
     path('profile/delete-account/', views.delete_account, name='delete_account'),
     path('contact/', views.contact_us, name='contact_us'),
     path('latest-offer/', views.latest_offer, name='latest_offer')

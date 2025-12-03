@@ -38,9 +38,9 @@ window.addEventListener('pageshow', function(event) {
                     <span class="icon"><i class="fa-solid fa-table-columns"></i></span>
                     <span>Dashboard</span>
                 </a>
-                <a href="#" class="nav-item">
+                <a href="{% url 'admin_bookings' %}" class="nav-item">
                     <span class="icon"><i class="fa-solid fa-ticket"></i></span>
-                    <span>Bookings</span>
+                    <span>Manage Bookings</span>
                 </a>
                 <a href="{% url 'admin_users' %}" class="nav-item active">
                     <span class="icon"><i class="fa-solid fa-users"></i></span>
