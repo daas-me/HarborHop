@@ -870,7 +870,7 @@ def change_user_role(request):
 @require_http_methods(["POST"])
 def add_user(request):
     """Add a new user - Fixed for AJAX requests with Supabase"""
-    
+
     logger.info("="*50)
     logger.info("ADD USER REQUEST RECEIVED")
     logger.info(f"User authenticated: {request.user.is_authenticated}")
