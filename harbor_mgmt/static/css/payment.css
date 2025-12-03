@@ -1397,3 +1397,239 @@ body {
 .ewallet-select:hover {
     border-color: #ff9800;
 }
+
+/* Price Breakdown Section */
+.price-breakdown-section {
+    margin: 24px 30px 30px;
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.breakdown-header {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: white;
+}
+
+.breakdown-header i {
+    font-size: 1.3rem;
+}
+
+.breakdown-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.breakdown-journey {
+    padding: 20px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.breakdown-journey:last-of-type {
+    border-bottom: none;
+}
+
+.journey-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    color: #2c3e50;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.journey-label.return {
+    color: #2c3e50;
+}
+
+.journey-label i {
+    color: #ff9800;
+    font-size: 1.1rem;
+}
+
+.journey-label.return i {
+    color: #ff9800;
+}
+
+.breakdown-items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #ff9800;
+}
+
+.breakdown-item.child {
+    border-left-color: #4caf50;
+}
+
+.breakdown-item.infant {
+    border-left-color: #2196f3;
+}
+
+.item-desc {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.item-desc i {
+    color: #ff9800;
+    font-size: 1.1rem;
+}
+
+.breakdown-item.child .item-desc i {
+    color: #4caf50;
+}
+
+.breakdown-item.infant .item-desc i {
+    color: #2196f3;
+}
+
+.item-price {
+    font-weight: 700;
+    color: #2c3e50;
+    font-size: 1rem;
+}
+
+.child-price {
+    color: #4caf50;
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+.infant-price {
+    color: #2196f3;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.breakdown-subtotal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #fff5e6 0%, #ffe8cc 100%);
+    border-radius: 8px;
+    margin-top: 4px;
+}
+
+.breakdown-subtotal span:first-child {
+    color: #e65100;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.subtotal-amount {
+    color: #e65100;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.breakdown-total {
+    padding: 20px;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.total-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.total-label i {
+    font-size: 1.2rem;
+}
+
+.total-amount {
+    color: #ff9800;
+    font-weight: 700;
+    font-size: 1.8rem;
+}
+
+.total-note {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.8rem;
+    text-align: right;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .price-breakdown-section {
+        margin: 20px 15px 25px;
+    }
+    
+    .breakdown-journey {
+        padding: 16px;
+    }
+    
+    .breakdown-item {
+        padding: 10px 14px;
+    }
+    
+    .item-desc span {
+        font-size: 0.9rem;
+    }
+    
+    .item-price {
+        font-size: 0.9rem;
+    }
+    
+    .total-amount {
+        font-size: 1.5rem;
+    }
+}
+
+.discount-badge {
+    background: #ff9900;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-left: 5px;
+}
+
+.breakdown-subtotal-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    font-size: 0.9rem;
+    color: #666;
+    border-bottom: 1px dashed #e0e0e0;
+    margin-bottom: 10px;
+}
+
+.child-price {
+    color: #ff9900 !important;
+    font-weight: 600;
+}

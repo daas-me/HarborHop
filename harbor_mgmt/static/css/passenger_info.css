@@ -450,6 +450,7 @@ body {
 .field {
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .field.full-width {
@@ -582,3 +583,80 @@ body {
         justify-content: center;
     }
 }
+
+.age-validation-notice {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.age-validation-notice i {
+    color: #ff9900;
+    font-size: 1.2rem;
+    margin-top: 2px;
+}
+
+.age-validation-notice strong {
+    color: #856404;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.age-validation-notice p {
+    color: #856404;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.flatpickr-calendar {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    border: none;
+}
+
+
+.flatpickr-day.selected {
+    background: #007bff;
+    border-color: #007bff;
+}
+
+.flatpickr-day.today {
+    border-color: #007bff;
+}
+
+.flatpickr-day:hover {
+    background: #e7f3ff;
+}
+
+/* Style for date inputs with Flatpickr */
+input[name*="_dob"] {
+    cursor: pointer;
+    background-color: #fff;
+    padding-right: 35px; /* Make room for calendar icon */
+}
+
+input[name*="_dob"]:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+input[name*="_dob"].has-value {
+    border-color: #28a745;
+}
+
+/* Disable future dates visually */
+.flatpickr-day.disabled {
+    color: #ccc !important;
+    cursor: not-allowed !important;
+}
+
+.flatpickr-day.disabled:hover {
+    background: transparent !important;
+}
+
+

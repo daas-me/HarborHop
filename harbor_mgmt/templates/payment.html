@@ -1,4 +1,5 @@
 {% load static %}
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -111,7 +112,7 @@
                 {% if booking.details.outbound %}
                 <div class="journey-card outbound">
                     <div class="journey-header">
-                        <i class="fa-solid fa-plane-departure"></i>
+                        <i class="fa-solid fa-ship"></i>
                         <span>Departure Journey</span>
                     </div>
                     <div class="journey-details">
@@ -175,7 +176,7 @@
                 {% if booking.details.return %}
                 <div class="journey-card return">
                     <div class="journey-header">
-                        <i class="fa-solid fa-plane-arrival"></i>
+                        <i class="fa-solid fa-ship"></i>
                         <span>Return Journey</span>
                     </div>
                     <div class="journey-details">
@@ -235,7 +236,6 @@
                 </div>
                 {% endif %}
 
-                <!-- Passengers Info -->
                 <div class="passengers-info">
                     <i class="fa-solid fa-users"></i>
                     <div>
@@ -245,6 +245,139 @@
                             {% if booking.children > 0 %} • {{ booking.children }} Child(ren){% endif %}
                             {% if booking.details.infants %} • {{ booking.details.infants }} Infant(s){% endif %}
                         </span>
+                    </div>
+                </div>
+
+            <!-- Price Breakdown Section -->
+                <div class="price-breakdown-section">
+                    <div class="breakdown-header">
+                        <i class="fa-solid fa-receipt"></i>
+                        <h3>Price Breakdown</h3>
+                    </div>
+                    
+                    <!-- Outbound Journey Breakdown -->
+                    {% if booking.details.outbound %}
+                    <div class="breakdown-journey">
+                        <div class="journey-label">
+                            <i class="fa-solid fa-ship"></i>
+                            <span>Departure Journey</span>
+                        </div>
+                        
+                        <div class="breakdown-items">
+                            <!-- Adults -->
+                            {% if booking.adults > 0 %}
+                            <div class="breakdown-item">
+                                <div class="item-desc">
+                                    <i class="fa-solid fa-user"></i>
+                                    <span>Adult × {{ booking.adults }}</span>
+                                </div>
+                                <span class="item-price">₱{{ booking.details.outbound.adult_price|floatformat:2 }} each</span>
+                            </div>
+                            <div class="breakdown-subtotal-item">
+                                <span>Adults Subtotal</span>
+                                <span>₱{{ booking.details.outbound.adult_price|floatformat:2|multiply:booking.adults }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Children (50% discount) -->
+                            {% if booking.details.outbound.valid_children > 0 %}
+                            <div class="breakdown-item child">
+                                <div class="item-desc">
+                                    <i class="fa-solid fa-child"></i>
+                                    <span>Child × {{ booking.details.outbound.valid_children }} <span class="discount-badge">50% OFF</span></span>
+                                    <span class="age-verified-badge"><i class="fa-solid fa-check-circle"></i> Age Verified</span>
+                                </div>
+                                <span class="item-price child-price">₱{{ booking.details.outbound.child_price|floatformat:2 }} each</span>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Infants (if any) -->
+                            {% if booking.details.infants > 0 %}
+                            <div class="breakdown-item infant">
+                                <div class="item-desc">
+                                    <i class="fa-solid fa-baby"></i>
+                                    <span>Infant × {{ booking.details.infants }}</span>
+                                </div>
+                                <span class="item-price infant-price">FREE</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="breakdown-subtotal">
+                            <span>Departure Subtotal</span>
+                            <span class="subtotal-amount">₱{{ booking.details.outbound.price|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Return Journey Breakdown (if round trip) -->
+                    {% if booking.details.return %}
+                    <div class="breakdown-journey">
+                        <div class="journey-label return">
+                            <i class="fa-solid fa-ship"></i>
+                            <span>Return Journey</span>
+                        </div>
+                        
+                        <div class="breakdown-items">
+                            <!-- Adults -->
+                            {% if booking.adults > 0 %}
+                            <div class="breakdown-item">
+                                <div class="item-desc">
+                                    <i class="fa-solid fa-user"></i>
+                                    <span>Adult × {{ booking.adults }}</span>
+                                </div>
+                                <span class="item-price">₱{{ booking.details.return.adult_price|floatformat:2 }} each</span>
+                            </div>
+                            <div class="breakdown-subtotal-item">
+                                <span>Adults Subtotal</span>
+                                <span>₱{{ booking.details.return.adult_price|floatformat:2|multiply:booking.adults }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Children (50% discount) -->
+                            {% if booking.children > 0 %}
+                            <div class="breakdown-item child">
+                                <div class="item-desc">
+                                    <i class="fa-solid fa-child"></i>
+                                    <span>Child × {{ booking.children }} <span class="discount-badge">50% OFF</span></span>
+                                </div>
+                                <span class="item-price child-price">₱{{ booking.details.return.child_price|floatformat:2 }} each</span>
+                            </div>
+                            <div class="breakdown-subtotal-item">
+                                <span>Children Subtotal</span>
+                                <span>₱{{ booking.details.return.child_price|floatformat:2|multiply:booking.children }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Infants (if any) -->
+                            {% if booking.details.infants > 0 %}
+                            <div class="breakdown-item infant">
+                                <div class="item-desc">
+                                    <i class="fa-solid fa-baby"></i>
+                                    <span>Infant × {{ booking.details.infants }}</span>
+                                </div>
+                                <span class="item-price infant-price">FREE</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="breakdown-subtotal">
+                            <span>Return Subtotal</span>
+                            <span class="subtotal-amount">₱{{ booking.details.return.price|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Grand Total -->
+                    <div class="breakdown-total">
+                        <div class="total-row">
+                            <span class="total-label">
+                                <i class="fa-solid fa-calculator"></i>
+                                Grand Total
+                            </span>
+                            <span class="total-amount">₱{{ booking.total_price|floatformat:2 }}</span>
+                        </div>
+                        <p class="total-note">All taxes and fees included • Children save 50%</p>
                     </div>
                 </div>
             </div>

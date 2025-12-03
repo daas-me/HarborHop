@@ -230,12 +230,110 @@ def passenger_info(request):
         normalized_outbound = normalize_voyage_data(outbound) if outbound else None
         normalized_return = normalize_voyage_data(return_trip) if return_trip else None
         
-        # Calculate total price
+        # GET ADULTS AND CHILDREN FROM SUMMARY
+        adults = summary.get('adults', 1)
+        children = summary.get('children', 0)
+        
+        # VALIDATE CHILDREN'S AGES BASED ON BIRTHDATES
+        from datetime import datetime, timedelta
+        from dateutil.relativedelta import relativedelta
+        
+        valid_children_count = 0
+        invalid_children = []
+        
+        # Get departure date for age calculation
+        dep_date_str = summary.get('departure_date_formatted', '')
+        try:
+            departure_date = datetime.strptime(dep_date_str, '%a, %d %b %Y').date()
+        except:
+            departure_date = datetime.now().date()
+        
+        # ==========================================
+        # FIX: VALIDATE EACH CHILD PASSENGER'S AGE
+        # ==========================================
+        for i in range(1, children + 1):
+            # Calculate the correct passenger number (adults come first)
+            passenger_number = adults + i
+            
+            # FIX: Changed 'birthdate' to 'dob' to match HTML form field
+            birthdate_str = request.POST.get(f'passenger_{passenger_number}_dob')
+            
+            if birthdate_str:
+                try:
+                    birthdate = datetime.strptime(birthdate_str, '%Y-%m-%d').date()
+                    
+                    # Calculate age at time of departure
+                    age_at_departure = relativedelta(departure_date, birthdate).years
+                    
+                    # Check if age is between 2-11 years old
+                    if 2 <= age_at_departure <= 11:
+                        valid_children_count += 1
+                    else:
+                        invalid_children.append({
+                            'number': passenger_number,
+                            'age': age_at_departure,
+                            'name': request.POST.get(f'passenger_{passenger_number}_first_name', f'Child {i}')
+                        })
+                except ValueError:
+                    invalid_children.append({
+                        'number': passenger_number,
+                        'age': 'Invalid date',
+                        'name': request.POST.get(f'passenger_{passenger_number}_first_name', f'Child {i}')
+                    })
+            else:
+                # FIX: Handle missing birthdate
+                invalid_children.append({
+                    'number': passenger_number,
+                    'age': 'Missing birthdate',
+                    'name': request.POST.get(f'passenger_{passenger_number}_first_name', f'Child {i}')
+                })
+        
+        # If there are invalid children, show error and return
+        if invalid_children:
+            error_messages = []
+            for child in invalid_children:
+                if child['age'] == 'Invalid date':
+                    error_messages.append(f"<strong>Passenger {child['number']}</strong> ({child['name']}): Invalid birthdate format")
+                elif child['age'] == 'Missing birthdate':
+                    error_messages.append(f"<strong>Passenger {child['number']}</strong> ({child['name']}): Birthdate is required for child discount verification")
+                elif child['age'] < 2:
+                    error_messages.append(f"<strong>Passenger {child['number']}</strong> ({child['name']}): Age {child['age']} years - Infants under 2 years should be marked as infants, not children")
+                else:
+                    error_messages.append(f"<strong>Passenger {child['number']}</strong> ({child['name']}): Age {child['age']} years - Only passengers aged 2-11 years qualify for child discount")
+            
+            # Use mark_safe to allow HTML in the message
+            from django.utils.safestring import mark_safe
+            messages.error(request, mark_safe(
+                '<strong>Child Discount Validation Failed:</strong><br><br>' + 
+                '<br>'.join(error_messages) +
+                '<br><br><em>Please correct the birthdates or change the passenger type to Adult.</em>'
+            ))
+            return redirect('passenger_info')
+        
+        # CALCULATE PRICES WITH VALIDATED CHILDREN
         total_price = 0
+        outbound_base_price = 0
+        return_base_price = 0
+
         if normalized_outbound and isinstance(normalized_outbound.get('price'), (int, float)):
-            total_price += normalized_outbound['price']
+            outbound_base_price = normalized_outbound['price']
+            # Calculate: (adults * full price) + (valid children * 50% price)
+            outbound_total = (outbound_base_price * adults) + (outbound_base_price * valid_children_count * 0.5)
+            normalized_outbound['price'] = outbound_total
+            normalized_outbound['adult_price'] = outbound_base_price
+            normalized_outbound['child_price'] = outbound_base_price * 0.5
+            normalized_outbound['valid_children'] = valid_children_count
+            total_price += outbound_total
+            
         if normalized_return and isinstance(normalized_return.get('price'), (int, float)):
-            total_price += normalized_return['price']
+            return_base_price = normalized_return['price']
+            # Calculate: (adults * full price) + (valid children * 50% price)
+            return_total = (return_base_price * adults) + (return_base_price * valid_children_count * 0.5)
+            normalized_return['price'] = return_total
+            normalized_return['adult_price'] = return_base_price
+            normalized_return['child_price'] = return_base_price * 0.5
+            normalized_return['valid_children'] = valid_children_count
+            total_price += return_total
         
         # Parse dates
         from datetime import datetime
@@ -290,7 +388,7 @@ def passenger_info(request):
                 'return': normalized_return,
                 'total_price': total_price,
                 'passengers': passenger_data,
-                'infants': summary.get('infants', 0),  # Add infants to details
+                'infants': summary.get('infants', 0),
             }
             
             booking = Booking.objects.create(
@@ -301,7 +399,7 @@ def passenger_info(request):
                 departure_date=dep_date,
                 return_date=ret_date,
                 adults=summary.get('adults', 1),
-                children=summary.get('children', 0),
+                children=valid_children_count,  # FIX: Use validated children count
                 booking_reference=booking_reference,
                 status='reserved',
                 reserved_until=now + timedelta(hours=48),
@@ -323,7 +421,7 @@ def passenger_info(request):
                 'return': normalized_return,
                 'total_price': total_price,
                 'passengers': passenger_data,
-                'infants': summary.get('infants', 0),  # Add infants to details
+                'infants': summary.get('infants', 0),
             }
             
             booking = Booking.objects.create(
@@ -334,7 +432,7 @@ def passenger_info(request):
                 departure_date=dep_date,
                 return_date=ret_date,
                 adults=summary.get('adults', 1),
-                children=summary.get('children', 0),
+                children=valid_children_count,  # FIX: Use validated children count
                 booking_reference=booking_reference,
                 status='pending',
                 reserved_until=None,
