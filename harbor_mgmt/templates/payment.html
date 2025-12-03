@@ -7,7 +7,7 @@
     <title>Payment - HarborHop</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
-    <link rel="stylesheet" href="{% static 'css/payment.css' %}?v=4">
+    <link rel="stylesheet" href="{% static 'css/payment.css' %}?v=5"
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon_io/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
@@ -447,6 +447,176 @@
         </div>
     </div>
 
+<!-- E-Wallet Payment Gateway Modal -->
+<div id="paymentGatewayModal" class="modal payment-gateway-modal">
+    <div class="modal-content">
+        <div class="modal-header payment-gateway-header">
+            <div class="gateway-logo">
+                <i class="fa-solid fa-wallet"></i>
+                <div>
+                    <h2>E-Wallet Payment</h2>
+                    <p class="gateway-subtitle">Complete your payment securely</p>
+                </div>
+            </div>
+            <button class="modal-close" onclick="closePaymentGateway()">&times;</button>
+        </div>
+        <div class="modal-body payment-gateway-body">
+            <div class="payment-provider-info">
+                <div class="provider-badge">
+                    <i class="fa-solid fa-wallet"></i>
+                    <span id="selected-provider">GCash</span>
+                </div>
+                <div class="amount-display-gateway">
+                    <span class="amount-label-small">Amount to Pay</span>
+                    <span class="amount-value-large">₱{{ booking.total_price|floatformat:2 }}</span>
+                </div>
+            </div>
+
+            <form id="gatewayPaymentForm">
+                <div class="gateway-form-group">
+                    <label>
+                        <i class="fa-solid fa-user"></i>
+                        Full Name
+                    </label>
+                    <input 
+                        type="text" 
+                        id="ewallet-name" 
+                        class="gateway-input" 
+                        placeholder="Juan Dela Cruz" 
+                        required
+                    >
+                    <span class="input-hint">Enter your full name as registered</span>
+                </div>
+
+                <div class="gateway-form-group">
+                    <label>
+                        <i class="fa-solid fa-mobile-screen"></i>
+                        Phone / Account Number
+                    </label>
+                    <input 
+                        type="tel" 
+                        id="phone-number" 
+                        class="gateway-input" 
+                        placeholder="09171234567" 
+                        pattern="[0-9]{11}"
+                        maxlength="11"
+                        required
+                    >
+                    <span class="input-hint">Enter your 11-digit phone or account number</span>
+                </div>
+
+                <div class="gateway-form-group">
+                    <label>
+                        <i class="fa-solid fa-peso-sign"></i>
+                        Confirm Amount
+                    </label>
+                    <input 
+                        type="text" 
+                        id="confirm-amount" 
+                        class="gateway-input" 
+                        value="{{ booking.total_price|floatformat:2 }}"
+                        readonly
+                    >
+                </div>
+
+                <div class="security-notice">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <div>
+                        <strong>Secure Transaction</strong>
+                        <p>You will receive a confirmation on your mobile device. Please approve the transaction to complete payment.</p>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer payment-gateway-footer">
+            <button type="button" class="btn-gateway-cancel" onclick="closePaymentGateway()">
+                <i class="fa-solid fa-xmark"></i> Cancel
+            </button>
+            <button type="button" class="btn-gateway-pay" onclick="processPayment()">
+                <i class="fa-solid fa-check"></i> Confirm Payment
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- PayPal Payment Modal -->
+<div id="paypalModal" class="modal payment-gateway-modal">
+    <div class="modal-content">
+        <div class="modal-header paypal-header">
+            <div class="gateway-logo">
+                <i class="fa-brands fa-paypal"></i>
+                <div>
+                    <h2>PayPal Payment</h2>
+                    <p class="gateway-subtitle">Pay securely with PayPal</p>
+                </div>
+            </div>
+            <button class="modal-close" onclick="closePaypalModal()">&times;</button>
+        </div>
+        <div class="modal-body payment-gateway-body">
+            <div class="payment-provider-info paypal-info">
+                <div class="provider-badge paypal-badge">
+                    <i class="fa-brands fa-paypal"></i>
+                    <span>PayPal</span>
+                </div>
+                <div class="amount-display-gateway">
+                    <span class="amount-label-small">Amount to Pay</span>
+                    <span class="amount-value-large">₱{{ booking.total_price|floatformat:2 }}</span>
+                </div>
+            </div>
+
+            <div class="paypal-info-box">
+                <i class="fa-solid fa-info-circle"></i>
+                <div>
+                    <strong>PayPal Information</strong>
+                    <p>You will be redirected to PayPal to complete your payment securely.</p>
+                </div>
+            </div>
+
+            <form id="paypalForm">
+                <div class="gateway-form-group">
+                    <label>
+                        <i class="fa-solid fa-envelope"></i>
+                        PayPal Email
+                    </label>
+                    <input 
+                        type="email" 
+                        id="paypal-email" 
+                        class="gateway-input" 
+                        placeholder="your.email@example.com" 
+                        required
+                    >
+                    <span class="input-hint">Enter your PayPal account email</span>
+                </div>
+
+                <div class="security-notice paypal-security">
+                    <i class="fa-solid fa-lock"></i>
+                    <div>
+                        <strong>Secure with PayPal</strong>
+                        <p>Your payment is protected by PayPal's Buyer Protection policy.</p>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer payment-gateway-footer">
+            <button type="button" class="btn-gateway-cancel" onclick="closePaypalModal()">
+                <i class="fa-solid fa-xmark"></i> Cancel
+            </button>
+            <button type="button" class="btn-gateway-pay paypal-btn" onclick="processPaypalPayment()">
+                <i class="fa-brands fa-paypal"></i> Pay with PayPal
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="paymentLoadingOverlay" class="payment-loading-overlay">
+    <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <h3>Processing Payment</h3>
+        <p>Please wait while we process your payment...</p>
+    </div>
+</div>
+
 <script>
     // Rules Modal Functions
     function openRulesModal(event) {
@@ -605,6 +775,141 @@
                 });
             });
         })();
+    
+
+document.addEventListener('DOMContentLoaded', function() {
+    // E-Wallet Dropdown Toggle
+    const paymentMethodRadios = document.querySelectorAll('input[name="payment_method"]');
+    const ewalletDropdown = document.getElementById('ewallet-dropdown');
+    
+    function toggleEwalletDropdown() {
+        const selectedMethod = document.querySelector('input[name="payment_method"]:checked');
+        if (selectedMethod && selectedMethod.value === 'ewallet') {
+            ewalletDropdown.classList.add('show');
+        } else {
+            ewalletDropdown.classList.remove('show');
+        }
+    }
+    
+    // Initial check
+    toggleEwalletDropdown();
+    
+    // Add change listeners
+    paymentMethodRadios.forEach(radio => {
+        radio.addEventListener('change', toggleEwalletDropdown);
+    });
+    
+    // INTERCEPT FORM SUBMISSION
+    const form = document.querySelector('.payment-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const selected = form.querySelector('input[name="payment_method"]:checked');
+            const method = selected ? selected.value : '';
+            
+            // Only allow credit_card to submit normally (Stripe handles it)
+            if (method === 'credit_card') {
+                return; // Let the Stripe handler take over
+            }
+            
+            // Prevent default submission for e-wallet and PayPal
+            e.preventDefault();
+            
+            // Open appropriate modal
+            if (method === 'ewallet') {
+                openPaymentGateway();
+            } else if (method === 'paypal') {
+                const paypalModal = document.getElementById('paypalModal');
+                paypalModal.style.display = 'block';
+                document.getElementById('paypalForm').reset();
+                document.body.style.overflow = 'hidden';
+            }
+        });
+    }
+});
+
+// Keep all existing modal functions exactly as they are
+function openRulesModal(event) {
+    event.preventDefault();
+    document.getElementById('rulesModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeRulesModal() {
+    document.getElementById('rulesModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+function openPaymentGateway() {
+    const selectedMethod = document.querySelector('input[name="payment_method"]:checked').value;
+    
+    if (selectedMethod === 'ewallet') {
+        const ewalletSelect = document.getElementById('ewallet-select');
+        const providerName = ewalletSelect.options[ewalletSelect.selectedIndex].text;
+        document.getElementById('selected-provider').textContent = providerName;
+        document.getElementById('paymentGatewayModal').style.display = 'block';
+        document.getElementById('gatewayPaymentForm').reset();
+        document.getElementById('confirm-amount').value = '{{ booking.total_price|floatformat:2 }}';
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closePaymentGateway() {
+    document.getElementById('paymentGatewayModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+function closePaypalModal() {
+    document.getElementById('paypalModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+function processPayment() {
+    const form = document.getElementById('gatewayPaymentForm');
+    
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    const fullName = document.getElementById('ewallet-name').value;
+    const phoneNumber = document.getElementById('phone-number').value;
+    
+    if (!fullName || fullName.trim().length < 3) {
+        alert('Please enter your full name');
+        return;
+    }
+    
+    if (phoneNumber.length !== 11) {
+        alert('Please enter a valid 11-digit phone or account number');
+        return;
+    }
+    
+    closePaymentGateway();
+    showLoadingAndSubmit();
+}
+
+function processPaypalPayment() {
+    const form = document.getElementById('paypalForm');
+    
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    closePaypalModal();
+    showLoadingAndSubmit();
+}
+
+function showLoadingAndSubmit() {
+    const loadingOverlay = document.getElementById('paymentLoadingOverlay');
+    loadingOverlay.classList.add('show');
+    
+    setTimeout(function() {
+        loadingOverlay.classList.remove('show');
+        // Submit the actual form
+        document.querySelector('.payment-form').submit();
+    }, 2000);
+}
     </script>
 </body>
 </html>

@@ -7,7 +7,7 @@
     <title>Payment Confirmation - HarborHop</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
-    <link rel="stylesheet" href="{% static 'css/payment_confirmation.css' %}">
+    <link rel="stylesheet" href="{% static 'css/payment_confirmation.css' %}?v=1">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon_io/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
@@ -342,5 +342,145 @@
             <p>&copy; 2025 HarborHop. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
         </div>
     </footer>
+
+   
+<script>
+console.log('Back navigation script loaded');
+
+// Wait for DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded');
+    
+    let allowNavigation = false;
+    const modal = document.getElementById('backNavigationModal');
+    
+    if (!modal) {
+        console.error('Modal element not found!');
+        return;
+    }
+    console.log('Modal found:', modal);
+    
+    // Show custom modal function
+    function showBackModal() {
+        console.log('Showing modal...');
+        modal.style.display = 'block';
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    // Close modal function
+    window.closeBackModal = function() {
+        console.log('Closing modal...');
+        modal.classList.remove('show');
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    };
+    
+    // Go to home function
+    window.goToHome = function() {
+        console.log('Going to home...');
+        allowNavigation = true;
+        window.location.href = "{% url 'home' %}";
+    };
+    
+    // Close modal when clicking overlay
+    const overlay = modal.querySelector('.back-nav-overlay');
+    if (overlay) {
+        overlay.addEventListener('click', function(e) {
+            console.log('Overlay clicked');
+            closeBackModal();
+        });
+    }
+    
+    // Prevent back button navigation
+    if (window.history && window.history.pushState) {
+        console.log('Setting up history manipulation');
+        
+        // Add initial state
+        window.history.pushState({page: 'confirmation'}, '', window.location.href);
+        
+        window.addEventListener('popstate', function(event) {
+            console.log('Popstate triggered, allowNavigation:', allowNavigation);
+            
+            if (allowNavigation) {
+                console.log('Navigation allowed');
+                return;
+            }
+            
+            // Push forward again to block back button
+            window.history.pushState({page: 'confirmation'}, '', window.location.href);
+            
+            // Show custom modal
+            showBackModal();
+        });
+    }
+    
+    // Allow navigation when clicking legitimate buttons/links
+    document.querySelectorAll('a[href], button').forEach(function(element) {
+        element.addEventListener('click', function(e) {
+            // Don't set allowNavigation for modal buttons
+            if (!e.target.closest('.back-nav-modal')) {
+                console.log('Link/button clicked, allowing navigation');
+                allowNavigation = true;
+            }
+        });
+    });
+    
+    // Prevent keyboard back shortcuts
+    document.addEventListener('keydown', function(e) {
+        const inInputField = (
+            e.target.tagName === 'INPUT' || 
+            e.target.tagName === 'TEXTAREA' ||
+            e.target.isContentEditable
+        );
+        
+        if (inInputField) {
+            return;
+        }
+        
+        // Prevent browser back shortcuts (Alt+Left or Cmd+Left)
+        if ((e.altKey && e.key === 'ArrowLeft') || 
+            (e.metaKey && e.key === 'ArrowLeft')) {
+            e.preventDefault();
+            console.log('Keyboard shortcut detected');
+            showBackModal();
+        }
+        
+        // Close modal with ESC key
+        if (e.key === 'Escape' && modal.classList.contains('show')) {
+            console.log('ESC pressed');
+            closeBackModal();
+        }
+    });
+    
+    console.log('Back navigation script initialized');
+});
+</script>
+
+<div id="backNavigationModal" class="back-nav-modal">
+    <div class="back-nav-overlay"></div>
+    <div class="back-nav-content">
+        <div class="back-nav-icon">
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <h2>Payment Already Completed</h2>
+        <p>Your booking has been successfully confirmed and paid for.</p>
+        <p class="secondary-text">You cannot return to the payment page. Would you like to go to the home page instead?</p>
+        
+        <div class="back-nav-reference">
+            <i class="fa-solid fa-ticket"></i>
+            <span>Booking Reference: <strong>{{ booking.booking_reference }}</strong></span>
+        </div>
+        
+        <div class="back-nav-buttons">
+            <button class="btn-stay" onclick="closeBackModal()">
+                <i class="fa-solid fa-xmark"></i> Stay Here
+            </button>
+            <button class="btn-go-home" onclick="goToHome()">
+                <i class="fa-solid fa-house"></i> Go to Home
+            </button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
