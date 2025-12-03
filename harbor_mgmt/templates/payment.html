@@ -288,6 +288,9 @@
                                 </div>
                             </label>
                         </div>
+                        <p style="margin-top: 10px; font-size: 0.9rem; color: #555;">
+                            Selecting <strong>Credit Card</strong> will securely redirect you to the Stripe test checkout page to complete your payment.
+                        </p>
                     </div>
 
                     <div class="payment-info-box">
@@ -447,6 +450,65 @@
                 closeRulesModal();
             }
         }
+    </script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        (function() {
+            const form = document.querySelector('.payment-form');
+            if (!form) return;
+
+            const stripePublicKey = '{{ stripe_public_key|escapejs }}';
+
+            form.addEventListener('submit', function (e) {
+                const selected = form.querySelector('input[name="payment_method"]:checked');
+                const method = selected ? selected.value : '';
+
+                if (method !== 'credit_card') {
+                    return; // let normal POST flow handle other methods
+                }
+
+                e.preventDefault();
+
+                if (!stripePublicKey) {
+                    alert('Stripe is not configured.');
+                    return;
+                }
+
+                const stripe = Stripe(stripePublicKey);
+                const csrfToken = form.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+                fetch('{% url "stripe_checkout" booking.id %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify({}),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data.sessionId) {
+                        throw new Error('No sessionId returned');
+                    }
+                    return stripe.redirectToCheckout({ sessionId: data.sessionId });
+                })
+                .then(function (result) {
+                    if (result && result.error) {
+                        alert(result.error.message);
+                    }
+                })
+                .catch(function (error) {
+                    console.error('Error starting Stripe checkout:', error);
+                    alert('Unable to start Stripe payment. Please try again later.');
+                });
+            });
+        })();
     </script>
 </body>
 </html>

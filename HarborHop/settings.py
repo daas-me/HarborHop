@@ -29,7 +29,8 @@ DEBUG = os.getenv("DEBUG", "1") == "1"
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-_$m65#@^#d8#pb20xa02k)6%$zyo0yzd@@mcz0$q(l@3xt0)qk'
-
+STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY", "")
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 

@@ -18,6 +18,8 @@ from datetime import datetime, date
 import json
 import logging
 import requests
+import string
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -461,8 +463,75 @@ def payment_view(request, booking_id):
         'booking': booking,
         'user': request.user,
         'route_distance': distance,
+        'stripe_public_key': settings.STRIPE_PUBLISHABLE_KEY,
     }
     return render(request, 'payment.html', context)
+
+
+@require_POST
+@login_required
+def stripe_checkout(request, booking_id):
+    import stripe
+
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+
+    session = stripe.checkout.Session.create(
+        mode="payment",
+        payment_method_types=["card"],
+        customer_email=request.user.email,
+        line_items=[{
+            "price_data": {
+                "currency": "php",
+                "unit_amount": int(booking.total_price * 100),
+                "product_data": {"name": f"{booking.origin} - {booking.destination}"},
+            },
+            "quantity": 1,
+        }],
+        success_url=request.build_absolute_uri(
+            reverse("stripe_success", args=[booking.id])
+        ) + "?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url=request.build_absolute_uri(
+            reverse("payment", args=[booking.id])
+        ),
+    )
+
+    details = booking.details or {}
+    details["payment"] = {"method": "stripe_test", "session_id": session.id, "status": "pending"}
+    booking.details = details
+    booking.save(update_fields=["details", "updated_at"])
+
+    return JsonResponse({"sessionId": session.id})
+
+
+@login_required
+def stripe_success(request, booking_id):
+    import stripe
+
+    session_id = request.GET.get("session_id")
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    session = stripe.checkout.Session.retrieve(session_id)
+
+    if session.payment_status == "paid":
+        details = booking.details or {}
+        details["payment"] = {
+            "method": "stripe_test",
+            "paid_at": timezone.now().isoformat(),
+            "paid_at_display": timezone.localtime().strftime('%b %d, %Y %I:%M %p'),
+            "session_id": session.id,
+        }
+        booking.details = details
+        booking.status = "completed"
+        booking.reserved_until = None
+        booking.save(update_fields=["details", "status", "reserved_until", "updated_at"])
+        messages.success(request, "Payment confirmed! Your booking was added to your history.")
+    else:
+        messages.error(request, "Payment not completed. Please try again.")
+
+    # After Stripe payment, go to the standard payment confirmation page
+    return redirect('payment_confirmation', booking_id=booking.id)
 
 @login_required
 def booking_history_view(request):
