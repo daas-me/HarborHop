@@ -15,6 +15,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.contrib.auth import update_session_auth_hash
 from datetime import datetime, date 
+from django.core.cache import cache
 import json
 import logging
 import requests
@@ -43,6 +44,7 @@ def normalize_voyage_data(voyage_data):
         'destinationName': voyage_data.get('destinationName', ''),
     }
 
+
 def home(request):
     # Ensure user has a profile if authenticated
     if request.user.is_authenticated:
@@ -51,35 +53,49 @@ def home(request):
         except UserProfile.DoesNotExist:
             UserProfile.objects.create(user=request.user)
     
-    # Fetch routes data from Barkota API
-    try:
-        url = "https://barkota-reseller-php-prod-4kl27j34za-uc.a.run.app/ob/routes/passageenabled"
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "Referer": "https://booking.barkota.com/",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-        }
-        payload = {"companyId": None}
-        
-        response = requests.post(url, json=payload, headers=headers, timeout=10)
-        response.raise_for_status()
-        routes_data = response.json()
-        
-        # Validate that we got actual data
-        if not routes_data or not isinstance(routes_data, list):
-            logger.warning("Barkota API returned empty or invalid data")
-            routes_data = []
+    # Try to get routes data from cache first
+    routes_data = cache.get('barkota_routes')
+    
+    if routes_data is None:
+        # Cache miss - fetch from Barkota API
+        try:
+            url = "https://barkota-reseller-php-prod-4kl27j34za-uc.a.run.app/ob/routes/passageenabled"
+            headers = {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Referer": "https://booking.barkota.com/",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            }
+            payload = {"companyId": None}
             
-    except requests.exceptions.Timeout:
-        logger.error("Barkota API request timed out")
-        routes_data = []
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Barkota API request failed: {str(e)}")
-        routes_data = []
-    except Exception as e:
-        logger.error(f"Unexpected error fetching routes: {str(e)}")
-        routes_data = []
+            logger.info("Fetching routes from Barkota API (cache miss)")
+            
+            # Increased timeout to 25 seconds
+            response = requests.post(url, json=payload, headers=headers, timeout=25)
+            response.raise_for_status()
+            routes_data = response.json()
+            
+            # Validate that we got actual data
+            if not routes_data or not isinstance(routes_data, list):
+                logger.warning("Barkota API returned empty or invalid data")
+                routes_data = []
+            else:
+                # Cache the data for 10 minutes (600 seconds)
+                cache.set('barkota_routes', routes_data, 600)
+                logger.info(f"Cached {len(routes_data)} routes for 10 minutes")
+                
+        except requests.exceptions.Timeout:
+            logger.error("Barkota API request timed out")
+            routes_data = []
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Barkota API request failed: {str(e)}")
+            routes_data = []
+        except Exception as e:
+            logger.error(f"Unexpected error fetching routes: {str(e)}")
+            routes_data = []
+    else:
+        # Cache hit - using cached data
+        logger.info(f"Using cached routes data ({len(routes_data)} routes)")
     
     today = date.today().isoformat()
     
@@ -449,7 +465,6 @@ def payment_view(request, booking_id):
         booking.save(update_fields=['details', 'status', 'reserved_until', 'updated_at'])
 
         messages.success(request, 'Payment confirmed! Your booking was added to your history.')
-        profile_url = reverse('profile_settings')
         return redirect('payment_confirmation', booking_id=booking.id)
 
     details = booking.details or {}
@@ -530,7 +545,6 @@ def stripe_success(request, booking_id):
     else:
         messages.error(request, "Payment not completed. Please try again.")
 
-    # After Stripe payment, go to the standard payment confirmation page
     return redirect('payment_confirmation', booking_id=booking.id)
 
 @login_required
@@ -1339,7 +1353,7 @@ def delete_profile_photo(request):
     }, status=400)
 
 def search_trips(request):
-    """Handle trip search using Barkota API"""
+    """Handle trip search using Barkota API with caching"""
     if request.method == 'POST':
         # Get form data
         trip_type = request.POST.get('trip_type', 'one_way')
@@ -1354,19 +1368,29 @@ def search_trips(request):
         total_passengers = max(adults + children, 1)  # At least 1 passenger
         
         try:
-            # First, fetch all locations to get the names
-            locations_url = "https://barkota-reseller-php-prod-4kl27j34za-uc.a.run.app/ob/routes/passageenabled"
-            locations_headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-                "Referer": "https://booking.barkota.com/",
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-            }
-            locations_payload = {"companyId": None}
+            # First, fetch location names - use cache
+            routes_data = cache.get('barkota_routes')
             
-            locations_response = requests.post(locations_url, json=locations_payload, headers=locations_headers, timeout=10)
-            locations_response.raise_for_status()
-            routes_data = locations_response.json()
+            if not routes_data:
+                # Cache miss - fetch from API
+                locations_url = "https://barkota-reseller-php-prod-4kl27j34za-uc.a.run.app/ob/routes/passageenabled"
+                locations_headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                    "Referer": "https://booking.barkota.com/",
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+                }
+                locations_payload = {"companyId": None}
+                
+                logger.info("Fetching routes for search (cache miss)")
+                locations_response = requests.post(locations_url, json=locations_payload, headers=locations_headers, timeout=25)
+                locations_response.raise_for_status()
+                routes_data = locations_response.json()
+                
+                # Cache for 10 minutes
+                cache.set('barkota_routes', routes_data, 600)
+            else:
+                logger.info("Using cached routes for search")
             
             # Find the location names from routes data
             origin_name = f"Origin {origin}"
@@ -1397,49 +1421,73 @@ def search_trips(request):
             
             logger.info(f"Location names: {origin_name} -> {destination_name}")
             
-            # Search for outbound voyages using Barkota API
-            url = "https://barkota-reseller-php-prod-4kl27j34za-uc.a.run.app/ob/voyages/search/bylocation"
+            # Create cache key for voyage search based on search parameters
+            outbound_cache_key = f"voyage_{origin}_{destination}_{departure_date}_{total_passengers}"
+            return_cache_key = f"voyage_{destination}_{origin}_{return_date}_{total_passengers}" if return_date else None
             
-            headers = {
-                "Content-Type": "application/json",
-                "Accept": "application/json, text/plain, */*",
-                "Origin": "https://booking.barkota.com",
-                "Referer": "https://booking.barkota.com/"
-            }
+            # Search for outbound voyages - check cache first
+            outbound_voyages = cache.get(outbound_cache_key)
             
-            payload = {
-                "origin": int(origin),
-                "destination": int(destination),
-                "departureDate": departure_date,
-                "passengerCount": total_passengers,
-                "shippingCompany": None,
-                "cargoItemId": None,
-                "withDriver": 1
-            }
-            
-            logger.info(f"Searching voyages: {payload}")
-            
-            response = requests.post(url, json=payload, headers=headers, timeout=10)
-            response.raise_for_status()
-            
-            outbound_voyages = response.json()
-            
-            # If roundtrip, search for return voyages
-            return_voyages = []
-            if trip_type == 'round_trip' and return_date:
-                return_payload = {
-                    "origin": int(destination),  # Swapped
-                    "destination": int(origin),  # Swapped
-                    "departureDate": return_date,
+            if not outbound_voyages:
+                # Cache miss - fetch from API
+                url = "https://barkota-reseller-php-prod-4kl27j34za-uc.a.run.app/ob/voyages/search/bylocation"
+                
+                headers = {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json, text/plain, */*",
+                    "Origin": "https://booking.barkota.com",
+                    "Referer": "https://booking.barkota.com/"
+                }
+                
+                payload = {
+                    "origin": int(origin),
+                    "destination": int(destination),
+                    "departureDate": departure_date,
                     "passengerCount": total_passengers,
                     "shippingCompany": None,
                     "cargoItemId": None,
                     "withDriver": 1
                 }
                 
-                return_response = requests.post(url, json=return_payload, headers=headers, timeout=10)
-                return_response.raise_for_status()
-                return_voyages = return_response.json()
+                logger.info(f"Searching outbound voyages (cache miss): {payload}")
+                
+                response = requests.post(url, json=payload, headers=headers, timeout=25)
+                response.raise_for_status()
+                
+                outbound_voyages = response.json()
+                
+                # Cache voyage results for 5 minutes (shorter than routes cache)
+                cache.set(outbound_cache_key, outbound_voyages, 300)
+            else:
+                logger.info("Using cached outbound voyages")
+            
+            # If roundtrip, search for return voyages
+            return_voyages = []
+            if trip_type == 'round_trip' and return_date:
+                return_voyages = cache.get(return_cache_key)
+                
+                if not return_voyages:
+                    # Cache miss - fetch from API
+                    return_payload = {
+                        "origin": int(destination),  # Swapped
+                        "destination": int(origin),  # Swapped
+                        "departureDate": return_date,
+                        "passengerCount": total_passengers,
+                        "shippingCompany": None,
+                        "cargoItemId": None,
+                        "withDriver": 1
+                    }
+                    
+                    logger.info(f"Searching return voyages (cache miss): {return_payload}")
+                    
+                    return_response = requests.post(url, json=return_payload, headers=headers, timeout=25)
+                    return_response.raise_for_status()
+                    return_voyages = return_response.json()
+                    
+                    # Cache for 5 minutes
+                    cache.set(return_cache_key, return_voyages, 300)
+                else:
+                    logger.info("Using cached return voyages")
             
             # Get first voyage times for display
             departure_time = ""

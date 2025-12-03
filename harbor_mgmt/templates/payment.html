@@ -7,7 +7,7 @@
     <title>Payment - HarborHop</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
-    <link rel="stylesheet" href="{% static 'css/payment.css' %}?v=2">
+    <link rel="stylesheet" href="{% static 'css/payment.css' %}?v=4">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon_io/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
@@ -263,16 +263,30 @@
                 <form method="post" class="payment-form">
                     {% csrf_token %}
                     
-                    <div class="form-group">
+                   <div class="form-group">
                         <label><i class="fa-solid fa-credit-card"></i> Payment Method</label>
                         <div class="payment-methods">
+                            <!-- E-Wallet Option with Dropdown -->
                             <label class="payment-method-option">
-                                <input type="radio" name="payment_method" value="gcash" checked>
+                                <input type="radio" name="payment_method" value="ewallet" checked>
                                 <div class="method-card">
                                     <i class="fa-solid fa-wallet"></i>
-                                    <span>GCash</span>
+                                    <span>E-Wallet</span>
                                 </div>
                             </label>
+                            
+                            <!-- E-Wallet Dropdown (shown when E-Wallet is selected) -->
+                            <div class="ewallet-dropdown" id="ewallet-dropdown">
+                                <label for="ewallet-select">Select E-Wallet Provider:</label>
+                                <select name="ewallet_provider" id="ewallet-select" class="ewallet-select">
+                                    <option value="gcash">GCash</option>
+                                    <option value="maya">Maya</option>
+                                    <option value="shopeepay">ShopeePay</option>
+                                    <option value="gotyme">GoTyme</option>
+                                </select>
+                            </div>
+
+                            <!-- Credit Card Option -->
                             <label class="payment-method-option">
                                 <input type="radio" name="payment_method" value="credit_card">
                                 <div class="method-card">
@@ -280,6 +294,8 @@
                                     <span>Credit Card</span>
                                 </div>
                             </label>
+
+                            <!-- PayPal Option -->
                             <label class="payment-method-option">
                                 <input type="radio" name="payment_method" value="paypal">
                                 <div class="method-card">
@@ -431,23 +447,103 @@
         </div>
     </div>
 
-    <script>
-        function openRulesModal(event) {
-            event.preventDefault();
-            document.getElementById('rulesModal').style.display = 'block';
+<script>
+    // Rules Modal Functions
+    function openRulesModal(event) {
+        event.preventDefault();
+        document.getElementById('rulesModal').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeRulesModal() {
+        document.getElementById('rulesModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Payment Gateway Functions
+    function openPaymentGateway() {
+        const selectedMethod = document.querySelector('input[name="payment_method"]:checked').value;
+        
+        if (selectedMethod === 'ewallet') {
+            const ewalletSelect = document.getElementById('ewallet-select');
+            const providerName = ewalletSelect.options[ewalletSelect.selectedIndex].text;
+            document.getElementById('selected-provider').textContent = providerName;
+            document.getElementById('paymentGatewayModal').style.display = 'block';
+            document.getElementById('gatewayPaymentForm').reset();
+            document.getElementById('confirm-amount').value = '{{ booking.total_price }}';
+            document.body.style.overflow = 'hidden';
+        } else if (selectedMethod === 'paypal') {
+            document.getElementById('paypalModal').style.display = 'block';
+            document.getElementById('paypalForm').reset();
             document.body.style.overflow = 'hidden';
         }
+        // Note: credit_card is handled by Stripe redirect in form submit
+    }
 
-        function closeRulesModal() {
-            document.getElementById('rulesModal').style.display = 'none';
-            document.body.style.overflow = 'auto';
+    function closePaymentGateway() {
+        document.getElementById('paymentGatewayModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    function closePaypalModal() {
+        document.getElementById('paypalModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    function processPayment() {
+        const form = document.getElementById('gatewayPaymentForm');
+        
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
         }
+        
+        const phoneNumber = document.getElementById('phone-number').value;
+        
+        if (phoneNumber.length !== 11) {
+            alert('Please enter a valid 11-digit phone number');
+            return;
+        }
+        
+        closePaymentGateway();
+        showLoadingAndSubmit();
+    }
 
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('rulesModal');
-            if (event.target == modal) {
-                closeRulesModal();
+    function processPaypalPayment() {
+        const form = document.getElementById('paypalForm');
+        
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+        
+        closePaypalModal();
+        showLoadingAndSubmit();
+    }
+
+    function showLoadingAndSubmit() {
+        const loadingOverlay = document.getElementById('paymentLoadingOverlay');
+        loadingOverlay.classList.add('show');
+        
+        setTimeout(function() {
+            loadingOverlay.classList.remove('show');
+            document.querySelector('.payment-form').submit();
+        }, 2000);
+    }
+
+    // Document Ready
+    document.addEventListener('DOMContentLoaded', function() {
+        // E-Wallet Dropdown Toggle
+        const paymentMethodRadios = document.querySelectorAll('input[name="payment_method"]');
+        const ewalletDropdown = document.getElementById('ewallet-dropdown');
+        
+        function toggleEwalletDropdown() {
+            const selectedMethod = document.querySelector('input[name="payment_method"]:checked').value;
+            
+            if (selectedMethod === 'ewallet') {
+                ewalletDropdown.classList.add('show');
+            } else {
+                ewalletDropdown.classList.remove('show');
             }
         }
     </script>
