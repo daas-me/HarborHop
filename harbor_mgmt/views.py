@@ -617,6 +617,39 @@ def booking_history_view(request):
     }
     return render(request, 'passenger_info.html', context)
 
+
+@never_cache
+@login_required
+def admin_bookings(request):
+    """Admin bookings management page - view all bookings"""
+    # Check admin permissions
+    if not hasattr(request.user, 'profile') or not request.user.profile.is_admin_user:
+        messages.error(request, "You don't have permission to access this page.")
+        return redirect('home')
+
+    # Get all bookings with related user
+    bookings = Booking.objects.select_related('user').order_by('-created_at')
+
+    # Booking statistics
+    total_bookings = bookings.count()
+    pending_bookings = bookings.filter(status='pending').count()
+    reserved_bookings = bookings.filter(status='reserved').count()
+    confirmed_bookings = bookings.filter(status='confirmed').count()
+    cancelled_bookings = bookings.filter(status='cancelled').count()
+    completed_bookings = bookings.filter(status='completed').count()
+
+    context = {
+        'bookings': bookings,
+        'total_bookings': total_bookings,
+        'pending_bookings': pending_bookings,
+        'reserved_bookings': reserved_bookings,
+        'confirmed_bookings': confirmed_bookings,
+        'cancelled_bookings': cancelled_bookings,
+        'completed_bookings': completed_bookings,
+        'user': request.user,
+    }
+    return render(request, 'admin_bookings.html', context)
+
 @never_cache
 @login_required
 def admin_dashboard(request):
@@ -635,7 +668,9 @@ def admin_dashboard(request):
     from django.db.models import Count
     from django.db.models.functions import TruncMonth
     from datetime import timedelta
-    
+    import json
+    from django.utils import timezone
+
     total_bookings = Booking.objects.count()  # Get actual booking count
     total_users = User.objects.count()
     admin_users = UserProfile.objects.filter(is_admin_user=True).count()

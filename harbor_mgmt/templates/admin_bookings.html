@@ -5,25 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-store" />
-    <title>HarborHop - Admin Dashboard</title>
+    <title>HarborHop - Manage Bookings</title>
     <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/admin.css' %}?v=6">
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}?v=3">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon_io/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon_io/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon_io/favicon-16x16.png' %}">
     <link rel="manifest" href="{% static 'images/favicon_io/site.webmanifest' %}">
     <script src="https://kit.fontawesome.com/1256e3cde2.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
-
-<script>
-window.addEventListener('pageshow', function(event) {
-  if (event.persisted) {
-    window.location.reload();
-  }
-});
-</script>
-
 <body>
     <div class="admin-container">
         <!-- Sidebar -->
@@ -32,13 +22,12 @@ window.addEventListener('pageshow', function(event) {
                 <a href="{% url 'home' %}" class="logo">HARBOR<span>hop</span></a>
                 <p class="tagline">Admin Dashboard</p>
             </div>
-            
             <nav class="sidebar-nav">
-                <a href="{% url 'admin_dashboard' %}" class="nav-item active">
+                <a href="{% url 'admin_dashboard' %}" class="nav-item">
                     <span class="icon"><i class="fa-solid fa-table-columns"></i></span>
                     <span>Dashboard</span>
                 </a>
-                <a href="{% url 'admin_bookings' %}" class="nav-item">
+                <a href="{% url 'admin_bookings' %}" class="nav-item active">
                     <span class="icon"><i class="fa-solid fa-ticket"></i></span>
                     <span>Bookings</span>
                 </a>
@@ -55,7 +44,6 @@ window.addEventListener('pageshow', function(event) {
                     <span>Settings</span>
                 </a>
             </nav>
-            
             <div class="sidebar-footer">
                 <a href="{% url 'home' %}" class="nav-item">
                     <span class="icon"><i class="fa-solid fa-house"></i></span>
@@ -67,22 +55,20 @@ window.addEventListener('pageshow', function(event) {
                 </a>
             </div>
         </aside>
-
-        
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Top Header -->
             <header class="top-header">
-                <h1>Welcome back, {{ user.first_name|default:user.username }}!</h1>
+                <div>
+                    <h1>Manage Bookings</h1>
+                    <p class="page-subtitle">View and manage all bookings</p>
+                </div>
                 <div class="user-info">
                     <span class="user-avatar"><i class="fa-solid fa-user"></i></span>
                     <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
                 </div>
             </header>
-
-            <!-- Dashboard Content -->
             <div class="dashboard-content">
-                <!-- Stats Grid -->
+                <!-- Stats Overview -->
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon"><i class="fa-solid fa-ticket"></i></div>
@@ -91,95 +77,81 @@ window.addEventListener('pageshow', function(event) {
                             <p class="stat-number">{{ total_bookings }}</p>
                         </div>
                     </div>
-                    
                     <div class="stat-card">
-                        <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                        <div class="stat-icon"><i class="fa-solid fa-hourglass-half"></i></div>
                         <div class="stat-info">
-                            <h3>Total Users</h3>
-                            <p class="stat-number">{{ total_users }}</p>
+                            <h3>Pending</h3>
+                            <p class="stat-number">{{ pending_bookings }}</p>
                         </div>
                     </div>
-                    
                     <div class="stat-card">
-                        <div class="stat-icon"><i class="fa-solid fa-crown"></i></div>
+                        <div class="stat-icon"><i class="fa-solid fa-bookmark"></i></div>
                         <div class="stat-info">
-                            <h3>Admin Users</h3>
-                            <p class="stat-number">{{ admin_users }}</p>
+                            <h3>Reserved</h3>
+                            <p class="stat-number">{{ reserved_bookings }}</p>
                         </div>
                     </div>
-
                     <div class="stat-card">
                         <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
                         <div class="stat-info">
-                            <h3>Active Users</h3>
-                            <p class="stat-number">{{ active_users }}</p>
+                            <h3>Confirmed</h3>
+                            <p class="stat-number">{{ confirmed_bookings }}</p>
                         </div>
                     </div>
-
                     <div class="stat-card">
-                        <div class="stat-icon"><i class="fa-solid fa-calendar-days"></i></div>
+                        <div class="stat-icon"><i class="fa-solid fa-xmark"></i></div>
                         <div class="stat-info">
-                            <h3>New This Month</h3>
-                            <p class="stat-number">{{ new_this_month }}</p>
+                            <h3>Cancelled</h3>
+                            <p class="stat-number">{{ cancelled_bookings }}</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fa-solid fa-flag-checkered"></i></div>
+                        <div class="stat-info">
+                            <h3>Completed</h3>
+                            <p class="stat-number">{{ completed_bookings }}</p>
                         </div>
                     </div>
                 </div>
-
-                <!-- User Growth Chart Section -->
-                <div class="chart-section">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3><i class="fa-solid fa-chart-line"></i> Monthly User Growth</h3>
-                            <div class="chart-controls">
-                                <button class="action-btn chart-toggle active" type="button" onclick="toggleChart('monthly')">
-                                    <i class="fa-solid fa-calendar-plus"></i>
-                                    <span>Monthly New Users</span>
-                                </button>
-
-                                <button class="action-btn chart-toggle" type="button" onclick="toggleChart('cumulative')">
-                                    <i class="fa-solid fa-chart-area"></i>
-                                    <span>Total Users Growth</span>
-                                </button>
-                            </div>
-
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="userGrowthChart" 
-                                    data-labels='{{ chart_labels|safe }}'
-                                    data-monthly='{{ chart_data|safe }}'
-                                    data-cumulative='{{ cumulative_data|safe }}'>
-                            </canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Actions -->
-                <div class="quick-actions">
-                    <h3>Quick Actions</h3>
-                    <div class="actions-grid">
-                        <button class="action-btn">
-                            <span class="icon"><i class="fa-solid fa-plus"></i></span>
-                            <span>Add Booking</span>
-                        </button>
-                        <button class="action-btn">
-                            <span class="icon"><i class="fa-solid fa-ship"></i></span>
-                            <span>Add Ferry Route</span>
-                        </button>
-                        <button class="action-btn" onclick="window.location.href='{% url 'admin_users' %}'">
-                            <span class="icon"><i class="fa-solid fa-user-plus"></i></span>
-                            <span>Add User</span>
-                        </button>
-                        <button class="action-btn">
-                            <span class="icon"><i class="fa-solid fa-tag"></i></span>
-                            <span>Create Offer</span>
-                        </button>
-                    </div>
+                <!-- Bookings Table -->
+                <div class="users-table-container">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>Reference</th>
+                                <th>User</th>
+                                <th>Origin</th>
+                                <th>Destination</th>
+                                <th>Departure</th>
+                                <th>Status</th>
+                                <th>Total Price</th>
+                                <th>Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for b in bookings %}
+                            <tr>
+                                <td>{{ b.booking_reference }}</td>
+                                <td>{{ b.user.get_full_name|default:b.user.username }}</td>
+                                <td>{{ b.origin }}</td>
+                                <td>{{ b.destination }}</td>
+                                <td>{{ b.departure_date|date:"M d, Y" }}</td>
+                                <td>
+                                    <span class="status-badge {{ b.status }}">{{ b.status|title }}</span>
+                                </td>
+                                <td>₱{{ b.total_price }}</td>
+                                <td>{{ b.created_at|date:"M d, Y H:i" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" style="text-align:center;">No bookings found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </main>
     </div>
-
-    <!-- Load chart script -->
-    <script src="{% static 'js/admin_chart.js' %}?v=1"></script>
 </body>
 </html>
