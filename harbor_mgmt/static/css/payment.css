@@ -370,7 +370,7 @@ body {
     background: white;
     border-radius: 20px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    overflow: hidden;
+    overflow: auto;
     position: sticky;
     top: 20px;
     animation: slideInRight 0.6s ease-out;
@@ -988,7 +988,7 @@ body {
 
 .payment-gateway-body {
     padding: 30px;
-    overflow: hidden;
+    overflow: auto;
 }
 
 .payment-provider-info {
@@ -1126,7 +1126,7 @@ body {
 #creditCardForm,
 #paypalForm {
     width: 100%;
-    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .btn-gateway-cancel,
